@@ -54,7 +54,7 @@ using NSL.Network.XmlRpc;
 
 
 
-[assembly: Addin("MoneyModule", "1.0")]
+[assembly: Addin("DTLNSLMoneyModule", "1.0")]
 [assembly: AddinDependency("OpenSim.Region.Framework", OpenSim.VersionInfo.VersionNumber)]
 
 
@@ -156,8 +156,8 @@ namespace OpenSim.Modules.Currency
 
 
 	// 
-	[Extension(Path = "/OpenSim/RegionModules", NodeName = "RegionModule", Id = "MoneyModule")]
-	public class MoneyModule : IMoneyModule, ISharedRegionModule
+	[Extension(Path = "/OpenSim/RegionModules", NodeName = "RegionModule", Id = "DTLNSLMoneyModule")]
+	public class DTLNSLMoneyModule : IMoneyModule, ISharedRegionModule
 	{
 		#region Constant numbers and members.
 
