@@ -54,7 +54,7 @@ using NSL.Network.XmlRpc;
 
 
 
-[assembly: Addin("DTLNSLMoneyModule", "1.0")]
+[assembly: Addin("MoneyModule", "1.0")]
 [assembly: AddinDependency("OpenSim.Region.Framework", OpenSim.VersionInfo.VersionNumber)]
 
 
