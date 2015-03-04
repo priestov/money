@@ -15,9 +15,9 @@ yes | mono ../bin/Prebuild.exe /clean
 xbuild || exit 1
 
 echo
-cp bin/OpenSim.Data.MySQL.MySQLMoneyDataWrapper.dll $OPNSIMPATH
-cp bin/OpenSim.Modules.Currency.dll $OPNSIMPATH
-cp bin/MoneyServer.exe $OPNSIMPATH
+cp -f bin/OpenSim.Data.MySQL.MySQLMoneyDataWrapper.dll $OPNSIMPATH
+cp -f bin/OpenSim.Modules.Currency.dll $OPNSIMPATH
+cp -f bin/MoneyServer.exe $OPNSIMPATH
 
 
 rm -f $OPNSIMPATH/OpenSim.Forge.Currency.dll
