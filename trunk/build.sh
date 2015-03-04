@@ -9,9 +9,9 @@ echo "==================="
 
 rm -f  bin/*
 rm -rf OpenSim.*/obj/*
-#yes | mono ../bin/Prebuild.exe /clean
 
 ./runprebuild.sh
+xbuild /target:CLean || exit 1
 xbuild || exit 1
 
 echo
