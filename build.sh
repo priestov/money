@@ -7,9 +7,7 @@ echo "==================="
 echo "DTL/NSL_CURRENCY"
 echo "==================="
 
-rm -f  bin/*
-rm -rf OpenSim.*/obj/*
-
+./clean.sh
 ./runprebuild.sh
 xbuild /target:CLean || exit 1
 xbuild || exit 1
