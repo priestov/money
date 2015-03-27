@@ -16,6 +16,7 @@ echo
 cp -f bin/OpenSim.Data.MySQL.MySQLMoneyDataWrapper.dll $OPNSIMPATH
 cp -f bin/OpenSim.Modules.Currency.dll $OPNSIMPATH
 cp -f bin/MoneyServer.exe $OPNSIMPATH
+cp -f Mono.Security.dll $OPNSIMPATH
 
 
 rm -f $OPNSIMPATH/OpenSim.Forge.Currency.dll
