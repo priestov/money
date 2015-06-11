@@ -495,6 +495,8 @@ namespace OpenSim.Modules.Currency
 
 		public bool UploadCovered(UUID agentID, int amount)
 		{
+			if (amount==0) return true;		// for invalid Money Server 
+			//
 			IClientAPI client = GetLocateClient(agentID);
 			int balance = QueryBalanceFromMoneyServer(client);
 			if (balance<amount) return false;
@@ -504,6 +506,8 @@ namespace OpenSim.Modules.Currency
 
 		public bool AmountCovered(UUID agentID, int amount)
 		{
+			if (amount==0) return true;		// for invalid Money Server 
+			//
 			IClientAPI client = GetLocateClient(agentID);
 			int balance = QueryBalanceFromMoneyServer(client);
 			if (balance<amount) return false;
@@ -685,12 +689,20 @@ namespace OpenSim.Modules.Currency
 			IClientAPI senderClient = GetLocateClient(landBuyEvent.agentId);
 			if (senderClient!=null)
 			{
-				int balance = QueryBalanceFromMoneyServer(senderClient);
-				if (balance >= landBuyEvent.parcelPrice)
-				{
+				if (landBuyEvent.parcelPrice==0) {		// for invalid Money Server
 					lock(landBuyEvent)
 					{
 						landBuyEvent.economyValidated = true;
+					}
+				}
+				else {
+					int balance = QueryBalanceFromMoneyServer(senderClient);
+					if (balance >= landBuyEvent.parcelPrice)
+					{
+						lock(landBuyEvent)
+						{
+							landBuyEvent.economyValidated = true;
+						}
 					}
 				}
 			}
@@ -744,7 +756,7 @@ namespace OpenSim.Modules.Currency
 
 			// Get the balance from money server.   
 			int balance = QueryBalanceFromMoneyServer(remoteClient);
-			if (balance < salePrice)
+			if (salePrice>0 && balance<salePrice)
 			{
 				remoteClient.SendAgentAlertMessage("Unable to buy now. You don't have sufficient funds", false);
 				return;
@@ -761,8 +773,11 @@ namespace OpenSim.Modules.Currency
 					{
 						UUID receiverId = sceneObj.OwnerID;
 						ulong regionHandle = sceneObj.RegionHandle;
-						bool ret = TransferMoney(remoteClient.AgentId, receiverId, salePrice,
+						bool ret = true;
+						if (salePrice>0) {
+							ret = TransferMoney(remoteClient.AgentId, receiverId, salePrice,
 												(int)MoneyTransactionType.PayObject, sceneObj.UUID, regionHandle, "Object Buy");
+						}
 						if (ret)
 						{
 							mod.BuyObject(remoteClient, categoryID, localID, saleType, salePrice);
@@ -1316,7 +1331,7 @@ namespace OpenSim.Modules.Currency
 				return false;
 			}
 
-			if (QueryBalanceFromMoneyServer(senderClient)<amount)
+			if (amount>0 && QueryBalanceFromMoneyServer(senderClient)<amount)
 			{
 				m_log.InfoFormat("[MONEY]: TransferMoney: No insufficient balance in client [{0}]", sender.ToString());
 				return false;
@@ -1537,7 +1552,7 @@ namespace OpenSim.Modules.Currency
 				return false;
 			}
 
-			if (QueryBalanceFromMoneyServer(senderClient)<amount)
+			if (amount>0 && QueryBalanceFromMoneyServer(senderClient)<amount)
 			{
 				m_log.InfoFormat("[MONEY]: PayMoneyCharge: No insufficient balance in client [{0}]", sender.ToString());
 				return false;
@@ -1642,6 +1657,9 @@ namespace OpenSim.Modules.Currency
 			else m_log.ErrorFormat("[MONEY]: LoginMoneyServer: Money Server is not available!!");
 
 			#endregion
+
+			// Viewerへ設定を通知する．
+			OnEconomyDataRequest(client);
 
 			return ret;
 		}
