@@ -169,6 +169,7 @@ namespace OpenSim.Modules.Currency
 
 		private bool  m_enabled = true;
 		private bool  m_sellEnabled = false;
+		private bool  m_enable_server = false;	// enable Money Server
 
 		private IConfigSource m_config;
 
@@ -320,7 +321,7 @@ namespace OpenSim.Modules.Currency
 
 		public void AddRegion(Scene scene)
 		{
-			//m_log.InfoFormat("[MONEY]: AddRegion:");
+			m_log.InfoFormat("[MONEY]: AddRegion:");
 
 			if (scene==null) return;
 
@@ -330,7 +331,8 @@ namespace OpenSim.Modules.Currency
 			{
 				if (m_sceneList.Count==0)
 				{
-					if (!string.IsNullOrEmpty(m_moneyServURL))
+					//if (!string.IsNullOrEmpty(m_moneyServURL))
+					if (m_enable_server)
 					{
 						HttpServer = new BaseHttpServer(9000);
 						HttpServer.AddStreamHandler(new Region.Framework.Scenes.RegionStatsHandler(scene.RegionInfo));
@@ -495,7 +497,7 @@ namespace OpenSim.Modules.Currency
 
 		public bool UploadCovered(UUID agentID, int amount)
 		{
-			if (amount==0) return true;		// for invalid Money Server 
+			//if (amount==0) return true;		// for invalid Money Server 
 			//
 			IClientAPI client = GetLocateClient(agentID);
 			int balance = QueryBalanceFromMoneyServer(client);
@@ -506,7 +508,7 @@ namespace OpenSim.Modules.Currency
 
 		public bool AmountCovered(UUID agentID, int amount)
 		{
-			if (amount==0) return true;		// for invalid Money Server 
+			//if (amount==0) return true;		// for invalid Money Server 
 			//
 			IClientAPI client = GetLocateClient(agentID);
 			int balance = QueryBalanceFromMoneyServer(client);
@@ -582,12 +584,12 @@ namespace OpenSim.Modules.Currency
 
 		public void OnMakeRootAgent(ScenePresence agent)
 		{
-			//m_log.InfoFormat("[MONEY]: OnMakeRootAgent:");
+			m_log.InfoFormat("[MONEY]: OnMakeRootAgent:");
 
 			int balance = 0;
 			IClientAPI client = agent.ControllingClient;
 
-			LoginMoneyServer(client, out balance);
+			m_enable_server = LoginMoneyServer(client, out balance);
 			//client.SendMoneyBalance(UUID.Zero, true, new byte[0], balance);
 			client.SendMoneyBalance(UUID.Zero, true, new byte[0], balance, 0, UUID.Zero, false, UUID.Zero, false, 0, String.Empty);
 
@@ -603,7 +605,7 @@ namespace OpenSim.Modules.Currency
 		// for OnClientClosed event
 		private void ClientClosed(IClientAPI client)
 		{
-			if (client!=null)
+			if (m_enable_server && client!=null)
 			{
 				LogoffMoneyServer(client);
 			}
@@ -689,20 +691,12 @@ namespace OpenSim.Modules.Currency
 			IClientAPI senderClient = GetLocateClient(landBuyEvent.agentId);
 			if (senderClient!=null)
 			{
-				if (landBuyEvent.parcelPrice==0) {		// for invalid Money Server
+				int balance = QueryBalanceFromMoneyServer(senderClient);
+				if (balance >= landBuyEvent.parcelPrice)
+				{
 					lock(landBuyEvent)
 					{
 						landBuyEvent.economyValidated = true;
-					}
-				}
-				else {
-					int balance = QueryBalanceFromMoneyServer(senderClient);
-					if (balance >= landBuyEvent.parcelPrice)
-					{
-						lock(landBuyEvent)
-						{
-							landBuyEvent.economyValidated = true;
-						}
 					}
 				}
 			}
@@ -756,7 +750,7 @@ namespace OpenSim.Modules.Currency
 
 			// Get the balance from money server.   
 			int balance = QueryBalanceFromMoneyServer(remoteClient);
-			if (salePrice>0 && balance<salePrice)
+			if (balance<salePrice)
 			{
 				remoteClient.SendAgentAlertMessage("Unable to buy now. You don't have sufficient funds", false);
 				return;
@@ -807,21 +801,15 @@ namespace OpenSim.Modules.Currency
 
 			if (client.AgentId==agentID && client.SessionId==SessionID)
 			{
-				int balance = -1;
-				if (!string.IsNullOrEmpty(m_moneyServURL))
+				int balance = 0;
+				//if (!string.IsNullOrEmpty(m_moneyServURL))
+				if (m_enable_server)
 				{
 					balance = QueryBalanceFromMoneyServer(client);
 				}
 
-				if (balance < 0)
-				{
-					client.SendAlertMessage("Fail to query the balance");
-				}
-				else
-				{
-					//client.SendMoneyBalance(TransactionID, true, new byte[0], balance);
-					client.SendMoneyBalance(TransactionID, true, new byte[0], balance, 0, UUID.Zero, false, UUID.Zero, false, 0, String.Empty);
-				}
+				//client.SendMoneyBalance(TransactionID, true, new byte[0], balance);
+				client.SendMoneyBalance(TransactionID, true, new byte[0], balance, 0, UUID.Zero, false, UUID.Zero, false, 0, String.Empty);
 			}
 			else
 			{
@@ -1331,7 +1319,7 @@ namespace OpenSim.Modules.Currency
 				return false;
 			}
 
-			if (amount>0 && QueryBalanceFromMoneyServer(senderClient)<amount)
+			if (QueryBalanceFromMoneyServer(senderClient)<amount)
 			{
 				m_log.InfoFormat("[MONEY]: TransferMoney: No insufficient balance in client [{0}]", sender.ToString());
 				return false;
@@ -1339,7 +1327,8 @@ namespace OpenSim.Modules.Currency
 
 			#region Send transaction request to money server and parse the resultes.
 
-			if (!string.IsNullOrEmpty(m_moneyServURL))
+			//if (!string.IsNullOrEmpty(m_moneyServURL))
+			if (m_enable_server)
 			{
 				// Fill parameters for money transfer XML-RPC.   
 				Hashtable paramTable = new Hashtable();
@@ -1366,7 +1355,7 @@ namespace OpenSim.Modules.Currency
 				}
 				else m_log.ErrorFormat("[MONEY]: TransferMoney: Can not money transfer request from [{0}] to [{1}]", sender.ToString(), receiver.ToString());
 			}
-			else m_log.ErrorFormat("[MONEY]: TransferMoney: Money Server is not available!!");
+			//else m_log.ErrorFormat("[MONEY]: TransferMoney: Money Server is not available!!");
 
 			#endregion
 
@@ -1394,7 +1383,8 @@ namespace OpenSim.Modules.Currency
 
 			#region Force send transaction request to money server and parse the resultes.
 
-			if (!string.IsNullOrEmpty(m_moneyServURL))
+			//if (!string.IsNullOrEmpty(m_moneyServURL))
+			if (m_enable_server)
 			{
 				// Fill parameters for money transfer XML-RPC.   
 				Hashtable paramTable = new Hashtable();
@@ -1419,7 +1409,7 @@ namespace OpenSim.Modules.Currency
 				}
 				else m_log.ErrorFormat("[MONEY]: ForceTransferMoney: Can not money force transfer request from [{0}] to [{1}]", sender.ToString(), receiver.ToString());
 			}
-			else m_log.ErrorFormat("[MONEY]: ForceTransferMoney: Money Server is not available!!");
+			//else m_log.ErrorFormat("[MONEY]: ForceTransferMoney: Money Server is not available!!");
 
 			#endregion
 
@@ -1444,7 +1434,8 @@ namespace OpenSim.Modules.Currency
 			bool ret = false;
 			m_settle_user = false;
 
-			if (!string.IsNullOrEmpty(m_moneyServURL))
+			//if (!string.IsNullOrEmpty(m_moneyServURL))
+			if (m_enable_server)
 			{
 				// Fill parameters for money transfer XML-RPC.   
 				Hashtable paramTable = new Hashtable();
@@ -1476,7 +1467,7 @@ namespace OpenSim.Modules.Currency
 				}
 				else m_log.ErrorFormat("[MONEY]: AddBankerMoney: Money Server is not responce");
 			}
-			else m_log.ErrorFormat("[MONEY]: AddBankerMoney: Money Server is not available!!");
+			//else m_log.ErrorFormat("[MONEY]: AddBankerMoney: Money Server is not available!!");
 
 			return ret;
 		}
@@ -1498,7 +1489,8 @@ namespace OpenSim.Modules.Currency
 
 			bool ret = false;
 
-			if (!string.IsNullOrEmpty(m_moneyServURL))
+			//if (!string.IsNullOrEmpty(m_moneyServURL))
+			if (m_enable_server)
 			{
 				// Fill parameters for money transfer XML-RPC.   
 				Hashtable paramTable = new Hashtable();
@@ -1522,7 +1514,7 @@ namespace OpenSim.Modules.Currency
 				}
 				else m_log.ErrorFormat("[MONEY]: SendMoneyBalance: Money Server is not responce");
 			}
-			else m_log.ErrorFormat("[MONEY]: SendMoneyBalance: Money Server is not available!!");
+			//else m_log.ErrorFormat("[MONEY]: SendMoneyBalance: Money Server is not available!!");
 
 			return ret;
 		}
@@ -1552,7 +1544,7 @@ namespace OpenSim.Modules.Currency
 				return false;
 			}
 
-			if (amount>0 && QueryBalanceFromMoneyServer(senderClient)<amount)
+			if (QueryBalanceFromMoneyServer(senderClient)<amount)
 			{
 				m_log.InfoFormat("[MONEY]: PayMoneyCharge: No insufficient balance in client [{0}]", sender.ToString());
 				return false;
@@ -1560,7 +1552,8 @@ namespace OpenSim.Modules.Currency
 
 			#region Send transaction request to money server and parse the resultes.
 
-			if (!string.IsNullOrEmpty(m_moneyServURL))
+			//if (!string.IsNullOrEmpty(m_moneyServURL))
+			if (m_enable_server)
 			{
 				// Fill parameters for money transfer XML-RPC.   
 				Hashtable paramTable = new Hashtable();
@@ -1585,7 +1578,7 @@ namespace OpenSim.Modules.Currency
 				}
 				else m_log.ErrorFormat("[MONEY]: PayMoneyCharge: Can not pay money of charge request from [{0}]", sender.ToString());
 			}
-			else m_log.ErrorFormat("[MONEY]: PayMoneyCharge: Money Server is not available!!");
+			//else m_log.ErrorFormat("[MONEY]: PayMoneyCharge: Money Server is not available!!");
 
 			#endregion
 
@@ -1775,13 +1768,14 @@ namespace OpenSim.Modules.Currency
 		{
 			//m_log.InfoFormat("[MONEY]: QueryBalanceFromMoneyServer:");
 
-			int ret = -1;
+			int balance = 0;
 
 			#region Send the request to get the balance from money server for cilent.
 
 			if (client!=null)
 			{
-				if (!string.IsNullOrEmpty(m_moneyServURL))
+				//if (!string.IsNullOrEmpty(m_moneyServURL))
+				if (m_enable_server)
 				{
 					Hashtable paramTable = new Hashtable();
 					paramTable["clientUUID"] 			= client.AgentId.ToString();
@@ -1796,7 +1790,7 @@ namespace OpenSim.Modules.Currency
 					{
 						if ((bool)resultTable["success"]==true)
 						{
-							ret = (int)resultTable["clientBalance"];
+							balance = (int)resultTable["clientBalance"];
 						}
 					}
 				}
@@ -1804,20 +1798,22 @@ namespace OpenSim.Modules.Currency
 				{
 					if (m_moneyServer.ContainsKey(client.AgentId))
 					{
-						ret = m_moneyServer[client.AgentId];
+						balance = m_moneyServer[client.AgentId];
 					}
 				}
 
-				if (ret < 0)
+/*
+				if (balance < 0)
 				{
 					m_log.ErrorFormat("[MONEY]: QueryBalanceFromMoneyServer: Unable to query balance from Money Server {0} for client [{1}]", 
 																					m_moneyServURL, client.AgentId.ToString());
 				}
+*/
 			}
 
 			#endregion
 
-			return ret;
+			return balance;
 		}
 
 
@@ -1829,7 +1825,8 @@ namespace OpenSim.Modules.Currency
 
 			EventManager.MoneyTransferArgs args = null;
 
-			if (!string.IsNullOrEmpty(m_moneyServURL))
+			//if (!string.IsNullOrEmpty(m_moneyServURL))
+			if (m_enable_server)
 			{
 				Hashtable paramTable = new Hashtable();
 				paramTable["clientUUID"]			= client.AgentId.ToString();
