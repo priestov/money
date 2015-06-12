@@ -1,3 +1,5 @@
+// * Modified by Fumi.Iseki for Unix/Linix  http://www.nsl.tuis.ac.jp
+// *
 // * Copyright (c) Contributors, http://opensimulator.org/, http://www.nsl.tuis.ac.jp/
 // * See CONTRIBUTORS.TXT for a full list of copyright holders.
 // *
@@ -169,7 +171,7 @@ namespace OpenSim.Modules.Currency
 
 		private bool  m_enabled = true;
 		private bool  m_sellEnabled = false;
-		private bool  m_enable_server = false;	// enable Money Server
+		private bool  m_enable_server = true;	// enable Money Server
 
 		private IConfigSource m_config;
 
@@ -230,6 +232,8 @@ namespace OpenSim.Modules.Currency
 		public void Initialise(Scene scene, IConfigSource source)
 		{
 			Initialise(source);
+			if (string.IsNullOrEmpty(m_moneyServURL)) m_enable_server = false;
+			//
 			AddRegion(scene);
 		}
 
@@ -321,7 +325,7 @@ namespace OpenSim.Modules.Currency
 
 		public void AddRegion(Scene scene)
 		{
-			m_log.InfoFormat("[MONEY]: AddRegion:");
+			//m_log.InfoFormat("[MONEY]: AddRegion:");
 
 			if (scene==null) return;
 
@@ -331,7 +335,6 @@ namespace OpenSim.Modules.Currency
 			{
 				if (m_sceneList.Count==0)
 				{
-					//if (!string.IsNullOrEmpty(m_moneyServURL))
 					if (m_enable_server)
 					{
 						HttpServer = new BaseHttpServer(9000);
@@ -460,12 +463,10 @@ namespace OpenSim.Modules.Currency
 				ulong regionHandle = sceneObj.RegionHandle;
 				if (GetLocateClient(fromID)!=null)
 				{
-					//ret = TransferMoney(fromID, toID, amount, (int)TransactionType.ObjectPays, objectID, regionHandle, description);
 					ret = TransferMoney(fromID, toID, amount, (int)MoneyTransactionType.ObjectPays, objectID, regionHandle, description);
 				}
 				else
 				{
-					//ret = ForceTransferMoney(fromID, toID, amount, (int)TransactionType.ObjectPays, objectID, regionHandle, description);
 					ret = ForceTransferMoney(fromID, toID, amount, (int)MoneyTransactionType.ObjectPays, objectID, regionHandle, description);
 				}
 			}
@@ -497,8 +498,6 @@ namespace OpenSim.Modules.Currency
 
 		public bool UploadCovered(UUID agentID, int amount)
 		{
-			//if (amount==0) return true;		// for invalid Money Server 
-			//
 			IClientAPI client = GetLocateClient(agentID);
 			int balance = QueryBalanceFromMoneyServer(client);
 			if (balance<amount) return false;
@@ -508,8 +507,6 @@ namespace OpenSim.Modules.Currency
 
 		public bool AmountCovered(UUID agentID, int amount)
 		{
-			//if (amount==0) return true;		// for invalid Money Server 
-			//
 			IClientAPI client = GetLocateClient(agentID);
 			int balance = QueryBalanceFromMoneyServer(client);
 			if (balance<amount) return false;
@@ -584,7 +581,7 @@ namespace OpenSim.Modules.Currency
 
 		public void OnMakeRootAgent(ScenePresence agent)
 		{
-			m_log.InfoFormat("[MONEY]: OnMakeRootAgent:");
+			//m_log.InfoFormat("[MONEY]: OnMakeRootAgent:");
 
 			int balance = 0;
 			IClientAPI client = agent.ControllingClient;
@@ -802,13 +799,12 @@ namespace OpenSim.Modules.Currency
 			if (client.AgentId==agentID && client.SessionId==SessionID)
 			{
 				int balance = 0;
-				//if (!string.IsNullOrEmpty(m_moneyServURL))
+				//
 				if (m_enable_server)
 				{
 					balance = QueryBalanceFromMoneyServer(client);
 				}
 
-				//client.SendMoneyBalance(TransactionID, true, new byte[0], balance);
 				client.SendMoneyBalance(TransactionID, true, new byte[0], balance, 0, UUID.Zero, false, UUID.Zero, false, 0, String.Empty);
 			}
 			else
@@ -1327,7 +1323,6 @@ namespace OpenSim.Modules.Currency
 
 			#region Send transaction request to money server and parse the resultes.
 
-			//if (!string.IsNullOrEmpty(m_moneyServURL))
 			if (m_enable_server)
 			{
 				// Fill parameters for money transfer XML-RPC.   
@@ -1383,7 +1378,6 @@ namespace OpenSim.Modules.Currency
 
 			#region Force send transaction request to money server and parse the resultes.
 
-			//if (!string.IsNullOrEmpty(m_moneyServURL))
 			if (m_enable_server)
 			{
 				// Fill parameters for money transfer XML-RPC.   
@@ -1434,7 +1428,6 @@ namespace OpenSim.Modules.Currency
 			bool ret = false;
 			m_settle_user = false;
 
-			//if (!string.IsNullOrEmpty(m_moneyServURL))
 			if (m_enable_server)
 			{
 				// Fill parameters for money transfer XML-RPC.   
@@ -1489,7 +1482,6 @@ namespace OpenSim.Modules.Currency
 
 			bool ret = false;
 
-			//if (!string.IsNullOrEmpty(m_moneyServURL))
 			if (m_enable_server)
 			{
 				// Fill parameters for money transfer XML-RPC.   
@@ -1552,7 +1544,6 @@ namespace OpenSim.Modules.Currency
 
 			#region Send transaction request to money server and parse the resultes.
 
-			//if (!string.IsNullOrEmpty(m_moneyServURL))
 			if (m_enable_server)
 			{
 				// Fill parameters for money transfer XML-RPC.   
@@ -1774,7 +1765,6 @@ namespace OpenSim.Modules.Currency
 
 			if (client!=null)
 			{
-				//if (!string.IsNullOrEmpty(m_moneyServURL))
 				if (m_enable_server)
 				{
 					Hashtable paramTable = new Hashtable();
@@ -1801,14 +1791,6 @@ namespace OpenSim.Modules.Currency
 						balance = m_moneyServer[client.AgentId];
 					}
 				}
-
-/*
-				if (balance < 0)
-				{
-					m_log.ErrorFormat("[MONEY]: QueryBalanceFromMoneyServer: Unable to query balance from Money Server {0} for client [{1}]", 
-																					m_moneyServURL, client.AgentId.ToString());
-				}
-*/
 			}
 
 			#endregion
@@ -1825,7 +1807,6 @@ namespace OpenSim.Modules.Currency
 
 			EventManager.MoneyTransferArgs args = null;
 
-			//if (!string.IsNullOrEmpty(m_moneyServURL))
 			if (m_enable_server)
 			{
 				Hashtable paramTable = new Hashtable();
