@@ -1,7 +1,7 @@
-diff -Nur opensim/OpenSim/Framework/Servers/HttpServer/BaseHttpServer.cs opensim_server/OpenSim/Framework/Servers/HttpServer/BaseHttpServer.cs
---- opensim/OpenSim/Framework/Servers/HttpServer/BaseHttpServer.cs	2015-01-24 17:01:54.940426676 +0900
-+++ opensim_server/OpenSim/Framework/Servers/HttpServer/BaseHttpServer.cs	2015-01-24 17:02:49.084542865 +0900
-@@ -1079,6 +1079,7 @@
+diff -Nur OpenSim-/Framework/Servers/HttpServer/BaseHttpServer.cs OpenSim/Framework/Servers/HttpServer/BaseHttpServer.cs
+--- OpenSim-/Framework/Servers/HttpServer/BaseHttpServer.cs	2015-11-16 12:37:24.000000000 +0900
++++ OpenSim/Framework/Servers/HttpServer/BaseHttpServer.cs	2015-11-20 16:16:46.111890755 +0900
+@@ -1080,6 +1080,7 @@
                              }
                          }
                          xmlRprcRequest.Params.Add(request.Headers.Get(xff)); // Param[3]
@@ -9,9 +9,9 @@ diff -Nur opensim/OpenSim/Framework/Servers/HttpServer/BaseHttpServer.cs opensim
  
                          try
                          {
-diff -Nur opensim/OpenSim/Tests/Common/Mock/TestHttpClientContext.cs opensim_server/OpenSim/Tests/Common/Mock/TestHttpClientContext.cs
---- opensim/OpenSim/Tests/Common/Mock/TestHttpClientContext.cs	2015-01-24 17:01:54.940426676 +0900
-+++ opensim_server/OpenSim/Tests/Common/Mock/TestHttpClientContext.cs	2015-01-24 17:02:49.085542868 +0900
+diff -Nur OpenSim-/Tests/Common/Mock/TestHttpClientContext.cs OpenSim/Tests/Common/Mock/TestHttpClientContext.cs
+--- OpenSim-/Tests/Common/Mock/TestHttpClientContext.cs	2015-11-16 12:37:24.000000000 +0900
++++ OpenSim/Tests/Common/Mock/TestHttpClientContext.cs	2015-11-20 16:16:46.111890755 +0900
 @@ -71,6 +71,11 @@
  //            Console.WriteLine("TestHttpClientContext.Disconnect Received disconnect with status {0}", error);
          }
