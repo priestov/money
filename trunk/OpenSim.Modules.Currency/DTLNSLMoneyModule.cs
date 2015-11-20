@@ -564,6 +564,26 @@ namespace OpenSim.Modules.Currency
 		}
 
 
+		// 0.8.3
+        public void MoveMoney(UUID fromAgentID, UUID toAgentID, int amount, string text)
+        {
+        }
+
+        public bool ObjectGiveMoney(UUID objectID, UUID fromID, UUID toID, int amount, UUID txn, out string result)
+        {
+            result = String.Empty;
+/*
+            string description = String.Format("Object {0} pays {1}", resolveObjectName(objectID), resolveAgentName(toID));
+
+            bool give_result = doMoneyTransfer(fromID, toID, amount, 2, description);
+
+            BalanceUpdate(fromID, toID, give_result, description);
+
+            return give_result;
+*/
+            return true;
+        }
+
 		#endregion
 
 
