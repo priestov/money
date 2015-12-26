@@ -63,8 +63,6 @@
       <Reference name="OpenSim.Framework.Console" path="../../bin/"/>
       <Reference name="OpenSim.Framework.Servers" path="../../bin/"/>
       <Reference name="OpenSim.Framework.Servers.HttpServer" path="../../bin/"/>
-      <Reference name="OpenSim.Framework.Communications" path="../../bin/"/>
-      <Reference name="OpenSim.Region.Physics.Manager" path="../../bin/"/>
       <Reference name="OpenSim.Services.Interfaces" path="../../bin/"/>
       <Reference name="OpenSim.Server.Base" path="../../bin/"/>
       <Reference name="OpenSim.Data" path="../../bin/"/>
@@ -105,8 +103,6 @@
       <Reference name="OpenSim.Framework.Console" path="../../bin"/>
       <Reference name="OpenSim.Framework.Servers" path="../../bin"/>
       <Reference name="OpenSim.Framework.Servers.HttpServer" path="../../bin"/>
-      <Reference name="OpenSim.Framework.Communications" path="../../bin"/>
-      <Reference name="OpenSim.Region.Physics.Manager" path="../../bin"/>
       <Reference name="OpenSim.Services.Interfaces" path="../../bin"/>
       <Reference name="OpenSim.Server.Base" path="../../bin"/>
       <Reference name="OpenSim.Data" path="../../bin"/>
@@ -149,8 +145,6 @@
       <Reference name="OpenSim.Framework.Console" path="../../bin/"/>
       <Reference name="OpenSim.Framework.Servers" path="../../bin/"/>
       <Reference name="OpenSim.Framework.Servers.HttpServer" path="../../bin/"/>
-      <Reference name="OpenSim.Framework.Communications" path="../../bin/"/>
-      <Reference name="OpenSim.Region.Physics.Manager" path="../../bin/"/>
       <Reference name="OpenSim.Services.Interfaces" path="../../bin/"/>
       <Reference name="OpenSim.Server.Base" path="../../bin/"/>
       <Reference name="OpenSim.Data" path="../../bin/"/>
