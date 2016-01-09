@@ -328,9 +328,12 @@ namespace OpenSim.Grid.MoneyServer
 				if (!m_moneyDBService.TryAddUserInfo(user))
 				{
 					m_log.ErrorFormat("[MONEY RPC]: handleClientLogin: Unable to refresh information for user \"{0}\" in DB", avatarName);
-					responseData["success"] = false;
+					//responseData["success"] = false;
+					//responseData["clientBalance"] = balance;		// -1
+					responseData["success"] = true;             	// for FireStorm
+					responseData["clientBalance"] = 0;
 					responseData["description"] = "Update or add user information to db failed";
-					responseData["clientBalance"] = balance;
+
 				}
 				return response;
 
