@@ -437,10 +437,12 @@ namespace OpenSim.Grid.MoneyServer
                     m_log.InfoFormat("[MONEY DB]: Unable to find user \"{0}\", add it to DB successfully", user.Avatar);
                     return true;
                 }
+                m_log.InfoFormat("[MONEY DB]: WARNNING: TryAddUserInfo: Unable to find user. NPC or HG Avatar?");
                 return false;
             }
             catch (Exception e)
             {
+                m_log.InfoFormat("[MONEY DB]: ERROR: EXCEPTION: Reconnect to Managers.");
                 dbm.Manager.Reconnect();
                 // Fumi.Iseki
                 m_moneyManager.Reconnect();
