@@ -9,11 +9,6 @@ namespace HttpServer
     /// </summary>
     public interface IHttpClientContext
     {
-        //
-        //
-        // by Fumi.Iseki
-        string SSLCommonName { get; }
-
         /// <summary>
         /// Using SSL or other encryption method.
         /// </summary>
@@ -92,6 +87,13 @@ namespace HttpServer
         /// A request have been received in the context.
         /// </summary>
         event EventHandler<RequestEventArgs> RequestReceived;
+
+        HTTPNetworkContext GiveMeTheNetworkStreamIKnowWhatImDoing();
+    }
+    public class HTTPNetworkContext
+    {
+        public NetworkStream Stream;
+        public Socket Socket;
     }
 
     /// <summary>
