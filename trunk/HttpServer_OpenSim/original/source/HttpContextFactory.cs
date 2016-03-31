@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
@@ -18,10 +18,7 @@ namespace HttpServer
         private readonly Queue<HttpClientContext> _contextQueue = new Queue<HttpClientContext>();
         private readonly IRequestParserFactory _factory;
         private readonly ILogWriter _logWriter;
-
-        // by Fumi.Iseki
-        public  static RemoteCertificateValidationCallback ClientCertificateValidationCallback = null;
-        private RemoteCertificateValidationCallback _clientCallback = null;
+        private readonly ContextTimeoutManager _contextTimeoutManager;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="HttpContextFactory"/> class.
@@ -34,13 +31,7 @@ namespace HttpServer
             _logWriter = writer;
             _bufferSize = bufferSize;
             _factory = factory;
-
-            // by Fumi.Iseki
-            if (ClientCertificateValidationCallback != null)
-            {
-                _clientCallback = ClientCertificateValidationCallback;
-                ClientCertificateValidationCallback = null;
-            }
+            _contextTimeoutManager = new ContextTimeoutManager(ContextTimeoutManager.MonitorType.Thread);
         }
 
         ///<summary>
@@ -84,7 +75,9 @@ namespace HttpServer
 			context.IsSecured = isSecured;
 			context.RemotePort = endPoint.Port.ToString();
 			context.RemoteAddress = endPoint.Address.ToString();
-			context.Start();
+			_contextTimeoutManager.StartMonitoringContext(context);
+            context.Start();
+
             return context;
         }
 
@@ -117,6 +110,7 @@ namespace HttpServer
             }
             else
             {
+               
                 imp.Close();
             }
         }
@@ -138,19 +132,11 @@ namespace HttpServer
 			var networkStream = new ReusableSocketNetworkStream(socket, true);
             var remoteEndPoint = (IPEndPoint) socket.RemoteEndPoint;
 
-            // by Fumi.Iseki
-            var sslStream = new SslStream(networkStream, false, new RemoteCertificateValidationCallback(_clientCallback));
+            var sslStream = new SslStream(networkStream, false);
             try
             {
                 //TODO: this may fail
-                if (_clientCallback == null)    // by Fumi.Iseki
-                {
-                    sslStream.AuthenticateAsServer(certificate, false, protocol, false);
-                }
-                else
-                {
-                    sslStream.AuthenticateAsServer(certificate, true, protocol, false);
-                }
+                sslStream.AuthenticateAsServer(certificate, false, protocol, false);
                 return CreateContext(true, remoteEndPoint, sslStream, socket);
             }
             catch (IOException err)
@@ -188,6 +174,14 @@ namespace HttpServer
         }
 
         #endregion
+
+        /// <summary>
+        /// Server is shutting down so shut down the factory
+        /// </summary>
+        public void Shutdown()
+        {
+            _contextTimeoutManager.StopMonitoring();
+        }
     }
 
 	/// <summary>
@@ -351,5 +345,10 @@ namespace HttpServer
         /// A request have been received from one of the contexts.
         /// </summary>
         event EventHandler<RequestEventArgs> RequestReceived;
+
+        /// <summary>
+        /// Server is shutting down so shut down the factory
+        /// </summary>
+        void Shutdown();
     }
 }
