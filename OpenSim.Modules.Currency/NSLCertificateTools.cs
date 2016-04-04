@@ -132,15 +132,14 @@ namespace NSL.Certificate.Tools
 				}
 			}
 
-			X509Certificate2 certificate2 = new X509Certificate2(certificate);
-			string simplename = certificate2.GetNameInfo(X509NameType.SimpleName, false);
-
-			// None, ChainErrors 以外は全てエラーとする．
-			if (sslPolicyErrors!=SslPolicyErrors.None && sslPolicyErrors!=SslPolicyErrors.RemoteCertificateChainErrors) {
-				m_log.InfoFormat("[NSL CERT VERIFY]: ValidateServerCertificate: Simple Name is \"{0}\"", simplename);
-				m_log.InfoFormat("[NSL CERT VERIFY]: ValidateServerCertificate: Policy Error!", sslPolicyErrors);
+			// RemoteCertificateNotAvailableはエラーとする．
+			if ((sslPolicyErrors & SslPolicyErrors.RemoteCertificateNotAvailable)==SslPolicyErrors.RemoteCertificateNotAvailable) {
+				m_log.InfoFormat("[NSL CERT VERIFY]: ValidateServerCertificate: Policy Error! {0}", sslPolicyErrors);
 				return false;
 			}
+
+			X509Certificate2 certificate2 = new X509Certificate2(certificate);
+			string simplename = certificate2.GetNameInfo(X509NameType.SimpleName, false);
 
 			bool valid = CheckPrivateChain(certificate2);
 			if (valid) {
@@ -158,17 +157,16 @@ namespace NSL.Certificate.Tools
 		// obj is SslStream
 		public bool ValidateClientCertificate(object obj, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)
 		{
-			m_log.InfoFormat("[NSL CERT VERIFY]: ValidateClientCertificate: Policy is ({0})", sslPolicyErrors);
+			//m_log.InfoFormat("[NSL CERT VERIFY]: ValidateClientCertificate: Policy is ({0})", sslPolicyErrors);
 
-			X509Certificate2 certificate2 = new X509Certificate2(certificate);
-			string simplename = certificate2.GetNameInfo(X509NameType.SimpleName, false);
-
-			// None, ChainErrors 以外は全てエラーとする．
-			if (sslPolicyErrors!=SslPolicyErrors.None && sslPolicyErrors!=SslPolicyErrors.RemoteCertificateChainErrors) {
-				m_log.InfoFormat("[NSL CERT VERIFY]: ValidateClientCertificate: Simple Name is \"{0}\"", simplename);
-				m_log.InfoFormat("[NSL CERT VERIFY]: ValidateClientCertificate: Policy Error!");
+			// RemoteCertificateNotAvailableはエラーとする．
+			if ((sslPolicyErrors & SslPolicyErrors.RemoteCertificateNotAvailable)==SslPolicyErrors.RemoteCertificateNotAvailable) {
+				m_log.InfoFormat("[NSL CERT VERIFY]: ValidateClientCertificate: Policy Error! {0}", sslPolicyErrors);
 				return false;
 			}
+			
+			X509Certificate2 certificate2 = new X509Certificate2(certificate);
+			string simplename = certificate2.GetNameInfo(X509NameType.SimpleName, false);
 
 			// check CRL
 			if (m_clientcrl!=null) {

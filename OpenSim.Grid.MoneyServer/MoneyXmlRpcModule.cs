@@ -84,6 +84,7 @@ namespace OpenSim.Grid.MoneyServer
 		private string m_BalanceMessageReceiveGift	= "Received Gift L${0} from {1}.";
 		private string m_BalanceMessagePayCharge 	= "";
 		private string m_BalanceMessageBuyObject  	= "Bought the Object L${0} from {1}.";
+		private string m_BalanceMessageSellObject  	= "";
 		private string m_BalanceMessageGetMoney  	= "Got the Money L${0} from {1}.";
 		private string m_BalanceMessageBuyMoney  	= "Bought the Money L${0}.";
 		private string m_BalanceMessageReceiveMoney = "Received L${0} from System.";
@@ -168,6 +169,7 @@ namespace OpenSim.Grid.MoneyServer
 			m_BalanceMessageReceiveGift  = m_config.GetString("BalanceMessageReceiveGift",	m_BalanceMessageReceiveGift);
 			m_BalanceMessagePayCharge	 = m_config.GetString("BalanceMessagePayCharge",	m_BalanceMessagePayCharge);
 			m_BalanceMessageBuyObject	 = m_config.GetString("BalanceMessageBuyObject", 	m_BalanceMessageBuyObject); 
+			m_BalanceMessageSellObject	 = m_config.GetString("BalanceMessageSellObject", 	m_BalanceMessageSellObject); 
 			m_BalanceMessageGetMoney	 = m_config.GetString("BalanceMessageGetMoney", 	m_BalanceMessageGetMoney); 
 			m_BalanceMessageBuyMoney	 = m_config.GetString("BalanceMessageBuyMoney", 	m_BalanceMessageBuyMoney); 
 			m_BalanceMessageReceiveMoney = m_config.GetString("BalanceMessageReceiveMoney", m_BalanceMessageReceiveMoney);
@@ -443,6 +445,7 @@ namespace OpenSim.Grid.MoneyServer
 									}
 									else if (transaction.Type==(int)TransactionType.PayObject) {
 										snd_message = m_BalanceMessageBuyObject;
+										rcv_message = m_BalanceMessageSellObject;
 									}
 									else if (transaction.Type==(int)TransactionType.ObjectPays) {		// ObjectGiveMoney
 										rcv_message = m_BalanceMessageGetMoney;
@@ -578,6 +581,7 @@ namespace OpenSim.Grid.MoneyServer
 							}
 							else if (transaction.Type==(int)TransactionType.PayObject) {
 								snd_message = m_BalanceMessageBuyObject;
+								rcv_message = m_BalanceMessageSellObject;
 							}
 							else if (transaction.Type==(int)TransactionType.ObjectPays) {		// ObjectGiveMoney
 								rcv_message = m_BalanceMessageGetMoney;
