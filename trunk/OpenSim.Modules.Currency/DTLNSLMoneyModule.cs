@@ -175,20 +175,22 @@ namespace OpenSim.Modules.Currency
 
 		private IConfigSource m_config;
 
-		private string m_moneyServURL	 = string.Empty;
+		private string m_moneyServURL	  = string.Empty;
 		public  BaseHttpServer HttpServer;
 
-		private string m_certFilename	 = "";
-		private string m_certPassword	 = "";
-		private bool   m_checkServerCert = false;
-		private string m_cacertFilename	 = "";
-		private X509Certificate2 m_cert	 = null;
+		private bool   m_enableAmountZero = false;
+
+		private string m_certFilename	  = "";
+		private string m_certPassword	  = "";
+		private bool   m_checkServerCert  = false;
+		private string m_cacertFilename	  = "";
+		private X509Certificate2 m_cert	  = null;
 
 		//
-		private bool   m_use_web_settle	 = false;
-		private string m_settle_url	  	 = "";
-		private string m_settle_message  = "";
-		private bool   m_settle_user  	 = false;
+		private bool   m_use_web_settle	  = false;
+		private string m_settle_url	  	  = "";
+		private string m_settle_message   = "";
+		private bool   m_settle_user  	  = false;
 
 		private NSLCertificateVerify m_certVerify = new NSLCertificateVerify();	// サーバ認証用
 
@@ -266,6 +268,10 @@ namespace OpenSim.Modules.Currency
 					m_log.InfoFormat("[MONEY]: The DTL/NSL MoneyModule is enabled");
 				}
 
+				// Enable Amount is 0
+				string enableAmountZero = economyConfig.GetString("EnableAmountZeroTransaction", "false");
+				if (enableAmountZero.ToLower()=="true") m_enableAmountZero = true;
+
 				m_sellEnabled  = economyConfig.GetBoolean("SellEnabled", false);
 				m_moneyServURL = economyConfig.GetString("CurrencyServer");
 
@@ -313,7 +319,6 @@ namespace OpenSim.Modules.Currency
 				TeleportMinPrice 		= economyConfig.GetInt	("TeleportMinPrice", 		2);
 				TeleportPriceExponent 	= economyConfig.GetFloat("TeleportPriceExponent", 	2f);
 				EnergyEfficiency 		= economyConfig.GetFloat("EnergyEfficiency", 		1);
-
 			}
 			catch
 			{
@@ -733,8 +738,8 @@ namespace OpenSim.Modules.Currency
 					if (sender is Scene) regionID = ((Scene)sender).RegionInfo.RegionID;
 
 					if (TransferMoney(landBuyEvent.agentId, landBuyEvent.parcelOwnerID, 
-									  //landBuyEvent.parcelPrice, (int)MoneyTransactionType.LandSale, regionID, parcelID, "Land Purchase"))
 									  landBuyEvent.parcelPrice, (int)TransactionType.LandSale, regionID, parcelID, "Land Purchase"))
+									  //landBuyEvent.parcelPrice, (int)MoneyTransactionType.LandSale, regionID, parcelID, "Land Purchase"))
 					{
 						landBuyEvent.amountDebited = landBuyEvent.parcelPrice;
 					}
@@ -777,11 +782,11 @@ namespace OpenSim.Modules.Currency
 						UUID receiverId = sceneObj.OwnerID;
 						ulong regionHandle = sceneObj.RegionHandle;
 						bool ret = true;
-						//if (salePrice>0) {
-						if (salePrice>=0) {
+						//
+						if (salePrice>0 || (salePrice==0&&m_enableAmountZero)) {
 							ret = TransferMoney(remoteClient.AgentId, receiverId, salePrice,
-												//(int)MoneyTransactionType.PayObject, sceneObj.UUID, regionHandle, "Object Buy");
 												(int)TransactionType.PayObject, sceneObj.UUID, regionHandle, "Object Buy");
+												//(int)MoneyTransactionType.PayObject, sceneObj.UUID, regionHandle, "Object Buy");
 						}
 						if (ret)
 						{
