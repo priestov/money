@@ -10,9 +10,6 @@
     CurrencyServer = "https://jogrid.net:8008/"
     EconomyModule = DTLNSLMoneyModule
 
-    ; Save Transactions, even when amout is 0. Default is false.
-    ;EnableAmountZeroTransaction = false;
-
     ;
     ;ClientCertFilename = "jogrid_region.p12"
     ;ClientCertPassword = ""
