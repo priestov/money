@@ -777,7 +777,8 @@ namespace OpenSim.Modules.Currency
 						UUID receiverId = sceneObj.OwnerID;
 						ulong regionHandle = sceneObj.RegionHandle;
 						bool ret = true;
-						if (salePrice>0) {
+						//if (salePrice>0) {
+						if (salePrice>=0) {
 							ret = TransferMoney(remoteClient.AgentId, receiverId, salePrice,
 												//(int)MoneyTransactionType.PayObject, sceneObj.UUID, regionHandle, "Object Buy");
 												(int)TransactionType.PayObject, sceneObj.UUID, regionHandle, "Object Buy");
