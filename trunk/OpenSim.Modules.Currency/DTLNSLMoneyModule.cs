@@ -969,8 +969,12 @@ namespace OpenSim.Modules.Currency
 								if (requestParam.Contains("Message")) msg = (string)requestParam["Message"];
 								//client.SendMoneyBalance(UUID.Random(), true, Utils.StringToBytes(msg), (int)requestParam["Balance"]);
 								client.SendMoneyBalance(UUID.Random(), true, Utils.StringToBytes(msg), (int)requestParam["Balance"],
-																					//0, UUID.Zero, false, UUID.Zero, false, 0, String.Empty);
-																					0, client.AgentId, false, UUID.Zero, false, 0, String.Empty);
+																					0, UUID.Zero, false, UUID.Zero, false, 0, String.Empty);
+								// Dialog
+								Scene scene = (Scene)client.Scene;
+								IDialogModule dlg = scene.RequestModuleInterface<IDialogModule>();
+								dlg.SendAlertToUser(client.AgentId, msg);
+								
 								ret = true;
 							}
 						}
