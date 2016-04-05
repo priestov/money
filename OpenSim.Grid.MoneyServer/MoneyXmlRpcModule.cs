@@ -84,8 +84,8 @@ namespace OpenSim.Grid.MoneyServer
 		private string m_BalanceMessageSendGift 	= "Sent Gift L${0} to {1}.";
 		private string m_BalanceMessageReceiveGift	= "Received Gift L${0} from {1}.";
 		private string m_BalanceMessagePayCharge 	= "";
-		private string m_BalanceMessageBuyObject  	= "Bought the Object({2}) from {1} by L${0}.";
-		private string m_BalanceMessageSellObject  	= "{1} bought the Object({2}) by L${0}.";
+		private string m_BalanceMessageBuyObject  	= "Bought the Object {2} from {1} by L${0}.";
+		private string m_BalanceMessageSellObject  	= "{1} bought the Object {2} by L${0}.";
 		private string m_BalanceMessageGetMoney  	= "Got the Money L${0} from {1}.";
 		private string m_BalanceMessageBuyMoney  	= "Bought the Money L${0}.";
 		private string m_BalanceMessageReceiveMoney = "Received L${0} from System.";
