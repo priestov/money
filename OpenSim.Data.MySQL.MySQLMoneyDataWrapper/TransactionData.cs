@@ -45,6 +45,7 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
         int m_status;
         string m_description = string.Empty;
         string m_objectID = string.Empty;
+        string m_objectName = string.Empty;
         string m_regionHandle = string.Empty;
         string m_secureCode = string.Empty;
         string m_commonName = string.Empty;
@@ -101,6 +102,11 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
         {
             get { return m_objectID; }
             set { m_objectID = value; }
+        }
+        public string ObjectName
+        {
+            get { return m_objectName; }
+            set { m_objectName = value; }
         }
         public string RegionHandle
         {

@@ -174,24 +174,32 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 							UpdateTransactionTable4();
 							UpdateTransactionTable5();
 							UpdateTransactionTable6();
+							UpdateTransactionTable7();
 							break;
 						case 3: //Rev.3
 							UpdateTransactionTable3();
 							UpdateTransactionTable4();
 							UpdateTransactionTable5();
 							UpdateTransactionTable6();
+							UpdateTransactionTable7();
 							break;
 						case 4: //Rev.4
 							UpdateTransactionTable4();
 							UpdateTransactionTable5();
 							UpdateTransactionTable6();
+							UpdateTransactionTable7();
 							break;
 						case 5: //Rev.5
 							UpdateTransactionTable5();
 							UpdateTransactionTable6();
+							UpdateTransactionTable7();
 							break;
 						case 6: //Rev.6
 							UpdateTransactionTable6();
+							UpdateTransactionTable7();
+							break;
+						case 7: //Rev.7
+							UpdateTransactionTable7();
 							break;
 					}
 				}
@@ -246,7 +254,8 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 			sql += "`sender` varchar(128) NOT NULL,";
 			sql += "`receiver` varchar(128) NOT NULL,";
 			sql += "`amount` int(10) NOT NULL,";
-			sql += "`objectUUID` varchar(36) DEFAULT NULL,";
+			sql += "`objectUUID` varchar(36)  DEFAULT NULL,";
+			sql += "`objectName` varchar(255) DEFAULT NULL,";
 			sql += "`regionHandle` varchar(36) NOT NULL,";
 			sql += "`type` int(10) NOT NULL,";
 			sql += "`time` int(11) NOT NULL,";
@@ -532,6 +541,22 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 		}
 
 
+		/// <summary>
+		/// update transaction table from Rev.7 to Rev.8
+		/// </summary>
+		private void UpdateTransactionTable7()
+		{
+			string sql = string.Empty;
+
+			sql += "BEGIN;";
+			sql += "ALTER TABLE `" + Table_of_Transaction + "`";
+			sql += "ADD `objectName` varchar(255) DEFAULT NULL AFTER `objectUUID`,";
+			sql += "COMMENT = 'Rev.8';";
+			sql += "COMMIT;";
+			MySqlCommand cmd = new MySqlCommand(sql, dbcon);
+			cmd.ExecuteNonQuery();
+		}
+
 
 
 		///////////////////////////////////////////////////////////////////////
@@ -779,8 +804,8 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 			string sql = string.Empty;
 
 			sql += "INSERT INTO " + Table_of_Transaction;
-			sql += " (`UUID`,`sender`,`receiver`,`amount`,`objectUUID`,`regionHandle`,`type`,`time`,`secure`,`status`,`commonName`,`description`) VALUES";
-			sql += " (?transID,?sender,?receiver,?amount,?objID,?regionHandle,?type,?time,?secure,?status,?cname,?desc)";
+			sql += " (`UUID`,`sender`,`receiver`,`amount`,`objectUUID`,`objectName`,`regionHandle`,`type`,`time`,`secure`,`status`,`commonName`,`description`) VALUES";
+			sql += " (?transID,?sender,?receiver,?amount,?objID,?objName,?regionHandle,?type,?time,?secure,?status,?cname,?desc)";
 
 			MySqlCommand cmd = new MySqlCommand(sql, dbcon);
 			cmd.Parameters.AddWithValue("?transID", transaction.TransUUID.ToString());
@@ -788,6 +813,7 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 			cmd.Parameters.AddWithValue("?receiver", transaction.Receiver);
 			cmd.Parameters.AddWithValue("?amount", transaction.Amount);
 			cmd.Parameters.AddWithValue("?objID", transaction.ObjectUUID);
+			cmd.Parameters.AddWithValue("?objName", transaction.ObjectName);
 			cmd.Parameters.AddWithValue("?regionHandle", transaction.RegionHandle);
 			cmd.Parameters.AddWithValue("?type", transaction.Type);
 			cmd.Parameters.AddWithValue("?time", transaction.Time);
@@ -919,6 +945,7 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 						transactionData.Receiver = (string)r["receiver"];
 						transactionData.Amount = Convert.ToInt32(r["amount"]);
 						transactionData.ObjectUUID = (string)r["objectUUID"];
+						transactionData.ObjectName = (string)r["objectName"];
 						transactionData.RegionHandle = (string)r["regionHandle"];
 						transactionData.Type = Convert.ToInt32(r["type"]);
 						transactionData.Time = Convert.ToInt32(r["time"]);
@@ -980,6 +1007,7 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 							{
 								transactionData.ObjectUUID = (string)r["objectUUID"];
 							}
+							transactionData.ObjectName = (string)r["objectName"];
 							transactionData.Type = Convert.ToInt32(r["type"]);
 							transactionData.Time = Convert.ToInt32(r["time"]);
 							transactionData.Status = Convert.ToInt32(r["status"]);
