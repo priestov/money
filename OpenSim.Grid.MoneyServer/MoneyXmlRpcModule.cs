@@ -699,7 +699,7 @@ namespace OpenSim.Grid.MoneyServer
 							{
 								m_log.InfoFormat("[MONEY RPC]: handleAddBankerMoney: Adding money finished successfully, now update balance: {0}", 
 																															transactionUUID.ToString());
-								string message = string.Format(m_BalanceMessageBuyMoney, amount, "SYSTEM");
+								string message = string.Format(m_BalanceMessageBuyMoney, amount, "SYSTEM", string.Empty);
 								UpdateBalance(transaction.Receiver, message);
 								responseData["success"] = true;
 							}
@@ -824,7 +824,7 @@ namespace OpenSim.Grid.MoneyServer
 							{
 								m_log.InfoFormat("[MONEY RPC]: handleSendMoneyBalance: Sending money finished successfully, now update balance {0}", 
 																															transactionUUID.ToString());
-								string message = string.Format(m_BalanceMessageReceiveMoney, amount, "SYSTEM");
+								string message = string.Format(m_BalanceMessageReceiveMoney, amount, "SYSTEM", string.Empty);
 								UpdateBalance(transaction.Receiver, message);
 								responseData["success"] = true;
 							}
@@ -921,7 +921,7 @@ namespace OpenSim.Grid.MoneyServer
 							{
 								if (amount!=0)
 								{
-									string message = string.Format(m_BalanceMessagePayCharge, amount, "SYSTEM");
+									string message = string.Format(m_BalanceMessagePayCharge, amount, "SYSTEM", string.Empty);
 									responseData["success"] = NotifyTransfer(transactionUUID, message, "");
 								}
 								else
@@ -1311,8 +1311,8 @@ namespace OpenSim.Grid.MoneyServer
 					if (senderInfo!=null)   senderName   = senderInfo.Avatar;
 					if (receiverInfo!=null) receiverName = receiverInfo.Avatar;
 
-					string snd_message = string.Format(m_BalanceMessageRollBack, transaction.Amount, receiverName);
-					string rcv_message = string.Format(m_BalanceMessageRollBack, transaction.Amount, senderName);
+					string snd_message = string.Format(m_BalanceMessageRollBack, transaction.Amount, receiverName, string.Empty);
+					string rcv_message = string.Format(m_BalanceMessageRollBack, transaction.Amount, senderName,   string.Empty);
 
 					if (transaction.Sender!=transaction.Receiver) UpdateBalance(transaction.Sender, snd_message);
 					UpdateBalance(transaction.Receiver, rcv_message);
