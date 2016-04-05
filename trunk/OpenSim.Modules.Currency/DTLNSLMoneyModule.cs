@@ -169,7 +169,7 @@ namespace OpenSim.Modules.Currency
 		// Private data members.   
 		private static readonly ILog m_log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
 
-		private bool  m_enabled = true;
+		//private bool  m_enabled = true;
 		private bool  m_sellEnabled = false;
 		private bool  m_enable_server = true;	// enable Money Server
 
@@ -257,7 +257,7 @@ namespace OpenSim.Modules.Currency
 
 				if (economyConfig.GetString("EconomyModule")!=Name)
 				{
-					m_enabled = false;
+					//m_enabled = false;
 					m_log.InfoFormat("[MONEY]: The DTL/NSL MoneyModule is disabled");
 					return;
 				}
