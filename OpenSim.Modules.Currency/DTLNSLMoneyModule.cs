@@ -1344,6 +1344,10 @@ namespace OpenSim.Modules.Currency
 
 			if (m_enable_server)
 			{
+				string objName = string.Empty;
+				SceneObjectPart sceneObj = GetLocatePrim(objectID);
+				if (sceneObj!=null)objName = sceneObj.Name;
+  
 				// Fill parameters for money transfer XML-RPC.   
 				Hashtable paramTable = new Hashtable();
 				paramTable["senderID"] 				= sender.ToString();
@@ -1352,6 +1356,7 @@ namespace OpenSim.Modules.Currency
 				paramTable["senderSecureSessionID"] = senderClient.SecureSessionId.ToString();
 				paramTable["transactionType"] 		= type;
 				paramTable["objectID"] 				= objectID.ToString();
+				paramTable["objectName"] 			= objName;
 				paramTable["regionHandle"] 			= regionHandle.ToString();
 				paramTable["amount"] 				= amount;
 				paramTable["description"] 			= description;
@@ -1399,12 +1404,17 @@ namespace OpenSim.Modules.Currency
 
 			if (m_enable_server)
 			{
+				string objName = string.Empty;
+				SceneObjectPart sceneObj = GetLocatePrim(objectID);
+				if (sceneObj!=null)objName = sceneObj.Name;
+
 				// Fill parameters for money transfer XML-RPC.   
 				Hashtable paramTable = new Hashtable();
 				paramTable["senderID"] 			 = sender.ToString();
 				paramTable["receiverID"] 		 = receiver.ToString();
 				paramTable["transactionType"] 	 = type;
 				paramTable["objectID"] 			 = objectID.ToString();
+				paramTable["objectName"] 		 = objName;
 				paramTable["regionHandle"] 		 = regionHandle.ToString();
 				paramTable["amount"] 			 = amount;
 				paramTable["description"] 		 = description;
