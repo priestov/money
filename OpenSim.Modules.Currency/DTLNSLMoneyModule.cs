@@ -971,10 +971,11 @@ namespace OpenSim.Modules.Currency
 								client.SendMoneyBalance(UUID.Random(), true, Utils.StringToBytes(msg), (int)requestParam["Balance"],
 																					0, UUID.Zero, false, UUID.Zero, false, 0, String.Empty);
 								// Dialog
-								Scene scene = (Scene)client.Scene;
-								IDialogModule dlg = scene.RequestModuleInterface<IDialogModule>();
-								dlg.SendAlertToUser(client.AgentId, msg);
-								
+								if (msg!="") {
+									Scene scene = (Scene)client.Scene;
+									IDialogModule dlg = scene.RequestModuleInterface<IDialogModule>();
+									dlg.SendAlertToUser(client.AgentId, msg);
+								}
 								ret = true;
 							}
 						}
