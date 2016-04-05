@@ -239,7 +239,6 @@ namespace OpenSim.Grid.MoneyServer
 
 
 
-
 		/// <summary>
 		/// Get the user balance when user entering a parcel.
 		/// </summary>
@@ -477,9 +476,7 @@ namespace OpenSim.Grid.MoneyServer
 						responseData["success"] = false;
 						return response;
 					}
-					
 				}
-
 			}
 
 			m_log.Error("[MONEY RPC]: handleTransaction: Session authentication failure for sender " + senderID);
