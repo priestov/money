@@ -178,8 +178,6 @@ namespace OpenSim.Modules.Currency
 		private string m_moneyServURL	  = string.Empty;
 		public  BaseHttpServer HttpServer;
 
-		private bool   m_enableAmountZero = false;
-
 		private string m_certFilename	  = "";
 		private string m_certPassword	  = "";
 		private bool   m_checkServerCert  = false;
@@ -267,10 +265,6 @@ namespace OpenSim.Modules.Currency
 				{
 					m_log.InfoFormat("[MONEY]: The DTL/NSL MoneyModule is enabled");
 				}
-
-				// Enable Amount is 0
-				string enableAmountZero = economyConfig.GetString("EnableAmountZeroTransaction", "false");
-				if (enableAmountZero.ToLower()=="true") m_enableAmountZero = true;
 
 				m_sellEnabled  = economyConfig.GetBoolean("SellEnabled", false);
 				m_moneyServURL = economyConfig.GetString("CurrencyServer");
@@ -783,7 +777,7 @@ namespace OpenSim.Modules.Currency
 						ulong regionHandle = sceneObj.RegionHandle;
 						bool ret = true;
 						//
-						if (salePrice>0 || (salePrice==0&&m_enableAmountZero)) {
+						if (salePrice>=0) {
 							ret = TransferMoney(remoteClient.AgentId, receiverId, salePrice,
 												(int)TransactionType.PayObject, sceneObj.UUID, regionHandle, "Object Buy");
 												//(int)MoneyTransactionType.PayObject, sceneObj.UUID, regionHandle, "Object Buy");

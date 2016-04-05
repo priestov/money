@@ -177,7 +177,7 @@ namespace OpenSim.Grid.MoneyServer
 			m_BalanceMessageReceiveMoney = m_config.GetString("BalanceMessageReceiveMoney", m_BalanceMessageReceiveMoney);
 			m_BalanceMessageRollBack	 = m_config.GetString("BalanceMessageRollBack", 	m_BalanceMessageRollBack);
 
-			string enableAmountZero = m_config.GetString("EnableAmountZeroBalanceMessage", "false");
+			string enableAmountZero = m_config.GetString("EnableAmountZero", "false");
 			if (enableAmountZero.ToLower()=="true") m_enableAmountZero = true;
 
 			m_sessionDic = m_moneyCore.GetSessionDic();
