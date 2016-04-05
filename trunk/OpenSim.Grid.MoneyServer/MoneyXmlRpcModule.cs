@@ -410,6 +410,7 @@ namespace OpenSim.Grid.MoneyServer
 						transaction.Receiver = receiverID;
 						transaction.Amount = amount;
 						transaction.ObjectUUID = objectID;
+						transaction.ObjectName = objectName;
 						transaction.RegionHandle = regionHandle;
 						transaction.Type = transactionType;
 						transaction.Time = time;
@@ -546,6 +547,7 @@ namespace OpenSim.Grid.MoneyServer
 				transaction.Receiver = receiverID;
 				transaction.Amount = amount;
 				transaction.ObjectUUID = objectID;
+				transaction.ObjectName = objectName;
 				transaction.RegionHandle = regionHandle;
 				transaction.Type = transactionType;
 				transaction.Time = time;
@@ -701,7 +703,7 @@ namespace OpenSim.Grid.MoneyServer
 							{
 								m_log.InfoFormat("[MONEY RPC]: handleAddBankerMoney: Adding money finished successfully, now update balance: {0}", 
 																															transactionUUID.ToString());
-								string message = string.Format(m_BalanceMessageBuyMoney, amount, "SYSTEM");
+								string message = string.Format(m_BalanceMessageBuyMoney, amount, "SYSTEM", "");
 								UpdateBalance(transaction.Receiver, message);
 								responseData["success"] = true;
 							}
@@ -826,7 +828,7 @@ namespace OpenSim.Grid.MoneyServer
 							{
 								m_log.InfoFormat("[MONEY RPC]: handleSendMoneyBalance: Sending money finished successfully, now update balance {0}", 
 																															transactionUUID.ToString());
-								string message = string.Format(m_BalanceMessageReceiveMoney, amount, "SYSTEM");
+								string message = string.Format(m_BalanceMessageReceiveMoney, amount, "SYSTEM", "");
 								UpdateBalance(transaction.Receiver, message);
 								responseData["success"] = true;
 							}
@@ -880,6 +882,7 @@ namespace OpenSim.Grid.MoneyServer
 			string senderSessionID = string.Empty;
 			string senderSecureSessionID = string.Empty;
 			string objectID = UUID.Zero.ToString();
+			string objectName = string.Empty;
 			string regionHandle = string.Empty;
 			string description  = "Pay Charge on";
 
@@ -907,6 +910,7 @@ namespace OpenSim.Grid.MoneyServer
 						transaction.Receiver = receiverID;
 						transaction.Amount = amount;
 						transaction.ObjectUUID = objectID;
+						transaction.ObjectName = objectName;
 						transaction.RegionHandle = regionHandle;
 						transaction.Type = transactionType;
 						transaction.Time = time;
@@ -923,7 +927,7 @@ namespace OpenSim.Grid.MoneyServer
 							{
 								if (amount!=0)
 								{
-									string message = string.Format(m_BalanceMessagePayCharge, amount, "SYSTEM");
+									string message = string.Format(m_BalanceMessagePayCharge, amount, "SYSTEM", "");
 									responseData["success"] = NotifyTransfer(transactionUUID, message, "", "");
 								}
 								else
@@ -1024,6 +1028,7 @@ namespace OpenSim.Grid.MoneyServer
 							requestTable["transactionType"] = transaction.Type;
 							requestTable["amount"] = transaction.Amount;
 							requestTable["objectID"] = transaction.ObjectUUID;
+							requestTable["objectName"] = transaction.ObjectName;
 							requestTable["regionHandle"] = transaction.RegionHandle;
 
 							UserInfo user = m_moneyDBService.FetchUserInfo(transaction.Sender);
@@ -1313,8 +1318,8 @@ namespace OpenSim.Grid.MoneyServer
 					if (senderInfo!=null)   senderName   = senderInfo.Avatar;
 					if (receiverInfo!=null) receiverName = receiverInfo.Avatar;
 
-					string snd_message = string.Format(m_BalanceMessageRollBack, transaction.Amount, receiverName);
-					string rcv_message = string.Format(m_BalanceMessageRollBack, transaction.Amount, senderName);
+					string snd_message = string.Format(m_BalanceMessageRollBack, transaction.Amount, receiverName, transaction.ObjectName);
+					string rcv_message = string.Format(m_BalanceMessageRollBack, transaction.Amount, senderName,   transaction.ObjectName);
 
 					if (transaction.Sender!=transaction.Receiver) UpdateBalance(transaction.Sender, snd_message);
 					UpdateBalance(transaction.Receiver, rcv_message);
