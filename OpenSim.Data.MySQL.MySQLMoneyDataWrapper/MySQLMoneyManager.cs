@@ -56,7 +56,6 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 		private MySqlConnection dbcon;
   
 
-
 		public MySQLMoneyManager(string hostname,string database,string username ,string password,string cpooling, string port)
 		{
 			string s = "Server=" + hostname + ";Port=" + port + ";Database=" + database + ";User ID=" +
@@ -65,12 +64,10 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 		}
 
 
-
 		public MySQLMoneyManager(string connect)
 		{
 			Initialise(connect);
 		}
-
 
 
 		private void Initialise(string connect)
@@ -176,6 +173,7 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 							UpdateTransactionTable6();
 							UpdateTransactionTable7();
 							UpdateTransactionTable8();
+							UpdateTransactionTable9();
 							break;
 						case 3: //Rev.3
 							UpdateTransactionTable3();
@@ -184,6 +182,7 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 							UpdateTransactionTable6();
 							UpdateTransactionTable7();
 							UpdateTransactionTable8();
+							UpdateTransactionTable9();
 							break;
 						case 4: //Rev.4
 							UpdateTransactionTable4();
@@ -191,24 +190,32 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 							UpdateTransactionTable6();
 							UpdateTransactionTable7();
 							UpdateTransactionTable8();
+							UpdateTransactionTable9();
 							break;
 						case 5: //Rev.5
 							UpdateTransactionTable5();
 							UpdateTransactionTable6();
 							UpdateTransactionTable7();
 							UpdateTransactionTable8();
+							UpdateTransactionTable9();
 							break;
 						case 6: //Rev.6
 							UpdateTransactionTable6();
 							UpdateTransactionTable7();
 							UpdateTransactionTable8();
+							UpdateTransactionTable9();
 							break;
 						case 7: //Rev.7
 							UpdateTransactionTable7();
 							UpdateTransactionTable8();
+							UpdateTransactionTable9();
 							break;
 						case 8: //Rev.8
 							UpdateTransactionTable8();
+							UpdateTransactionTable9();
+							break;
+						case 9: //Rev.9
+							UpdateTransactionTable9();
 							break;
 					}
 				}
@@ -219,7 +226,6 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 				throw new Exception("[MONEY DB]: Error checking or creating tables: " + e.ToString());
 			}
 		}
-
 
 
 		private int getTableVersionNum(string version)
@@ -237,21 +243,19 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 		}
 
 
-
 		private void CreateBalanceTable()
 		{
 			string sql = string.Empty;
 
 			sql += "CREATE TABLE `" + Table_of_Balance + "`(";
 			sql += "`user` varchar(128) NOT NULL,";
-			sql += "`balance` int(10) NOT NULL,";
+			sql += "`balance` bigint(15) NOT NULL,";
 			sql += "`status` tinyint(2) default NULL,";
 			sql += "PRIMARY KEY (`user`))";
 			sql += "Engine=InnoDB DEFAULT CHARSET=utf8 COMMENT='Rev.2';";
 			MySqlCommand cmd = new MySqlCommand(sql, dbcon);
 			cmd.ExecuteNonQuery();
 		}
-
 
 
 		private void CreateTransactionTable()
@@ -279,7 +283,6 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 			MySqlCommand cmd = new MySqlCommand(sql, dbcon);
 			cmd.ExecuteNonQuery();
 		}
-
 
 
 		private void CreateUserTable()
@@ -369,7 +372,6 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 		}
 
 
-
 		private void UpdateUserInfoTable1()
 		{
 			m_log.Info("[MONEY DB]: Converting UserInfo Table...");
@@ -433,7 +435,6 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 				cmd.ExecuteNonQuery();
 			}
 		}
-
 
 
 		/// <summary>
@@ -581,12 +582,30 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 			sql += "ADD `senderBalance`   bigint(15) DEFAULT NULL AFTER `amount`,";
 			sql += "ADD `receiverBalance` bigint(15) DEFAULT NULL AFTER `senderBalance`,";
             sql += "CHANGE COLUMN `amount` `amount` bigint(15),"; 
-            sql += "CHANGE COLUMN `time` `time` bigint(12),"; 
+            sql += "CHANGE COLUMN `time`   `time`   bigint(12),"; 
 			sql += "COMMENT = 'Rev.9';";
 			sql += "COMMIT;";
 			MySqlCommand cmd = new MySqlCommand(sql, dbcon);
 			cmd.ExecuteNonQuery();
 		}
+
+
+		/// <summary>
+		/// update transaction table from Rev.9 to Rev.10
+		/// </summary>
+		private void UpdateTransactionTable9()
+		{
+			string sql = string.Empty;
+
+			sql += "BEGIN;";
+			sql += "ALTER TABLE `" + Table_of_Balance + "`";
+            sql += "CHANGE COLUMN `balance` `balance` bigint(15),"; 
+			sql += "COMMENT = 'Rev.10';";
+			sql += "COMMIT;";
+			MySqlCommand cmd = new MySqlCommand(sql, dbcon);
+			cmd.ExecuteNonQuery();
+		}
+
 
 
 		///////////////////////////////////////////////////////////////////////
