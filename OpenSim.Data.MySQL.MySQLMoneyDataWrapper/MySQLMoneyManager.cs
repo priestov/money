@@ -276,17 +276,17 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 			sql += "`sender` varchar(128) NOT NULL,";
 			sql += "`receiver` varchar(128) NOT NULL,";
 			sql += "`amount` int(10) NOT NULL,";
-			sql += "`senderBalance`   int(10) NOT NULL,";
-			sql += "`receiverBalance` int(10) NOT NULL,";
-			sql += "`objectUUID` varchar(36)  NOT NULL DEFAULT '-1',";
-			sql += "`objectName` varchar(255) NOT NULL DEFAULT '-1',";
+			sql += "`senderBalance`   int(10) NOT NULL DEFAULT -1,";
+			sql += "`receiverBalance` int(10) NOT NULL DEFAULT -1,";
+			sql += "`objectUUID` varchar(36)  DEFAULT NULL,";
+			sql += "`objectName` varchar(255) DEFAULT NULL,";
 			sql += "`regionHandle` varchar(36) NOT NULL,";
 			sql += "`type` int(10) NOT NULL,";
 			sql += "`time` int(11) NOT NULL,";
 			sql += "`secure` varchar(36) NOT NULL,";
-			sql += "`status` tinyint(1) NOT NULL,";
-			sql += "`commonName` varchar(128) default NULL,";
-			sql += "`description` varchar(255) default NULL,";
+			sql += "`status` tinyint(1)  NOT NULL,";
+			sql += "`commonName` varchar(128) NOT NULL,";
+			sql += "`description` varchar(255) DEFAULT NULL,";
 			sql += "PRIMARY KEY (`UUID`))";
 			sql += "Engine=InnoDB DEFAULT CHARSET=utf8 ";
 			///////////////////////////////////////////////
@@ -579,8 +579,8 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 
 			sql += "BEGIN;";
 			sql += "ALTER TABLE `" + Table_of_Transaction + "` ";
-			sql += "ADD `senderBalance`   int(10) NOT NULL AFTER `amount`,";
-			sql += "ADD `receiverBalance` int(10) NOT NULL AFTER `senderBalance`,";
+			sql += "ADD `senderBalance`   int(10) NOT NULL DEFAULT -1 AFTER `amount`,";
+			sql += "ADD `receiverBalance` int(10) NOT NULL DEFAULT -1 AFTER `senderBalance`,";
 			sql += "COMMENT = 'Rev.9';";
 			sql += "COMMIT;";
 			MySqlCommand cmd = new MySqlCommand(sql, dbcon);
