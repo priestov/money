@@ -175,6 +175,7 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 							UpdateTransactionTable5();
 							UpdateTransactionTable6();
 							UpdateTransactionTable7();
+							UpdateTransactionTable8();
 							break;
 						case 3: //Rev.3
 							UpdateTransactionTable3();
@@ -182,24 +183,32 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 							UpdateTransactionTable5();
 							UpdateTransactionTable6();
 							UpdateTransactionTable7();
+							UpdateTransactionTable8();
 							break;
 						case 4: //Rev.4
 							UpdateTransactionTable4();
 							UpdateTransactionTable5();
 							UpdateTransactionTable6();
 							UpdateTransactionTable7();
+							UpdateTransactionTable8();
 							break;
 						case 5: //Rev.5
 							UpdateTransactionTable5();
 							UpdateTransactionTable6();
 							UpdateTransactionTable7();
+							UpdateTransactionTable8();
 							break;
 						case 6: //Rev.6
 							UpdateTransactionTable6();
 							UpdateTransactionTable7();
+							UpdateTransactionTable8();
 							break;
 						case 7: //Rev.7
 							UpdateTransactionTable7();
+							UpdateTransactionTable8();
+							break;
+						case 8: //Rev.8
+							UpdateTransactionTable8();
 							break;
 					}
 				}
@@ -253,7 +262,9 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 			sql += "`UUID` varchar(36) NOT NULL,";
 			sql += "`sender` varchar(128) NOT NULL,";
 			sql += "`receiver` varchar(128) NOT NULL,";
-			sql += "`amount` int(10) NOT NULL,";
+			sql += "`amount` int(15) NOT NULL,";
+			sql += "`senderBalance` int(15) NOT NULL,";
+			sql += "`receiverBalance` int(15) NOT NULL,";
 			sql += "`objectUUID` varchar(36)  DEFAULT NULL,";
 			sql += "`objectName` varchar(255) DEFAULT NULL,";
 			sql += "`regionHandle` varchar(36) NOT NULL,";
@@ -498,7 +509,7 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 		/// </summary>
 		private void UpdateTransactionTable6()
 		{
-			m_log.Info("[MONEY DB]: Converting Transaction Table...");
+			//m_log.Info("[MONEY DB]: Converting Transaction Table...");
 			string sql = string.Empty;
 
 			sql = "SELECT COUNT(*) FROM " + Table_of_Transaction;
@@ -557,6 +568,31 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 			cmd.ExecuteNonQuery();
 		}
 
+
+		/// <summary>
+		/// update transaction table from Rev.8 to Rev.9
+		/// </summary>
+		private void UpdateTransactionTable8()
+		{
+			string sql = string.Empty;
+
+			sql += "BEGIN;";
+			sql += "ALTER TABLE `" + Table_of_Transaction + "`";
+            sql += "ALTER COLUMN `amount` int(15);"; 
+			sql += "COMMIT;";
+			MySqlCommand cmd = new MySqlCommand(sql, dbcon);
+			cmd.ExecuteNonQuery();
+
+			sql = string.Empty;
+			sql += "BEGIN;";
+			sql += "ALTER TABLE `" + Table_of_Transaction + "`";
+			sql += "ADD `receiverBalance` int(15) DEFAULT NULL AFTER `amount`,";
+			sql += "ADD `senderBalance`   int(15) DEFAULT NULL AFTER `amount`,";
+			sql += "COMMENT = 'Rev.9';";
+			sql += "COMMIT;";
+			cmd = new MySqlCommand(sql, dbcon);
+			cmd.ExecuteNonQuery();
+		}
 
 
 		///////////////////////////////////////////////////////////////////////
