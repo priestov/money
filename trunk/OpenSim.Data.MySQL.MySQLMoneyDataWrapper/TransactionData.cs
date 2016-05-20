@@ -40,84 +40,113 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
         string m_sender = string.Empty;
         string m_receiver = string.Empty;
         int m_amount;
+        int m_senderBalance;
+        int m_receiverBalance;
         int m_type;
         int m_time;
         int m_status;
-        string m_description = string.Empty;
         string m_objectID = string.Empty;
         string m_objectName = string.Empty;
         string m_regionHandle = string.Empty;
         string m_secureCode = string.Empty;
         string m_commonName = string.Empty;
+        string m_description = string.Empty;
 
-        //public TransactionData(string uuid, string sender, string receiver,
-        //    int amount, int time, int status, string description)
-        //{
-        //    this.m_uuid = uuid;
-        //    this.m_sender = sender;
-        //    this.m_receiver = receiver;
-        //    this.m_amount = amount;
-        //}
+/*
+        public TransactionData(string uuid, string sender, string receiver,
+            int amount, int time, int status, string description)
+        {
+            this.m_uuid = uuid;
+            this.m_sender = sender;
+            this.m_receiver = receiver;
+            this.m_amount = amount;
+        }
+*/
+
         public UUID TransUUID
         {
             get { return m_uuid; }
             set { m_uuid = value; }
         }
+
         public string Sender
         {
             get { return m_sender; }
             set { m_sender = value; }
         }
+
         public string Receiver
         {
             get { return m_receiver; }
             set { m_receiver = value; }
         }
+
         public int Amount
         {
             get { return m_amount; }
             set { m_amount = value; }
         }
+
+        public int SenderBalance
+        {
+            get { return m_senderBalance; }
+            set { m_senderBalance = value; }
+        }
+
+        public int ReceiverBalance
+        {
+            get { return m_receiverBalance; }
+            set { m_receiverBalance = value; }
+        }
+
         public int Type
         {
             get { return m_type; }
             set { m_type = value; }
         }
+
         public int Time
         {
             get { return m_time; }
             set { m_time = value; }
         }
+
         public int Status
         {
             get { return m_status; }
             set { m_status = value; }
         }
+
         public string Description
         {
             get { return m_description; }
             set { m_description = value; }
         }
+
         public string ObjectUUID
         {
             get { return m_objectID; }
             set { m_objectID = value; }
         }
+
         public string ObjectName
         {
             get { return m_objectName; }
             set { m_objectName = value; }
         }
+
         public string RegionHandle
         {
             get { return m_regionHandle; }
             set { m_regionHandle = value; }
         }
+
         public string SecureCode
         {
             get { return m_secureCode; }
             set { m_secureCode = value; }
         }
+
         public string CommonName
         {
             get { return m_commonName; }
@@ -130,7 +159,7 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
     { 
         SUCCESS_STATUS = 0, 
         PENDING_STATUS = 1, 
-        FAILED_STATUS = 2
+        FAILED_STATUS  = 2
     }
 
 
