@@ -373,7 +373,7 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 
 			sql += "BEGIN;";
 			sql += "ALTER TABLE `" + Table_of_Balance + "`";
-            sql += "CHANGE COLUMN `balance` `balance` bigint(15),"; 
+            sql += "CHANGE COLUMN `balance` `balance` bigint(15) NOT NULL,"; 
 			sql += "COMMENT = 'Rev.3';";
 			sql += "COMMIT;";
 			MySqlCommand cmd = new MySqlCommand(sql, dbcon);
@@ -594,8 +594,8 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 			sql += "ALTER TABLE `" + Table_of_Transaction + "`";
 			sql += "ADD `senderBalance`   bigint(15) DEFAULT NULL AFTER `amount`,";
 			sql += "ADD `receiverBalance` bigint(15) DEFAULT NULL AFTER `senderBalance`,";
-            sql += "CHANGE COLUMN `amount` `amount` bigint(15),"; 
-            sql += "CHANGE COLUMN `time`   `time`   bigint(12),"; 
+            sql += "CHANGE COLUMN `amount` `amount` bigint(15) NOT NULL,"; 
+            sql += "CHANGE COLUMN `time`   `time`   bigint(12) NOT NULL,"; 
 			sql += "COMMENT = 'Rev.9';";
 			sql += "COMMIT;";
 			MySqlCommand cmd = new MySqlCommand(sql, dbcon);
