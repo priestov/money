@@ -117,6 +117,10 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 					{
 						case 1: //Rev.1
 							UpdateBalanceTable1();
+							UpdateBalanceTable2();
+							break;
+						case 2: //Rev.2
+							UpdateBalanceTable2();
 							break;
 					}
 				}
@@ -173,7 +177,6 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 							UpdateTransactionTable6();
 							UpdateTransactionTable7();
 							UpdateTransactionTable8();
-							UpdateTransactionTable9();
 							break;
 						case 3: //Rev.3
 							UpdateTransactionTable3();
@@ -182,7 +185,6 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 							UpdateTransactionTable6();
 							UpdateTransactionTable7();
 							UpdateTransactionTable8();
-							UpdateTransactionTable9();
 							break;
 						case 4: //Rev.4
 							UpdateTransactionTable4();
@@ -190,32 +192,24 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 							UpdateTransactionTable6();
 							UpdateTransactionTable7();
 							UpdateTransactionTable8();
-							UpdateTransactionTable9();
 							break;
 						case 5: //Rev.5
 							UpdateTransactionTable5();
 							UpdateTransactionTable6();
 							UpdateTransactionTable7();
 							UpdateTransactionTable8();
-							UpdateTransactionTable9();
 							break;
 						case 6: //Rev.6
 							UpdateTransactionTable6();
 							UpdateTransactionTable7();
 							UpdateTransactionTable8();
-							UpdateTransactionTable9();
 							break;
 						case 7: //Rev.7
 							UpdateTransactionTable7();
 							UpdateTransactionTable8();
-							UpdateTransactionTable9();
 							break;
 						case 8: //Rev.8
 							UpdateTransactionTable8();
-							UpdateTransactionTable9();
-							break;
-						case 9: //Rev.9
-							UpdateTransactionTable9();
 							break;
 					}
 				}
@@ -300,8 +294,6 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 			cmd.ExecuteNonQuery();
 		}
 		   
-		
-
 
 		///////////////////////////////////////////////////////////////////////
 
@@ -372,6 +364,25 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 		}
 
 
+		/// <summary>
+		/// update transaction table from Rev.2 to Rev.3
+		/// </summary>
+		private void UpdateBalanceTable2()
+		{
+			string sql = string.Empty;
+
+			sql += "BEGIN;";
+			sql += "ALTER TABLE `" + Table_of_Balance + "`";
+            sql += "CHANGE COLUMN `balance` `balance` bigint(15),"; 
+			sql += "COMMENT = 'Rev.3';";
+			sql += "COMMIT;";
+			MySqlCommand cmd = new MySqlCommand(sql, dbcon);
+			cmd.ExecuteNonQuery();
+		}
+
+
+		///////////////////////////////////////////////////////////////////////
+
 		private void UpdateUserInfoTable1()
 		{
 			m_log.Info("[MONEY DB]: Converting UserInfo Table...");
@@ -436,6 +447,8 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 			}
 		}
 
+
+		///////////////////////////////////////////////////////////////////////
 
 		/// <summary>
 		/// update transaction table from Rev.2 to Rev.3
@@ -584,23 +597,6 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
             sql += "CHANGE COLUMN `amount` `amount` bigint(15),"; 
             sql += "CHANGE COLUMN `time`   `time`   bigint(12),"; 
 			sql += "COMMENT = 'Rev.9';";
-			sql += "COMMIT;";
-			MySqlCommand cmd = new MySqlCommand(sql, dbcon);
-			cmd.ExecuteNonQuery();
-		}
-
-
-		/// <summary>
-		/// update transaction table from Rev.9 to Rev.10
-		/// </summary>
-		private void UpdateTransactionTable9()
-		{
-			string sql = string.Empty;
-
-			sql += "BEGIN;";
-			sql += "ALTER TABLE `" + Table_of_Balance + "`";
-            sql += "CHANGE COLUMN `balance` `balance` bigint(15),"; 
-			sql += "COMMENT = 'Rev.10';";
 			sql += "COMMIT;";
 			MySqlCommand cmd = new MySqlCommand(sql, dbcon);
 			cmd.ExecuteNonQuery();
