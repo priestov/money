@@ -30,7 +30,6 @@ using System.Data;
 using System.Reflection;
 using System.Collections;
 using System.Collections.Generic;
-//using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using log4net;
@@ -117,10 +116,6 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 					{
 						case 1: //Rev.1
 							UpdateBalanceTable1();
-							UpdateBalanceTable2();
-							break;
-						case 2: //Rev.2
-							UpdateBalanceTable2();
 							break;
 					}
 				}
@@ -243,37 +238,12 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 
 			sql += "CREATE TABLE `" + Table_of_Balance + "`(";
 			sql += "`user` varchar(128) NOT NULL,";
-			sql += "`balance` bigint(15) NOT NULL,";
+			sql += "`balance` int(10) NOT NULL,";
 			sql += "`status` tinyint(2) default NULL,";
 			sql += "PRIMARY KEY (`user`))";
-			sql += "Engine=InnoDB DEFAULT CHARSET=utf8 COMMENT='Rev.2';";
-			MySqlCommand cmd = new MySqlCommand(sql, dbcon);
-			cmd.ExecuteNonQuery();
-		}
-
-
-		private void CreateTransactionTable()
-		{
-			string sql = string.Empty;
-
-			sql += "CREATE TABLE `" + Table_of_Transaction + "`(";
-			sql += "`UUID` varchar(36) NOT NULL,";
-			sql += "`sender` varchar(128) NOT NULL,";
-			sql += "`receiver` varchar(128) NOT NULL,";
-			sql += "`amount` bigint(15) NOT NULL,";
-			sql += "`senderBalance` bigint(15) NOT NULL,";
-			sql += "`receiverBalance` bigint(15) NOT NULL,";
-			sql += "`objectUUID` varchar(36)  DEFAULT NULL,";
-			sql += "`objectName` varchar(255) DEFAULT NULL,";
-			sql += "`regionHandle` varchar(36) NOT NULL,";
-			sql += "`type` int(10) NOT NULL,";
-			sql += "`time` bigint(12) NOT NULL,";
-			sql += "`secure` varchar(36) NOT NULL,";
-			sql += "`status` tinyint(1) NOT NULL,";
-			sql += "`commonName` varchar(128) default NULL,";
-			sql += "`description` varchar(255) default NULL,";
-			sql += "PRIMARY KEY (`UUID`))";
-			sql += "Engine=InnoDB DEFAULT CHARSET=utf8 COMMENT='Rev.7';";
+			sql += "Engine=InnoDB DEFAULT CHARSET=utf8 ";
+			///////////////////////////////////////////////
+			sql += "COMMENT='Rev.2';";
 			MySqlCommand cmd = new MySqlCommand(sql, dbcon);
 			cmd.ExecuteNonQuery();
 		}
@@ -289,11 +259,43 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 			sql += "`avatar` varchar(50) NOT NULL,";
 			sql += "`pass` varchar(36) DEFAULT NULL,";
 			sql += "PRIMARY KEY(`user`))";
-			sql += "Engine=InnoDB DEFAULT CHARSET=utf8 COMMENT='Rev.2';";
+			sql += "Engine=InnoDB DEFAULT CHARSET=utf8 ";
+			///////////////////////////////////////////////
+			sql += "COMMENT='Rev.2';";
 			MySqlCommand cmd = new MySqlCommand(sql, dbcon);
 			cmd.ExecuteNonQuery();
 		}
 		   
+
+		private void CreateTransactionTable()
+		{
+			string sql = string.Empty;
+
+			sql += "CREATE TABLE `" + Table_of_Transaction + "`(";
+			sql += "`UUID` varchar(36) NOT NULL,";
+			sql += "`sender` varchar(128) NOT NULL,";
+			sql += "`receiver` varchar(128) NOT NULL,";
+			sql += "`amount` int(10) NOT NULL,";
+			sql += "`senderBalance`   int(10) NOT NULL,";
+			sql += "`receiverBalance` int(10) NOT NULL,";
+			sql += "`objectUUID` varchar(36)  NOT NULL DEFAULT '-1',";
+			sql += "`objectName` varchar(255) NOT NULL DEFAULT '-1',";
+			sql += "`regionHandle` varchar(36) NOT NULL,";
+			sql += "`type` int(10) NOT NULL,";
+			sql += "`time` int(11) NOT NULL,";
+			sql += "`secure` varchar(36) NOT NULL,";
+			sql += "`status` tinyint(1) NOT NULL,";
+			sql += "`commonName` varchar(128) default NULL,";
+			sql += "`description` varchar(255) default NULL,";
+			sql += "PRIMARY KEY (`UUID`))";
+			sql += "Engine=InnoDB DEFAULT CHARSET=utf8 ";
+			///////////////////////////////////////////////
+			sql += "COMMENT='Rev.9';";
+			MySqlCommand cmd = new MySqlCommand(sql, dbcon);
+			cmd.ExecuteNonQuery();
+		}
+
+
 
 		///////////////////////////////////////////////////////////////////////
 
@@ -355,7 +357,7 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 
 				//
 				sql  = "BEGIN;";
-				sql += "ALTER TABLE `" + Table_of_Balance + "`";
+				sql += "ALTER TABLE `" + Table_of_Balance + "` ";
 				sql += "COMMENT = 'Rev.2';";
 				sql += "COMMIT;";
 				cmd = new MySqlCommand(sql, dbcon);
@@ -363,22 +365,6 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 			}
 		}
 
-
-		/// <summary>
-		/// update transaction table from Rev.2 to Rev.3
-		/// </summary>
-		private void UpdateBalanceTable2()
-		{
-			string sql = string.Empty;
-
-			sql += "BEGIN;";
-			sql += "ALTER TABLE `" + Table_of_Balance + "`";
-            sql += "CHANGE COLUMN `balance` `balance` bigint(15) NOT NULL,"; 
-			sql += "COMMENT = 'Rev.3';";
-			sql += "COMMIT;";
-			MySqlCommand cmd = new MySqlCommand(sql, dbcon);
-			cmd.ExecuteNonQuery();
-		}
 
 
 		///////////////////////////////////////////////////////////////////////
@@ -439,13 +425,14 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 
 				//
 				sql  = "BEGIN;";
-				sql += "ALTER TABLE `" + Table_of_UserInfo + "`";
+				sql += "ALTER TABLE `" + Table_of_UserInfo + "` ";
 				sql += "COMMENT = 'Rev.2';";
 				sql += "COMMIT;";
 				cmd = new MySqlCommand(sql, dbcon);
 				cmd.ExecuteNonQuery();
 			}
 		}
+
 
 
 		///////////////////////////////////////////////////////////////////////
@@ -458,8 +445,8 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 			string sql = string.Empty;
 
 			sql += "BEGIN;";
-			sql += "ALTER TABLE `" + Table_of_Transaction + "`";
-			sql += "ADD(`objectUUID` varchar(36) DEFAULT NULL),";
+			sql += "ALTER TABLE `" + Table_of_Transaction + "` ";
+			sql += "ADD(`objectUUID` varchar(36) DEFAULT NULL AFTER `amount`),";
 			sql += "COMMENT = 'Rev.3';";
 			sql += "COMMIT;";
 			MySqlCommand cmd = new MySqlCommand(sql, dbcon);
@@ -475,8 +462,8 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 			string sql = string.Empty;
 
 			sql += "BEGIN;";
-			sql += "ALTER TABLE `" + Table_of_Transaction + "`";
-			sql += "ADD(`secure` varchar(36) NOT NULL),";
+			sql += "ALTER TABLE `" + Table_of_Transaction + "` ";
+			sql += "ADD(`secure` varchar(36) NOT NULL AFTER `time`),";
 			sql += "COMMENT = 'Rev.4';";
 			sql += "COMMIT;";
 			MySqlCommand cmd = new MySqlCommand(sql, dbcon);
@@ -492,8 +479,8 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 			string sql = string.Empty;
 
 			sql += "BEGIN;";
-			sql += "ALTER TABLE `" + Table_of_Transaction + "`";
-			sql += "ADD(`regionHandle` varchar(36) NOT NULL),";
+			sql += "ALTER TABLE `" + Table_of_Transaction + "` ";
+			sql += "ADD(`regionHandle` varchar(36) NOT NULL AFTER `objectUUID`),";
 			sql += "COMMENT = 'Rev.5';";
 			sql += "COMMIT;";
 			MySqlCommand cmd = new MySqlCommand(sql, dbcon);
@@ -509,8 +496,8 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 			string sql = string.Empty;
 
 			sql += "BEGIN;";
-			sql += "ALTER TABLE `" + Table_of_Transaction + "`";
-			sql += "ADD(`commonName` varchar(128) NOT NULL),";
+			sql += "ALTER TABLE `" + Table_of_Transaction + "` ";
+			sql += "ADD(`commonName` varchar(128) NOT NULL AFTER `status`),";
 			sql += "COMMENT = 'Rev.6';";
 			sql += "COMMIT;";
 			MySqlCommand cmd = new MySqlCommand(sql, dbcon);
@@ -558,7 +545,7 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 			}
 
 			sql  = "BEGIN;";
-			sql += "ALTER TABLE `" + Table_of_Transaction + "`";
+			sql += "ALTER TABLE `" + Table_of_Transaction + "` ";
 			sql += "COMMENT = 'Rev.7';";
 			sql += "COMMIT;";
 			cmd = new MySqlCommand(sql, dbcon);
@@ -574,7 +561,7 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 			string sql = string.Empty;
 
 			sql += "BEGIN;";
-			sql += "ALTER TABLE `" + Table_of_Transaction + "`";
+			sql += "ALTER TABLE `" + Table_of_Transaction + "` ";
 			sql += "ADD `objectName` varchar(255) DEFAULT NULL AFTER `objectUUID`,";
 			sql += "COMMENT = 'Rev.8';";
 			sql += "COMMIT;";
@@ -591,11 +578,9 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 			string sql = string.Empty;
 
 			sql += "BEGIN;";
-			sql += "ALTER TABLE `" + Table_of_Transaction + "`";
-			sql += "ADD `senderBalance`   bigint(15) DEFAULT NULL AFTER `amount`,";
-			sql += "ADD `receiverBalance` bigint(15) DEFAULT NULL AFTER `senderBalance`,";
-            sql += "CHANGE COLUMN `amount` `amount` bigint(15) NOT NULL,"; 
-            sql += "CHANGE COLUMN `time`   `time`   bigint(12) NOT NULL,"; 
+			sql += "ALTER TABLE `" + Table_of_Transaction + "` ";
+			sql += "ADD `senderBalance`   int(10) NOT NULL AFTER `amount`,";
+			sql += "ADD `receiverBalance` int(10) NOT NULL AFTER `senderBalance`,";
 			sql += "COMMENT = 'Rev.9';";
 			sql += "COMMIT;";
 			MySqlCommand cmd = new MySqlCommand(sql, dbcon);
@@ -604,7 +589,9 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 
 
 
+
 		///////////////////////////////////////////////////////////////////////
+		//
 
 		private Dictionary<string,string> CheckTables()
 		{
@@ -662,8 +649,10 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 		}
 
 
-
 		///////////////////////////////////////////////////////////////////////
+		//
+		// balance
+		//
 
 		/// <summary>
 		/// Get balance from database. returns -1 if failed.
@@ -775,8 +764,9 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 			string sql = string.Empty;
 
 			sql += "BEGIN;";
-			sql += "UPDATE " + Table_of_Balance + " SET balance = balance - ?amount where user = ?userid;";
-			sql += "UPDATE " + Table_of_Transaction + " SET status = ?status where UUID  = ?tranid;";
+			sql += "UPDATE " + Table_of_Transaction + "," + Table_of_Balance;
+			sql += " SET senderBalance = balance - ?amount, "+ Table_of_Transaction + ".status = ?status, balance = balance - ?amount ";
+			sql += " WHERE UUID = ?tranid AND user = sender AND user = ?userid;"; 
 			sql += "COMMIT;";
 			MySqlCommand cmd = new MySqlCommand(sql, dbcon);
 
@@ -813,8 +803,9 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 			bool bRet  = false;
 
 			sql += "BEGIN;";
-			sql += "UPDATE " + Table_of_Balance + " SET balance = balance + ?amount where user = ?userid;";
-			sql += "UPDATE " + Table_of_Transaction + " SET status = ?status where UUID  = ?tranid;";
+			sql += "UPDATE " + Table_of_Transaction + "," + Table_of_Balance;
+			sql += " SET receiverBalance = balance + ?amount, " + Table_of_Transaction + ".status = ?status, balance = balance + ?amount ";
+			sql += " WHERE UUID = ?tranid AND user = receiver AND user = ?userid;"; 
 			sql += "COMMIT;";
 			MySqlCommand cmd = new MySqlCommand(sql, dbcon);
 
@@ -849,14 +840,17 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 			string sql = string.Empty;
 
 			sql += "INSERT INTO " + Table_of_Transaction;
-			sql += " (`UUID`,`sender`,`receiver`,`amount`,`objectUUID`,`objectName`,`regionHandle`,`type`,`time`,`secure`,`status`,`commonName`,`description`) VALUES";
-			sql += " (?transID,?sender,?receiver,?amount,?objID,?objName,?regionHandle,?type,?time,?secure,?status,?cname,?desc)";
+			sql += " (`UUID`,`sender`,`receiver`,`amount`,`senderBalance`,`receiverBalance`,`objectUUID`,`objectName`,";
+            sql += " `regionHandle`,`type`,`time`,`secure`,`status`,`commonName`,`description`) VALUES";
+			sql += " (?transID,?sender,?receiver,?amount,?senderBalance,?receiverBalance,?objID,?objName,?regionHandle,?type,?time,?secure,?status,?cname,?desc)";
 
 			MySqlCommand cmd = new MySqlCommand(sql, dbcon);
 			cmd.Parameters.AddWithValue("?transID", transaction.TransUUID.ToString());
 			cmd.Parameters.AddWithValue("?sender", transaction.Sender);
 			cmd.Parameters.AddWithValue("?receiver", transaction.Receiver);
 			cmd.Parameters.AddWithValue("?amount", transaction.Amount);
+			cmd.Parameters.AddWithValue("?senderBalance",   -1);
+			cmd.Parameters.AddWithValue("?receiverBalance", -1);
 			cmd.Parameters.AddWithValue("?objID", transaction.ObjectUUID);
 			cmd.Parameters.AddWithValue("?objName", transaction.ObjectName);
 			cmd.Parameters.AddWithValue("?regionHandle", transaction.RegionHandle);
@@ -986,14 +980,16 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 				{
 					try
 					{
-						transactionData.Sender = (string)r["sender"];
+						transactionData.Sender   = (string)r["sender"];
 						transactionData.Receiver = (string)r["receiver"];
-						transactionData.Amount = Convert.ToInt32(r["amount"]);
-						transactionData.ObjectUUID = (string)r["objectUUID"];
-						transactionData.ObjectName = (string)r["objectName"];
+						transactionData.Amount          = Convert.ToInt32(r["amount"]);
+						transactionData.SenderBalance   = Convert.ToInt32(r["senderBalance"]);
+						transactionData.ReceiverBalance = Convert.ToInt32(r["receiverBalance"]);
+						transactionData.ObjectUUID   = (string)r["objectUUID"];
+						transactionData.ObjectName   = (string)r["objectName"];
 						transactionData.RegionHandle = (string)r["regionHandle"];
-						transactionData.Type = Convert.ToInt32(r["type"]);
-						transactionData.Time = Convert.ToInt32(r["time"]);
+						transactionData.Type   = Convert.ToInt32(r["type"]);
+						transactionData.Time   = Convert.ToInt32(r["time"]);
 						transactionData.Status = Convert.ToInt32(r["status"]);
 						transactionData.CommonName  = (string)r["commonName"];
 						transactionData.Description = (string)r["description"];
@@ -1021,6 +1017,7 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 			sql += "SELECT * from " + Table_of_Transaction + " where time>=?start AND time<=?end ";
 			sql += "AND (sender=?user or receiver=?user) order by time asc limit ?index,?num;";
 			MySqlCommand cmd = new MySqlCommand(sql, dbcon);
+
 			cmd.Parameters.AddWithValue("?start", startTime);
 			cmd.Parameters.AddWithValue("?end", endTime);
 			cmd.Parameters.AddWithValue("?user", userID);
@@ -1041,9 +1038,12 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 							UUID.TryParse(uuid,out transUUID);
 
 							transactionData.TransUUID = transUUID;
-							transactionData.Sender = (string)r["sender"];
+							transactionData.Sender   = (string)r["sender"];
 							transactionData.Receiver = (string)r["receiver"];
-							transactionData.Amount = Convert.ToInt32(r["amount"]);
+							transactionData.Amount          = Convert.ToInt32(r["amount"]);
+							transactionData.SenderBalance   = Convert.ToInt32(r["senderBalance"]);
+							transactionData.ReceiverBalance = Convert.ToInt32(r["receiverBalance"]);
+
 							if (r["objectUUID"] is System.DBNull)
 							{
 								transactionData.ObjectUUID = "null";
@@ -1052,9 +1052,10 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 							{
 								transactionData.ObjectUUID = (string)r["objectUUID"];
 							}
+
 							transactionData.ObjectName = (string)r["objectName"];
-							transactionData.Type = Convert.ToInt32(r["type"]);
-							transactionData.Time = Convert.ToInt32(r["time"]);
+							transactionData.Type   = Convert.ToInt32(r["type"]);
+							transactionData.Time   = Convert.ToInt32(r["time"]);
 							transactionData.Status = Convert.ToInt32(r["status"]);
 							transactionData.CommonName  = (string)r["commonName"];
 							transactionData.Description = (string)r["description"];
@@ -1085,6 +1086,7 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 			sql += "SELECT COUNT(*) AS number FROM " + Table_of_Transaction + " WHERE time>=?start AND time<=?end ";
 			sql += "AND (sender=?user OR receiver=?user);";
 			MySqlCommand cmd = new MySqlCommand(sql, dbcon);
+
 			cmd.Parameters.AddWithValue("?start", startTime);
 			cmd.Parameters.AddWithValue("?end", endTime);
 			cmd.Parameters.AddWithValue("?user", userID);
@@ -1200,7 +1202,6 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 
 			return bRet;
 		}
-
 
 	}
 }
