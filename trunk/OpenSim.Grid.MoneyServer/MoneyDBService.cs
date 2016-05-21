@@ -388,6 +388,7 @@ namespace OpenSim.Grid.MoneyServer
                             {
                                 m_log.ErrorFormat("[MONEY DB]: give money to receiver {0} failed but return it to sender {1} successfully", 
 														transaction.Receiver, transaction.Sender);
+								updateTransactionStatus(transactionUUID, (int)Status.FAILED_STATUS, "give money to receiver failed but return it to sender successfully");
                             }
                             else
                             {
