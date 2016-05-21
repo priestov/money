@@ -36,7 +36,7 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
     public class TransactionData
     {
         UUID m_uuid;
-        string m_sender = string.Empty;
+        string m_sender   = string.Empty;
         string m_receiver = string.Empty;
         int m_amount;
         int m_senderBalance;
@@ -44,12 +44,12 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
         int m_type;
         int m_time;
         int m_status;
-        string m_objectID = string.Empty;
-        string m_objectName = string.Empty;
+        string m_objectID     = "00000000-0000-0000-0000-000000000000";
+        string m_objectName   = string.Empty;
         string m_regionHandle = string.Empty;
-        string m_secureCode = string.Empty;
-        string m_commonName = string.Empty;
-        string m_description = string.Empty;
+        string m_secureCode   = string.Empty;
+        string m_commonName   = string.Empty;
+        string m_description  = string.Empty;
 
 /*
         public TransactionData(string uuid, string sender, string receiver,
@@ -158,7 +158,8 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
     { 
         SUCCESS_STATUS = 0, 
         PENDING_STATUS = 1, 
-        FAILED_STATUS  = 2
+        FAILED_STATUS  = 2,
+        ERROR_STATUS   = 9
     }
 
 
