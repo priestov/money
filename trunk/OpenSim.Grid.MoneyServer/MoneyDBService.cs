@@ -175,6 +175,8 @@ namespace OpenSim.Grid.MoneyServer
 
         public bool setTotalSale(TransactionData transaction)
         {
+			if (transaction.Receiver==transaction.Sender) return false;
+
             MySQLSuperManager dbm = GetLockedConnection();
             try
             {
