@@ -27,7 +27,6 @@
 
 using System;
 using System.Collections.Generic;
-//using System.Linq;
 using System.Text;
 using OpenSim.Data.MySQL.MySQLMoneyDataWrapper;
 using log4net;
@@ -160,6 +159,26 @@ namespace OpenSim.Grid.MoneyServer
             try
             {
                 return dbm.Manager.giveMoney(transactionID, receiverID, amount);
+            }
+            catch (Exception e)
+            {
+                dbm.Manager.Reconnect();
+                m_log.Error(e.ToString());
+                return false;
+            }
+            finally
+            {
+                dbm.Release();
+            }
+        }
+
+
+        public bool setTotalSale(TransactionData transaction)
+        {
+            MySQLSuperManager dbm = GetLockedConnection();
+            try
+            {
+                return dbm.Manager.setTotalSale(transaction.Receiver, transaction.ObjectUUID, transaction.Type, transaction.Amount);
             }
             catch (Exception e)
             {
@@ -337,6 +356,8 @@ namespace OpenSim.Grid.MoneyServer
 
         public bool DoTransfer(UUID transactionUUID)
         {
+			bool do_trans = false;
+
             TransactionData transaction = new TransactionData();
             transaction = FetchTransaction(transactionUUID);
             if (transaction != null && transaction.Status == (int)Status.PENDING_STATUS)
@@ -352,25 +373,26 @@ namespace OpenSim.Grid.MoneyServer
                         {
                             addUser(transaction.Receiver, 0, (int)Status.SUCCESS_STATUS);
                         }
-                        if (giveMoney(transactionUUID, transaction.Receiver, transaction.Amount))
-                            return true;
-                        else // give money to receiver failed.
+
+                        if (giveMoney(transactionUUID, transaction.Receiver, transaction.Amount)) 
                         {
+							do_trans = true;
+						}
+                        // give money to receiver failed. 返金処理
+						else {
                             m_log.ErrorFormat("[MONEY DB]: Give money to receiver {0} failed", transaction.Receiver);
                             //Return money to sender
                             if (giveMoney(transactionUUID, transaction.Sender, transaction.Amount))
                             {
-                                m_log.ErrorFormat("[MONEY DB]: give money to receiver {0} failed but return it to sender {1} successfully",
-                                    transaction.Receiver,
-                                    transaction.Sender);
-                                updateTransactionStatus(transactionUUID,
-                                    (int)Status.FAILED_STATUS,
-                                    "give money to receiver failed but return it to sender successfully");
+                                m_log.ErrorFormat("[MONEY DB]: give money to receiver {0} failed but return it to sender {1} successfully", 
+														transaction.Receiver, transaction.Sender);
+                                updateTransactionStatus(transactionUUID, (int)Status.FAILED_STATUS, "give money to receiver failed, but return it to sender successfully");
                             }
                             else
                             {
                                 m_log.ErrorFormat("[MONEY DB]: FATAL ERROR: Money withdrawn from sender: {0}, but failed to be given to receiver {1}",
-                                    transaction.Sender, transaction.Receiver);
+                                    					transaction.Sender, transaction.Receiver);
+                                updateTransactionStatus(transactionUUID, (int)Status.ERROR_STATUS, "give money to receiver failed, and return it to sender unsuccessfully!!!");
                             }
                         }
                     }
@@ -388,7 +410,14 @@ namespace OpenSim.Grid.MoneyServer
             {
                 m_log.ErrorFormat("[MONEY DB]: The transaction:{0} has expired", transactionUUID.ToString());
             }
-            return false;
+
+			//
+			if (do_trans)
+			{
+				setTotalSale(transaction);
+			}
+
+            return do_trans;
         }
 
 
@@ -398,7 +427,7 @@ namespace OpenSim.Grid.MoneyServer
             TransactionData transaction = new TransactionData();
             transaction = FetchTransaction(transactionUUID);
 			
-            if (transaction != null && transaction.Status == (int)Status.PENDING_STATUS)
+            if (transaction!=null && transaction.Status==(int)Status.PENDING_STATUS)
             {
                 //If receiver not found, add it to DB.
                 if (getBalance(transaction.Receiver)==-1)

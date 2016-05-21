@@ -44,10 +44,10 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 
 		// by Fumi.Iseki
 		private string Table_of_Balances	 = "balances";
-		private string Table_of_UserInfo	 = "userinfo";
 		private string Table_of_Transactions = "transactions";
 		private string Table_of_TotalSales	 = "totalsales";
-		//private string Table_of_UserInfo	 = "currency_users";	// for Aurora-Sim
+		private string Table_of_UserInfo	 = "userinfo";
+//		private string Table_of_UserInfo	 = "currency_users";	// for Aurora-Sim
 
 		private string connectString;
 
@@ -106,7 +106,7 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 					}
 					catch (Exception e)
 					{
-						throw new Exception("[MONEY DB]: Error creating balance table: " + e.ToString());
+						throw new Exception("[MONEY DB]: Error creating balances table: " + e.ToString());
 					}
 				}
 				else
@@ -181,10 +181,10 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 					}
 					catch (Exception e)
 					{
-						throw new Exception("[MONEY DB]: Error creating transaction table: " + e.ToString());
+						throw new Exception("[MONEY DB]: Error creating transactions table: " + e.ToString());
 					}
 				}
-				else // check transaction table version
+				else // check transactions table version
 				{
 					string version = tableList[Table_of_Transactions].Trim();
 					int nVer = getTableVersionNum(version);
@@ -272,10 +272,11 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 			sql += "COMMENT='Rev.2';";
 			MySqlCommand cmd = new MySqlCommand(sql, dbcon);
 			cmd.ExecuteNonQuery();
+			cmd.Dispose();
 		}
 
 
-		private void CreateTotalSlesTable()
+		private void CreateTotalSalesTable()
 		{
 			string sql = string.Empty;
 
@@ -283,7 +284,6 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 			sql += "`UUID` varchar(36) NOT NULL,";
 			sql += "`user` varchar(128) NOT NULL,";
 			sql += "`objectUUID` varchar(36)  DEFAULT NULL,";
-			sql += "`objectName` varchar(255) DEFAULT NULL,";
 			sql += "`type` int(10) NOT NULL,";
 			sql += "`TotalCount`  int(10) NOT NULL DEFAULT 0,";
 			sql += "`TotalAmount` int(10) NOT NULL DEFAULT 0,";
@@ -293,6 +293,7 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 			sql += "COMMENT='Rev.1';";
 			MySqlCommand cmd = new MySqlCommand(sql, dbcon);
 			cmd.ExecuteNonQuery();
+			cmd.Dispose();
 		}
 
 
@@ -311,6 +312,7 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 			sql += "COMMENT='Rev.2';";
 			MySqlCommand cmd = new MySqlCommand(sql, dbcon);
 			cmd.ExecuteNonQuery();
+			cmd.Dispose();
 		}
 
 
@@ -340,6 +342,7 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 			sql += "COMMENT='Rev.9';";
 			MySqlCommand cmd = new MySqlCommand(sql, dbcon);
 			cmd.ExecuteNonQuery();
+			cmd.Dispose();
 		}
 
 
@@ -409,6 +412,7 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 				sql += "COMMIT;";
 				cmd = new MySqlCommand(sql, dbcon);
 				cmd.ExecuteNonQuery();
+				cmd.Dispose();
 			}
 		}
 
@@ -416,7 +420,7 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 		///////////////////////////////////////////////////////////////////////
 
 		private void UpdateTotalSalesTable1()
-
+ 		{
 		}
 
 
@@ -483,6 +487,7 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 				sql += "COMMIT;";
 				cmd = new MySqlCommand(sql, dbcon);
 				cmd.ExecuteNonQuery();
+				cmd.Dispose();
 			}
 		}
 
@@ -491,7 +496,7 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 		///////////////////////////////////////////////////////////////////////
 
 		/// <summary>
-		/// update transaction table from Rev.2 to Rev.3
+		/// update transactions table from Rev.2 to Rev.3
 		/// </summary>
 		private void UpdateTransactionsTable2()
 		{
@@ -504,11 +509,12 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 			sql += "COMMIT;";
 			MySqlCommand cmd = new MySqlCommand(sql, dbcon);
 			cmd.ExecuteNonQuery();
+			cmd.Dispose();
 		}
 
 
 		/// <summary>
-		/// update transaction table from Rev.3 to Rev.4
+		/// update transactions table from Rev.3 to Rev.4
 		/// </summary>
 		private void UpdateTransactionsTable3()
 		{
@@ -521,11 +527,12 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 			sql += "COMMIT;";
 			MySqlCommand cmd = new MySqlCommand(sql, dbcon);
 			cmd.ExecuteNonQuery();
+			cmd.Dispose();
 		}
 
 
 		/// <summary>
-		/// update transaction table from Rev.4 to Rev.5
+		/// update transactions table from Rev.4 to Rev.5
 		/// </summary>
 		private void UpdateTransactionsTable4()
 		{
@@ -538,11 +545,12 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 			sql += "COMMIT;";
 			MySqlCommand cmd = new MySqlCommand(sql, dbcon);
 			cmd.ExecuteNonQuery();
+			cmd.Dispose();
 		}
 
 
 		/// <summary>
-		/// update transaction table from Rev.5 to Rev.6
+		/// update transactions table from Rev.5 to Rev.6
 		/// </summary>
 		private void UpdateTransactionsTable5()
 		{
@@ -555,11 +563,12 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 			sql += "COMMIT;";
 			MySqlCommand cmd = new MySqlCommand(sql, dbcon);
 			cmd.ExecuteNonQuery();
+			cmd.Dispose();
 		}
 
 
 		/// <summary>
-		/// update transaction table from Rev.6 to Rev.7
+		/// update transactions table from Rev.6 to Rev.7
 		/// </summary>
 		private void UpdateTransactionsTable6()
 		{
@@ -603,11 +612,12 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 			sql += "COMMIT;";
 			cmd = new MySqlCommand(sql, dbcon);
 			cmd.ExecuteNonQuery();
+			cmd.Dispose();
 		}
 
 
 		/// <summary>
-		/// update transaction table from Rev.7 to Rev.8
+		/// update transactions table from Rev.7 to Rev.8
 		/// </summary>
 		private void UpdateTransactionsTable7()
 		{
@@ -620,11 +630,12 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 			sql += "COMMIT;";
 			MySqlCommand cmd = new MySqlCommand(sql, dbcon);
 			cmd.ExecuteNonQuery();
+			cmd.Dispose();
 		}
 
 
 		/// <summary>
-		/// update transaction table from Rev.8 to Rev.9
+		/// update transactions table from Rev.8 to Rev.9
 		/// </summary>
 		private void UpdateTransactionsTable8()
 		{
@@ -638,6 +649,7 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 			sql += "COMMIT;";
 			MySqlCommand cmd = new MySqlCommand(sql, dbcon);
 			cmd.ExecuteNonQuery();
+			cmd.Dispose();
 		}
 
 
@@ -674,6 +686,8 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 					}
 					r.Close();
 				}
+
+				cmd.Dispose();
 				return tableDic;
 			}
 		}
@@ -702,9 +716,10 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 		}
 
 
+
 		///////////////////////////////////////////////////////////////////////
 		//
-		// balance
+		// balances
 		//
 
 		/// <summary>
@@ -781,6 +796,7 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 			cmd.Parameters.AddWithValue("?status",  status);
 			if (cmd.ExecuteNonQuery() > 0) bRet = true;
 
+			cmd.Dispose();
 			return bRet;
 		}
 
@@ -801,6 +817,7 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 			cmd.Parameters.AddWithValue("?balance", m_defaultMoney);
 			cmd.Parameters.AddWithValue("?status",  0);
 			cmd.ExecuteNonQuery();
+			cmd.Dispose();
 		}
 
 
@@ -885,12 +902,131 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 
 		///////////////////////////////////////////////////////////////////////
 		//
-		// transaction
+		// totalsales
+		//
+		public bool addTotalSale(string userUUID, string objectUUID, int type, int amount)
+		{
+			bool bRet = false;
+			string sql = string.Empty;
+			UUID uuid = UUID.Random();
+
+			// オブジェクトを伴う取引のみ記録
+			if (objectUUID==UUID.Zero.ToString()) return bRet;	
+
+			sql += "INSERT INTO " + Table_of_TotalSales;
+			sql += " (`UUID`,`user`,`objectUUID`,`type`,`TotalCount`,`TotalAmount`) VALUES";
+			sql += " (?ID,?userID,?objID,?type,?count,?amount)";
+
+			MySqlCommand cmd = new MySqlCommand(sql, dbcon);
+			cmd.Parameters.AddWithValue("?ID",      uuid.ToString());
+			cmd.Parameters.AddWithValue("?userID",  userUUID);
+			cmd.Parameters.AddWithValue("?objID",   objectUUID);
+			cmd.Parameters.AddWithValue("?type",    type);
+			cmd.Parameters.AddWithValue("?count",   1);
+			cmd.Parameters.AddWithValue("?amount",  amount);
+
+			try
+			{
+				if (cmd.ExecuteNonQuery() > 0) bRet = true;
+				cmd.Dispose();
+			}
+			catch (Exception e)
+			{
+				m_log.Error("[MONEY DB]: Error adding sale data to DB: " + e.ToString());
+				return false;
+			}
+			return bRet;
+		}
+
+
+		public bool updateTotalSale(UUID saleUUID, int amount)
+		{
+			bool bRet = false;
+			string sql = string.Empty;
+
+			sql += "UPDATE " + Table_of_TotalSales;
+			sql += " SET TotalCount = TotalCount + 1, TotalAmount = TotalAmount + ?amount ";
+			sql += " WHERE UUID = ?uuid;";
+			MySqlCommand cmd = new MySqlCommand(sql, dbcon);
+
+			cmd.Parameters.AddWithValue("?uuid",   saleUUID.ToString());
+			cmd.Parameters.AddWithValue("?amount", amount);
+
+			try
+			{
+				if (cmd.ExecuteNonQuery() > 0) bRet = true;
+				cmd.Dispose();
+			}
+			catch (Exception e)
+			{
+				m_log.Error("[MONEY DB]: Error updating sale data in DB: " + e.ToString());
+				return false;
+			}
+			return bRet;
+
+		}
+
+
+		public bool setTotalSale(string userUUID, string objectUUID, int type, int amount)
+		{
+			bool bRet = false;
+			string sql  = string.Empty;
+			string uuid = string.Empty;
+
+			sql += "SELECT UUID FROM " + Table_of_TotalSales;
+			sql += " WHERE user = ?userid AND objectUUID = ?objID AND type = ?type;";
+			MySqlCommand cmd = new MySqlCommand(sql, dbcon);
+
+			cmd.Parameters.AddWithValue("?userid", userUUID);
+			cmd.Parameters.AddWithValue("?objID",  objectUUID);
+			cmd.Parameters.AddWithValue("?type",   type);
+
+			using (MySqlDataReader r = cmd.ExecuteReader())
+			{
+				if(r.Read())
+				{
+					try
+					{
+						uuid = (string)r["UUID"];
+					}
+					catch (Exception e)
+					{
+						m_log.Error("[MONEY DB]: get sale data from DB failed: " + e.ToString());
+						return false;
+					}
+				}
+				r.Close();
+			}
+		
+			if (uuid!=string.Empty)
+			{
+				UUID saleUUID = UUID.Zero;
+				UUID.TryParse(uuid, out saleUUID);
+				bRet = updateTotalSale(saleUUID, amount);
+			}
+			else
+			{
+				bRet = addTotalSale(userUUID, objectUUID, type, amount);
+			}
+
+			cmd.Dispose();
+			return bRet;
+		}
+
+
+
+		///////////////////////////////////////////////////////////////////////
+		//
+		// transactions
 		//
 		public bool addTransaction(TransactionData transaction)
 		{
 			bool bRet = false;
 			string sql = string.Empty;
+
+			if (transaction.ObjectUUID ==null) transaction.ObjectUUID  = UUID.Zero.ToString();
+			if (transaction.ObjectName ==null) transaction.ObjectName  = string.Empty;
+			if (transaction.Description==null) transaction.Description = string.Empty;
 
 			sql += "INSERT INTO " + Table_of_Transactions;
 			sql += " (`UUID`,`sender`,`receiver`,`amount`,`senderBalance`,`receiverBalance`,`objectUUID`,`objectName`,";
@@ -995,6 +1131,7 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 			sql += "SELECT secure from " + Table_of_Transactions + " where UUID = ?transID;";
 			MySqlCommand cmd = new MySqlCommand(sql, dbcon);
 			cmd.Parameters.AddWithValue("?transID", transactionID.ToString());
+
 			using (MySqlDataReader r = cmd.ExecuteReader())
 			{
 				if(r.Read())
@@ -1013,6 +1150,8 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 				}
 				r.Close();
 			}
+
+			cmd.Dispose();
 			return bRet;
 		}
 
@@ -1038,18 +1177,22 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 						transactionData.Amount          = Convert.ToInt32(r["amount"]);
 						transactionData.SenderBalance   = Convert.ToInt32(r["senderBalance"]);
 						transactionData.ReceiverBalance = Convert.ToInt32(r["receiverBalance"]);
-						transactionData.ObjectUUID   = (string)r["objectUUID"];
-						transactionData.ObjectName   = (string)r["objectName"];
-						transactionData.RegionHandle = (string)r["regionHandle"];
 						transactionData.Type   = Convert.ToInt32(r["type"]);
 						transactionData.Time   = Convert.ToInt32(r["time"]);
 						transactionData.Status = Convert.ToInt32(r["status"]);
-						transactionData.CommonName  = (string)r["commonName"];
-						transactionData.Description = (string)r["description"];
+						transactionData.CommonName   = (string)r["commonName"];
+						transactionData.RegionHandle = (string)r["regionHandle"];
+						//
+						if (r["objectUUID"]  is System.DBNull) transactionData.ObjectUUID  = UUID.Zero.ToString();
+						else                                   transactionData.ObjectUUID  = (string)r["objectUUID"];
+						if (r["objectName"]  is System.DBNull) transactionData.ObjectName  = string.Empty;
+						else                                   transactionData.ObjectName  = (string)r["objectName"];
+						if (r["description"] is System.DBNull) transactionData.Description = string.Empty;
+						else                                   transactionData.Description = (string)r["description"];
 					}
 					catch (Exception e)
 					{
-						m_log.Error("[MONEY DB]: Fetching transaction failed: " + e.ToString());
+						m_log.Error("[MONEY DB]: Fetching transaction failed 1: " + e.ToString());
 						return null;
 					}
 
@@ -1057,9 +1200,9 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 				r.Close();
 			}
 
+			cmd.Dispose();
 			return transactionData;
 		}
-
 
 
 		public TransactionData[] FetchTransaction(string userID, int startTime, int endTime, uint index, uint retNum)
@@ -1091,33 +1234,29 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 							UUID.TryParse(uuid,out transUUID);
 
 							transactionData.TransUUID = transUUID;
-							transactionData.Sender   = (string)r["sender"];
-							transactionData.Receiver = (string)r["receiver"];
+							transactionData.Sender    = (string)r["sender"];
+							transactionData.Receiver  = (string)r["receiver"];
 							transactionData.Amount          = Convert.ToInt32(r["amount"]);
 							transactionData.SenderBalance   = Convert.ToInt32(r["senderBalance"]);
 							transactionData.ReceiverBalance = Convert.ToInt32(r["receiverBalance"]);
-
-							if (r["objectUUID"] is System.DBNull)
-							{
-								transactionData.ObjectUUID = "null";
-							}
-							else
-							{
-								transactionData.ObjectUUID = (string)r["objectUUID"];
-							}
-
-							transactionData.ObjectName = (string)r["objectName"];
 							transactionData.Type   = Convert.ToInt32(r["type"]);
 							transactionData.Time   = Convert.ToInt32(r["time"]);
 							transactionData.Status = Convert.ToInt32(r["status"]);
-							transactionData.CommonName  = (string)r["commonName"];
-							transactionData.Description = (string)r["description"];
+							transactionData.CommonName   = (string)r["commonName"];
+							transactionData.RegionHandle = (string)r["regionHandle"];
+							//
+							if (r["objectUUID"]  is System.DBNull) transactionData.ObjectUUID  = UUID.Zero.ToString();
+							else                                   transactionData.ObjectUUID  = (string)r["objectUUID"];
+							if (r["objectName"]  is System.DBNull) transactionData.ObjectName  = string.Empty;
+							else                                   transactionData.ObjectName  = (string)r["objectName"];
+							if (r["description"] is System.DBNull) transactionData.Description = string.Empty;
+							else                                   transactionData.Description = (string)r["description"];
+							//
 							rows.Add(transactionData);
 						}
-
 						catch (Exception e)
 						{
-							m_log.Error("[MONEY DB]: Fetching transaction failed: " + e.ToString());
+							m_log.Error("[MONEY DB]: Fetching transaction failed 2: " + e.ToString());
 							return null;
 						}
 
@@ -1159,6 +1298,7 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 					}
 				}
 			}
+
 			cmd.Dispose();
 			return iRet;
 		}
@@ -1233,6 +1373,7 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 				r.Close();
 			}
 
+			cmd.Dispose();
 			return userInfo;
 		}
 
@@ -1251,8 +1392,8 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 
 			if (cmd.ExecuteNonQuery() > 0) bRet = true;
 			else bRet = false;
-			cmd.Dispose();
 
+			cmd.Dispose();
 			return bRet;
 		}
 
