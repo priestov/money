@@ -425,6 +425,7 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 
 		private void InitTotalSalesTable()
  		{
+			m_log.Info("[MONEY DB]: Initailising TotalSales Table...");
 			string sql = string.Empty;
 
 			sql += "SELECT SQL_CALC_FOUND_ROWS receiver,objectUUID,type,COUNT(*),SUM(amount) FROM "+ Table_of_Transactions;
