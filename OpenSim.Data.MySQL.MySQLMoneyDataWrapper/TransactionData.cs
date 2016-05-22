@@ -44,7 +44,8 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
         int m_type;
         int m_time;
         int m_status;
-        string m_objectID     = "00000000-0000-0000-0000-000000000000";
+//      string m_objectID     = "00000000-0000-0000-0000-000000000000";
+        string m_objectID     = UUID.Zero.ToString();
         string m_objectName   = string.Empty;
         string m_regionHandle = string.Empty;
         string m_secureCode   = string.Empty;
