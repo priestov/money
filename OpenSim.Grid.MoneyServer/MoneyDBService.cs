@@ -41,10 +41,12 @@ namespace OpenSim.Grid.MoneyServer
         private static readonly ILog m_log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
         private string m_connect;
         private MySQLMoneyManager m_moneyManager;
+		private long TicksToEpoch = new DateTime(1970, 1, 1).Ticks;
 
         // DB manager pool
         protected Dictionary<int, MySQLSuperManager> m_dbconnections = new Dictionary<int, MySQLSuperManager>();
         private int m_maxConnections;
+
         public int m_lastConnect = 0;
 
 
@@ -180,7 +182,8 @@ namespace OpenSim.Grid.MoneyServer
             MySQLSuperManager dbm = GetLockedConnection();
             try
             {
-                return dbm.Manager.setTotalSale(transaction.Receiver, transaction.ObjectUUID, transaction.Type, transaction.Amount);
+				int time = (int)((DateTime.Now.Ticks - TicksToEpoch) / 10000000);
+                return dbm.Manager.setTotalSale(transaction.Receiver, transaction.ObjectUUID, transaction.Type, 1, transaction.Amount, time);
             }
             catch (Exception e)
             {

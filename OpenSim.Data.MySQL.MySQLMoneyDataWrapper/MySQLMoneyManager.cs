@@ -230,7 +230,7 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 					switch (nVer)
 					{
 						case 1: //Rev.1
-							//UpdateTotalSalesTable1();
+							UpdateTotalSalesTable1();
 							break;
 					}
 				}
@@ -288,16 +288,17 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 			sql += "`type` int(10) NOT NULL,";
 			sql += "`TotalCount`  int(10) NOT NULL DEFAULT 0,";
 			sql += "`TotalAmount` int(10) NOT NULL DEFAULT 0,";
+			sql += "`time` int(11) NOT NULL,";
 			sql += "PRIMARY KEY(`UUID`))";
 			sql += "Engine=InnoDB DEFAULT CHARSET=utf8 ";
 			///////////////////////////////////////////////
-			sql += "COMMENT='Rev.1';";
+			sql += "COMMENT='Rev.2';";
 			MySqlCommand cmd = new MySqlCommand(sql, dbcon);
 			cmd.ExecuteNonQuery();
 			cmd.Dispose();
 
 			//
-			InitTotalSalesTable();
+			initTotalSalesTable();
 		}
 
 
@@ -423,53 +424,21 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 
 		///////////////////////////////////////////////////////////////////////
 
-		private void InitTotalSalesTable()
- 		{
-			m_log.Info("[MONEY DB]: Initailising TotalSales Table...");
-			string sql = string.Empty;
-
-			sql += "SELECT SQL_CALC_FOUND_ROWS receiver,objectUUID,type,COUNT(*),SUM(amount) FROM "+ Table_of_Transactions;
-			sql += " WHERE sender<>receiver AND status = ?status ";
-			sql += " GROUP BY receiver,objectUUID,type;";
-
-			MySqlCommand cmd = new MySqlCommand(sql, dbcon);
-			cmd.Parameters.AddWithValue("?status", (int)Status.SUCCESS_STATUS);
-			cmd.ExecuteNonQuery();
-
-			MySqlCommand cmd2 = new MySqlCommand("SELECT FOUND_ROWS();", dbcon);
-			int lineCount = int.Parse(cmd2.ExecuteScalar().ToString()); 
-			cmd2.Dispose();
-
-			if (lineCount<=0) {
-				cmd.Dispose();
-				return;
-			}
-
-			MySqlDataReader r = cmd.ExecuteReader();
-			int l = 0;
-			string[,] row = new string[lineCount, r.FieldCount];
-			while (r.Read()) {
-				for (int i=0; i<r.FieldCount; i++) {
-					row[l, i] = r.GetString(i);
-				}
-				l++;
-			}
-			r.Close();
-			cmd.Dispose();
-
-			for (int i=0; i<lineCount; i++) {
-				string receiver = (string)row[i,0];				// receiver
-				string objUUID  = (string)row[i,1];				// objectUUID
-				int    type     = Convert.ToInt32(row[i,2]);	// type
-				int    count    = Convert.ToInt32(row[i,3]);	// COUNT(*)
-				int    amount   = Convert.ToInt32(row[i,4]);	// SUM(amount)
-				addTotalSale(receiver, objUUID, type, count, amount);
-			}
-		}
-
-
 		private void UpdateTotalSalesTable1()
  		{
+			string sql = string.Empty;
+
+			sql += "BEGIN;";
+			sql += "ALTER TABLE `" + Table_of_TotalSales + "` ";
+			sql += "ADD `time` int(11) NOT NULL AFTER `TotalAmount`,";
+			sql += "COMMENT = 'Rev.2';";
+			sql += "COMMIT;";
+			MySqlCommand cmd = new MySqlCommand(sql, dbcon);
+			cmd.ExecuteNonQuery();
+			cmd.Dispose();
+
+			deleteTotalSalesTable();
+			initTotalSalesTable();
 		}
 
 
@@ -954,7 +923,69 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 		//
 		// totalsales
 		//
-		public bool addTotalSale(string userUUID, string objectUUID, int type, int count, int amount)
+		private void initTotalSalesTable()
+ 		{
+			m_log.Info("[MONEY DB]: Initailising TotalSales Table...");
+			string sql = string.Empty;
+
+			sql += "SELECT SQL_CALC_FOUND_ROWS receiver,objectUUID,type,COUNT(*),SUM(amount),MIN(time) FROM "+ Table_of_Transactions;
+			sql += " WHERE sender<>receiver AND status = ?status ";
+			sql += " GROUP BY receiver,objectUUID,type;";
+
+			MySqlCommand cmd = new MySqlCommand(sql, dbcon);
+			cmd.Parameters.AddWithValue("?status", (int)Status.SUCCESS_STATUS);
+			cmd.ExecuteNonQuery();
+
+			MySqlCommand cmd2 = new MySqlCommand("SELECT FOUND_ROWS();", dbcon);
+			int lineCount = int.Parse(cmd2.ExecuteScalar().ToString()); 
+			cmd2.Dispose();
+
+			if (lineCount<=0) {
+				cmd.Dispose();
+				return;
+			}
+
+			MySqlDataReader r = cmd.ExecuteReader();
+			int l = 0;
+			string[,] row = new string[lineCount, r.FieldCount];
+			while (r.Read()) {
+				for (int i=0; i<r.FieldCount; i++) {
+					row[l, i] = r.GetString(i);
+				}
+				l++;
+			}
+			r.Close();
+			cmd.Dispose();
+
+			for (int i=0; i<lineCount; i++) {
+				string receiver = (string)row[i,0];				// receiver
+				string objUUID  = (string)row[i,1];				// objectUUID
+				int    type     = Convert.ToInt32(row[i,2]);	// type
+				int    count    = Convert.ToInt32(row[i,3]);	// COUNT(*)
+				int    amount   = Convert.ToInt32(row[i,4]);	// SUM(amount)
+				int    tmstamp  = Convert.ToInt32(row[i,5]);	// MIN(time)
+				//
+				setTotalSale(receiver, objUUID, type, count, amount, tmstamp);
+			}
+		}
+
+
+		private void deleteTotalSalesTable()
+ 		{
+			m_log.Info("[MONEY DB]: Deleting TotalSales Table...");
+			string sql = string.Empty;
+
+			sql += "DELETE FROM "+ Table_of_TotalSales;
+
+			MySqlCommand cmd = new MySqlCommand(sql, dbcon);
+			cmd.Parameters.AddWithValue("?status", (int)Status.SUCCESS_STATUS);
+			cmd.ExecuteNonQuery();
+
+			return;
+		}
+
+
+		public bool addTotalSale(string userUUID, string objectUUID, int type, int count, int amount, int tmstamp)
 		{
 			bool bRet = false;
 			string sql = string.Empty;
@@ -964,8 +995,8 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 //			if (objectUUID==UUID.Zero.ToString()) return bRet;	
 
 			sql += "INSERT INTO " + Table_of_TotalSales;
-			sql += " (`UUID`,`user`,`objectUUID`,`type`,`TotalCount`,`TotalAmount`) VALUES";
-			sql += " (?ID,?userID,?objID,?type,?count,?amount)";
+			sql += " (`UUID`,`user`,`objectUUID`,`type`,`TotalCount`,`TotalAmount`,`time`) VALUES";
+			sql += " (?ID,?userID,?objID,?type,?count,?amount,?time)";
 
 			MySqlCommand cmd = new MySqlCommand(sql, dbcon);
 			cmd.Parameters.AddWithValue("?ID",      uuid.ToString());
@@ -974,6 +1005,7 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 			cmd.Parameters.AddWithValue("?type",    type);
 			cmd.Parameters.AddWithValue("?count",   count);
 			cmd.Parameters.AddWithValue("?amount",  amount);
+			cmd.Parameters.AddWithValue("?time",    tmstamp);
 
 			try
 			{
@@ -989,18 +1021,20 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 		}
 
 
-		public bool updateTotalSale(UUID saleUUID, int amount)
+		public bool updateTotalSale(UUID saleUUID, int count, int amount, int tmstamp)
 		{
 			bool bRet = false;
 			string sql = string.Empty;
 
 			sql += "UPDATE " + Table_of_TotalSales;
-			sql += " SET TotalCount = TotalCount + 1, TotalAmount = TotalAmount + ?amount ";
+			sql += " SET TotalCount = TotalCount + ?count, TotalAmount = TotalAmount + ?amount, time = ?time ";
 			sql += " WHERE UUID = ?uuid;";
 			MySqlCommand cmd = new MySqlCommand(sql, dbcon);
 
 			cmd.Parameters.AddWithValue("?uuid",   saleUUID.ToString());
+			cmd.Parameters.AddWithValue("?count",  count);
 			cmd.Parameters.AddWithValue("?amount", amount);
+			cmd.Parameters.AddWithValue("?time",   tmstamp);
 
 			try
 			{
@@ -1017,13 +1051,14 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 		}
 
 
-		public bool setTotalSale(string userUUID, string objectUUID, int type, int amount)
+		public bool setTotalSale(string userUUID, string objectUUID, int type, int count, int amount, int tmstamp)
 		{
 			bool bRet = false;
 			string sql  = string.Empty;
 			string uuid = string.Empty;
+ 			int dbtm = 0;
 
-			sql += "SELECT UUID FROM " + Table_of_TotalSales;
+			sql += "SELECT UUID,time FROM " + Table_of_TotalSales;
 			sql += " WHERE user = ?userid AND objectUUID = ?objID AND type = ?type;";
 			MySqlCommand cmd = new MySqlCommand(sql, dbcon);
 
@@ -1038,6 +1073,7 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 					try
 					{
 						uuid = (string)r["UUID"];
+						dbtm = Convert.ToInt32(r["time"]);
 					}
 					catch (Exception e)
 					{
@@ -1052,11 +1088,12 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 			{
 				UUID saleUUID = UUID.Zero;
 				UUID.TryParse(uuid, out saleUUID);
-				bRet = updateTotalSale(saleUUID, amount);
+				if (dbtm<tmstamp) tmstamp = dbtm;
+				bRet = updateTotalSale(saleUUID, count, amount, tmstamp);
 			}
 			else
 			{
-				bRet = addTotalSale(userUUID, objectUUID, type, 1, amount);
+				bRet = addTotalSale(userUUID, objectUUID, type, count, amount, tmstamp);
 			}
 
 			cmd.Dispose();
