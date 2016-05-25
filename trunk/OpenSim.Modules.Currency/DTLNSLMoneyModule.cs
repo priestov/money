@@ -67,35 +67,36 @@ namespace OpenSim.Modules.Currency
 	public enum TransactionType : int
 	{
 		// One-Time Charges
-		GroupCreate	 	= 1002,
-		GroupJoin		= 1004,
-		UploadCharge	= 1101,
-		LandAuction		= 1102,
-		ClassifiedCharge= 1103,
+		BirthGift        = 1000,
+		GroupCreate	 	 = 1002,
+		GroupJoin		 = 1004,
+		UploadCharge	 = 1101,
+		LandAuction		 = 1102,
+		ClassifiedCharge = 1103,
 		// Recurrent Charges
-		ParcelDirFee	= 2003,
-		ClassifiedRenew = 2005,
-		ScheduledFee	= 2900,
+		ParcelDirFee	 = 2003,
+		ClassifiedRenew  = 2005,
+		ScheduledFee	 = 2900,
 		// Inventory Transactions
-		GiveInventory   = 3000,
+		GiveInventory    = 3000,
 		// Transfers Between Users
-		ObjectSale		= 5000,
-		Gift			= 5001,
-		LandSale		= 5002,
-		ReferBonus		= 5003,
-		InvntorySale	= 5004,
-		RefundPurchase	= 5005,
-		LandPassSale	= 5006,
-		DwellBonus		= 5007,
-		PayObject		= 5008,
-		ObjectPays		= 5009,
-		BuyMoney		= 5010,
-		MoveMoney		= 5011,
+		ObjectSale		 = 5000,
+		Gift			 = 5001,
+		LandSale		 = 5002,
+		ReferBonus		 = 5003,
+		InvntorySale	 = 5004,
+		RefundPurchase	 = 5005,
+		LandPassSale	 = 5006,
+		DwellBonus		 = 5007,
+		PayObject		 = 5008,
+		ObjectPays		 = 5009,
+		BuyMoney		 = 5010,
+		MoveMoney		 = 5011,
 		// Group Transactions
-		GroupLiability  = 6003,
-		GroupDividend   = 6004,
+		GroupLiability   = 6003,
+		GroupDividend    = 6004,
 		// Stipend Credits
-		StipendBasic    = 10000
+		StipendBasic     = 10000
 	}
 
 

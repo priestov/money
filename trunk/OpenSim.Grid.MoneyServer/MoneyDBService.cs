@@ -29,6 +29,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using OpenSim.Data.MySQL.MySQLMoneyDataWrapper;
+using OpenSim.Modules.Currency;
 using log4net;
 using System.Reflection;
 using OpenMetaverse;
@@ -220,10 +221,30 @@ namespace OpenSim.Grid.MoneyServer
 
         public bool addUser(string userID, int balance, int status)
         {
+            TransactionData transaction = new TransactionData();
+            transaction.TransUUID    = UUID.Random();
+            transaction.Sender       = UUID.Zero.ToString();
+            transaction.Receiver     = userID;
+            transaction.Amount       = balance;
+            transaction.ObjectUUID   = UUID.Zero.ToString();
+            transaction.ObjectName   = string.Empty;
+            transaction.RegionHandle = string.Empty;
+            transaction.Type         = (int)TransactionType.BirthGift;
+            transaction.Time         = (int)((DateTime.Now.Ticks - TicksToEpoch) / 10000000);;
+            transaction.Status       = (int)Status.PENDING_STATUS;
+            transaction.SecureCode   = UUID.Random().ToString();
+            transaction.CommonName   = string.Empty;
+            transaction.Description  = "addUser " + DateTime.Now.ToString();
+		
+            bool ret = addTransaction(transaction);
+			if (!ret) return false;
+
+			//
             MySQLSuperManager dbm = GetLockedConnection();
             try
             {
-                return dbm.Manager.addUser(userID, balance, status);
+                ret = dbm.Manager.addUser(userID, 0, status);		// make Balance Table
+                //return dbm.Manager.addUser(userID, balance, status);
             }
             catch (Exception e)
             {
@@ -235,6 +256,10 @@ namespace OpenSim.Grid.MoneyServer
             {
                 dbm.Release();
             }
+
+			//
+            if (ret) ret = giveMoney(transaction.TransUUID, userID, balance);
+			return ret;
         }
 
 
@@ -376,6 +401,7 @@ namespace OpenSim.Grid.MoneyServer
                         //If receiver not found, add it to DB.
                         if (getBalance(transaction.Receiver) == -1)
                         {
+                            m_log.ErrorFormat("[MONEY DB]: DoTransfer: Receiver not found. {0}", transaction.Receiver);
                             addUser(transaction.Receiver, 0, (int)Status.SUCCESS_STATUS);
                         }
 
@@ -437,6 +463,7 @@ namespace OpenSim.Grid.MoneyServer
                 //If receiver not found, add it to DB.
                 if (getBalance(transaction.Receiver)==-1)
                 {
+                    m_log.ErrorFormat("[MONEY DB]: DoAddMoney: Receiver not found. {0}", transaction.Receiver);
                     addUser(transaction.Receiver, 0, (int)Status.SUCCESS_STATUS);
                 }
 
@@ -463,8 +490,7 @@ namespace OpenSim.Grid.MoneyServer
                 if (dbm.Manager.fetchUserInfo(user.UserID) != null)
                 {
                     m_log.InfoFormat("[MONEY DB]: Found user \"{0}\", now update information", user.Avatar);
-                    if (m_moneyManager.updateUserInfo(user))
-                        return true;
+                    if (m_moneyManager.updateUserInfo(user)) return true;
                 }
                 else if (dbm.Manager.addUserInfo(user))
                 {
