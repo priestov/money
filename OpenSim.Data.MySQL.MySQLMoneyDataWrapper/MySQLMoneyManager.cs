@@ -801,7 +801,7 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 		}
 
 
-		public bool addUser(string userID,int balance,int status)
+		public bool addUser(string userID, int balance, int status)
 		{
 			bool bRet = false;
 			string sql = string.Empty;
@@ -814,8 +814,8 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 			cmd.Parameters.AddWithValue("?balance", balance);
 			cmd.Parameters.AddWithValue("?status",  status);
 			if (cmd.ExecuteNonQuery() > 0) bRet = true;
-
 			cmd.Dispose();
+
 			return bRet;
 		}
 
@@ -847,7 +847,7 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 		/// <param name="toID"></param>
 		/// <param name="amount"></param>
 		/// <returns></returns>
-		public bool withdrawMoney(UUID transactionID,string senderID, int amount)
+		public bool withdrawMoney(UUID transactionID, string senderID, int amount)
 		{
 			bool bRet = false;
 			string sql = string.Empty;

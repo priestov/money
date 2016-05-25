@@ -36,8 +36,8 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
     public class TransactionData
     {
         UUID m_uuid;
-        string m_sender   = string.Empty;
-        string m_receiver = string.Empty;
+        string m_sender       = string.Empty;
+        string m_receiver     = string.Empty;
         int m_amount;
         int m_senderBalance;
         int m_receiverBalance;
