@@ -929,11 +929,12 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 			string sql = string.Empty;
 
 			sql += "SELECT SQL_CALC_FOUND_ROWS receiver,objectUUID,type,COUNT(*),SUM(amount),MIN(time) FROM "+ Table_of_Transactions;
-			sql += " WHERE sender<>receiver AND status = ?status ";
+			sql += " WHERE sender != receiver AND status = ?status AND sender != ?system";
 			sql += " GROUP BY receiver,objectUUID,type;";
 
 			MySqlCommand cmd = new MySqlCommand(sql, dbcon);
 			cmd.Parameters.AddWithValue("?status", (int)Status.SUCCESS_STATUS);
+			cmd.Parameters.AddWithValue("?system", UUID.Zero.ToString());
 			cmd.ExecuteNonQuery();
 
 			MySqlCommand cmd2 = new MySqlCommand("SELECT FOUND_ROWS();", dbcon);

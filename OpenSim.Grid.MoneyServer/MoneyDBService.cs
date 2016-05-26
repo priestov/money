@@ -179,6 +179,7 @@ namespace OpenSim.Grid.MoneyServer
         public bool setTotalSale(TransactionData transaction)
         {
 			if (transaction.Receiver==transaction.Sender) return false;
+			if (transaction.Sender==UUID.Zero.ToString()) return false;
 
             MySQLSuperManager dbm = GetLockedConnection();
             try
@@ -466,8 +467,12 @@ namespace OpenSim.Grid.MoneyServer
                     m_log.ErrorFormat("[MONEY DB]: DoAddMoney: Receiver not found. {0}", transaction.Receiver);
                     addUser(transaction.Receiver, 0, (int)Status.SUCCESS_STATUS);
                 }
-
-                if (giveMoney(transactionUUID, transaction.Receiver, transaction.Amount)) return true;
+				//
+                if (giveMoney(transactionUUID, transaction.Receiver, transaction.Amount))
+				{
+					setTotalSale(transaction);
+					return true;
+				}
                 else // give money to receiver failed.
                 {
                     m_log.ErrorFormat("[MONEY DB]: Add money to receiver {0} failed", transaction.Receiver);
@@ -502,10 +507,8 @@ namespace OpenSim.Grid.MoneyServer
             }
             catch (Exception e)
             {
-                m_log.InfoFormat("[MONEY DB]: ERROR: EXCEPTION: Reconnect to Managers.");
+                //m_log.InfoFormat("[MONEY DB]: ERROR: EXCEPTION: Reconnect to Managers.");
                 dbm.Manager.Reconnect();
-                // Fumi.Iseki
-                m_moneyManager.Reconnect();
                 m_log.Error(e.ToString());
                 return false;
             }
