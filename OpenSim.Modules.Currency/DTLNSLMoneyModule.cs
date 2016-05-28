@@ -96,7 +96,9 @@ namespace OpenSim.Modules.Currency
 		GroupLiability   = 6003,
 		GroupDividend    = 6004,
 		// Stipend Credits
-		StipendBasic     = 10000
+		StipendBasic     = 7000,
+		// System
+		SystemOperation  = 9999
 	}
 
 
