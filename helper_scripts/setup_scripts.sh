@@ -161,11 +161,9 @@ fi
 
 if [ "$ONLY_DWNLD" = "NO" ]; then
     if   [ "$SYMBL_LINK" = "YES" ]; then
-#        ln -sf ../opensim.phplib/env.mysql.php include/env.mysql.php
         ln -sf ../opensim.phplib/mysql.func.php include/mysql.func.php
         ln -sf ../opensim.phplib/opensim.mysql.php include/opensim.mysql.php
     elif [ "$SYMBL_LINK" = "NO" ]; then
-#        cp -puf opensim.phplib/env.mysql.php include/env.mysql.php
         cp -puf opensim.phplib/mysql.func.php include/mysql.func.php
         cp -puf opensim.phplib/opensim.mysql.php include/opensim.mysql.php
     fi
