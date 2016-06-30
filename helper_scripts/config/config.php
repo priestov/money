@@ -6,8 +6,9 @@
 //
 
 // Please set this hepler script URL and directory
-if (!defined('ENV_HELPER_URL'))  define('ENV_HELPER_URL',  'http://www.opensim.tuis.ac.jp/currency/helper/');
-if (!defined('ENV_HELPER_PATH')) define('ENV_HELPER_PATH', '/home/apache/htdocs/currency/helper/');
+
+if (!defined('ENV_HELPER_URL'))  define('ENV_HELPER_URL',  'http://opensim.tuis.ac.jp/currency/helper/');
+if (!defined('ENV_HELPER_PATH')) define('ENV_HELPER_PATH', '/var/www/html/currency/helper/');
 
 //////////////////////////////////////////////////////////////////////////////////i
 // Valiables for OpenSim
@@ -18,7 +19,7 @@ define('OPENSIM_DB_NAME', 'opensim');
 define('OPENSIM_DB_USER', 'OpensimUser');
 define('OPENSIM_DB_PASS', 'OpensimPass');
 //
-define('OPENSIM_DB_MYSQLI', false);		// if you use MySQLi interface, please set true
+define('OPENSIM_DB_MYSQLI', true);
 
 
 // Money Server Access Key
