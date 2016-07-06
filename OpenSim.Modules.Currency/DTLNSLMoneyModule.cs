@@ -894,9 +894,8 @@ namespace OpenSim.Modules.Currency
 					if (clientUUID!=UUID.Zero)
 					{
 						IClientAPI client = GetLocateClient(clientUUID);
-						if (client!=null &&
-							client.SessionId.ToString()==(string)requestParam["clientSessionID"] &&
-							client.SecureSessionId.ToString()==(string)requestParam["clientSecureSessionID"])
+						if (client!=null && client.SecureSessionId.ToString()==(string)requestParam["clientSecureSessionID"] &&
+						   (client.SessionId==UUID.Zero || client.SessionId.ToString()==(string)requestParam["clientSessionID"]))
 						{
 							if (requestParam.Contains("transactionType") &&
 								requestParam.Contains("objectID") &&
@@ -959,9 +958,8 @@ namespace OpenSim.Modules.Currency
 					if (clientUUID!=UUID.Zero)
 					{
 						IClientAPI client = GetLocateClient(clientUUID);
-						if (client!=null &&
-							client.SessionId.ToString()==(string)requestParam["clientSessionID"] &&		// unable for Aurora-Sim
-							client.SecureSessionId.ToString()==(string)requestParam["clientSecureSessionID"])
+						if (client!=null && client.SecureSessionId.ToString()==(string)requestParam["clientSecureSessionID"] &&
+	 					   (client.SessionId==UUID.Zero || client.SessionId.ToString()==(string)requestParam["clientSessionID"])) 	// unable for Aurora-Sim
 						{
 							if (requestParam.Contains("Balance"))
 							{
@@ -1023,9 +1021,8 @@ namespace OpenSim.Modules.Currency
 					if (clientUUID!=UUID.Zero)
 					{
 						IClientAPI client = GetLocateClient(clientUUID);
-						if (client!=null &&
-							client.SessionId.ToString()==(string)requestParam["clientSessionID"] &&		// unable for Aurora-Sim
-							client.SecureSessionId.ToString()==(string)requestParam["clientSecureSessionID"])
+						if (client!=null && client.SecureSessionId.ToString()==(string)requestParam["clientSecureSessionID"] &&
+	 					   (client.SessionId==UUID.Zero || client.SessionId.ToString()==(string)requestParam["clientSessionID"])) 	// unable for Aurora-Sim
 						{
 							if (requestParam.Contains("Description"))
 							{
@@ -1074,9 +1071,8 @@ namespace OpenSim.Modules.Currency
 					if (clientUUID!=UUID.Zero)
 					{
 						IClientAPI client = GetLocateClient(clientUUID);
-						if (client!=null &&
-							client.SessionId.ToString()==(string)requestParam["clientSessionID"] &&		// unable for Aurora-Sim
-							client.SecureSessionId.ToString()==(string)requestParam["clientSecureSessionID"])
+						if (client!=null && client.SecureSessionId.ToString()==(string)requestParam["clientSecureSessionID"] &&
+	 					   (client.SessionId==UUID.Zero || client.SessionId.ToString()==(string)requestParam["clientSessionID"])) 	// unable for Aurora-Sim
 						{
 							balance = QueryBalanceFromMoneyServer(client);
 						}
@@ -1112,6 +1108,7 @@ namespace OpenSim.Modules.Currency
 			if (request.Params.Count>0)
 			{
 				Hashtable requestParam = (Hashtable)request.Params[0];
+
 				if (requestParam.Contains("clientUUID") &&
 					requestParam.Contains("clientSessionID") &&			// unable for Aurora-Sim
 					requestParam.Contains("clientSecureSessionID"))
@@ -1121,9 +1118,8 @@ namespace OpenSim.Modules.Currency
 					if (bankerUUID!=UUID.Zero)
 					{
 						IClientAPI client = GetLocateClient(bankerUUID);
-						if (client!=null &&
-							client.SessionId.ToString()==(string)requestParam["clientSessionID"] &&			// unable for Aurora-Sim
-							client.SecureSessionId.ToString()==(string)requestParam["clientSecureSessionID"])
+						if (client!=null && client.SecureSessionId.ToString()==(string)requestParam["clientSecureSessionID"] &&
+						   (client.SessionId==UUID.Zero || client.SessionId.ToString()==(string)requestParam["clientSessionID"]))
 						{
 							if (requestParam.Contains("amount"))
 							{
@@ -1242,9 +1238,8 @@ namespace OpenSim.Modules.Currency
 					if (clientUUID!=UUID.Zero)
 					{
 						IClientAPI client = GetLocateClient(clientUUID);
-						if (client!=null &&
-							client.SessionId.ToString()==(string)requestParam["clientSessionID"] &&
-							client.SecureSessionId.ToString()==(string)requestParam["clientSecureSessionID"])
+						if (client!=null && client.SecureSessionId.ToString()==(string)requestParam["clientSecureSessionID"] &&
+						   (client.SessionId==UUID.Zero || client.SessionId.ToString()==(string)requestParam["clientSessionID"]))
 						{
 							ret = UploadCovered(client, UploadCharge);
 						}
@@ -1284,9 +1279,8 @@ namespace OpenSim.Modules.Currency
 					if (clientUUID!=UUID.Zero)
 					{
 						IClientAPI client = GetLocateClient(clientUUID);
-						if (client!=null &&
-							client.SessionId.ToString()==(string)requestParam["clientSessionID"] &&
-							client.SecureSessionId.ToString()==(string)requestParam["clientSecureSessionID"])
+						if (client!=null && client.SecureSessionId.ToString()==(string)requestParam["clientSecureSessionID"] &&
+						   (client.SessionId==UUID.Zero || client.SessionId.ToString()==(string)requestParam["clientSessionID"]))
 						{
 							ApplyUploadCharge(clientUUID, UploadCharge, "Upload Asset");
 							ret = true;
