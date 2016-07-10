@@ -450,7 +450,7 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 
 			sql += "BEGIN;";
 			sql += "ALTER TABLE `" + Table_of_Balances + "` ";
-			sql += "MODIFY COLUMNS `user` varchar(255) ,";
+			sql += "MODIFY COLUMN `user` varchar(255) NOT NULL,";
 			sql += "COMMENT = 'Rev.3';";
 			sql += "COMMIT;";
 			MySqlCommand cmd = new MySqlCommand(sql, dbcon);
@@ -485,7 +485,7 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 
 			sql += "BEGIN;";
 			sql += "ALTER TABLE `" + Table_of_TotalSales + "` ";
-			sql += "MODIFY COLUMNS `user` varchar(255) ,";
+			sql += "MODIFY COLUMN `user` varchar(255) NOT NULL,";
 			sql += "COMMENT = 'Rev.3';";
 			sql += "COMMIT;";
 			MySqlCommand cmd = new MySqlCommand(sql, dbcon);
@@ -568,7 +568,7 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 
 			sql += "BEGIN;";
 			sql += "ALTER TABLE `" + Table_of_UserInfo + "` ";
-			sql += "MODIFY COLUMNS `user` varchar(255) ,";
+			sql += "MODIFY COLUMN `user` varchar(255) NOT NULL,";
 			sql += "COMMENT = 'Rev.3';";
 			sql += "COMMIT;";
 			MySqlCommand cmd = new MySqlCommand(sql, dbcon);
@@ -746,8 +746,8 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 
 			sql += "BEGIN;";
 			sql += "ALTER TABLE `" + Table_of_Transactions + "` ";
-			sql += "MODIFY COLUMNS `sender`   varchar(255) ,";
-			sql += "MODIFY COLUMNS `receiver` varchar(255) ,";
+			sql += "MODIFY COLUMN `sender`   varchar(255) NOT NULL,";
+			sql += "MODIFY COLUMN `receiver` varchar(255) NOT NULL,";
 			sql += "COMMENT = 'Rev.10';";
 			sql += "COMMIT;";
 			MySqlCommand cmd = new MySqlCommand(sql, dbcon);
