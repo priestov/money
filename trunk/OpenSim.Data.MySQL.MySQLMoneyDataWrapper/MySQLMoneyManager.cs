@@ -117,6 +117,10 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 					{
 						case 1: //Rev.1
 							UpdateBalancesTable1();
+							UpdateBalancesTable2();
+							break;
+						case 2: //Rev.2
+							UpdateBalancesTable2();
 							break;
 					}
 				}
@@ -142,6 +146,10 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 					{
 						case 1: //Rev.1
 							UpdateUserInfoTable1();
+							UpdateUserInfoTable2();
+							break;
+						case 2: //Rev.2
+							UpdateUserInfoTable2();
 							break;
 					}
 				}
@@ -173,6 +181,7 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 							UpdateTransactionsTable6();
 							UpdateTransactionsTable7();
 							UpdateTransactionsTable8();
+							UpdateTransactionsTable9();
 							break;
 						case 3: //Rev.3
 							UpdateTransactionsTable3();
@@ -181,6 +190,7 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 							UpdateTransactionsTable6();
 							UpdateTransactionsTable7();
 							UpdateTransactionsTable8();
+							UpdateTransactionsTable9();
 							break;
 						case 4: //Rev.4
 							UpdateTransactionsTable4();
@@ -188,24 +198,32 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 							UpdateTransactionsTable6();
 							UpdateTransactionsTable7();
 							UpdateTransactionsTable8();
+							UpdateTransactionsTable9();
 							break;
 						case 5: //Rev.5
 							UpdateTransactionsTable5();
 							UpdateTransactionsTable6();
 							UpdateTransactionsTable7();
 							UpdateTransactionsTable8();
+							UpdateTransactionsTable9();
 							break;
 						case 6: //Rev.6
 							UpdateTransactionsTable6();
 							UpdateTransactionsTable7();
 							UpdateTransactionsTable8();
+							UpdateTransactionsTable9();
 							break;
 						case 7: //Rev.7
 							UpdateTransactionsTable7();
 							UpdateTransactionsTable8();
+							UpdateTransactionsTable9();
 							break;
 						case 8: //Rev.8
 							UpdateTransactionsTable8();
+							UpdateTransactionsTable9();
+							break;
+						case 9: //Rev.9
+							UpdateTransactionsTable9();
 							break;
 					}
 				}
@@ -231,6 +249,10 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 					{
 						case 1: //Rev.1
 							UpdateTotalSalesTable1();
+							UpdateTotalSalesTable2();
+							break;
+						case 2: //Rev.2
+							UpdateTotalSalesTable2();
 							break;
 					}
 				}
@@ -264,13 +286,13 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 			string sql = string.Empty;
 
 			sql += "CREATE TABLE `" + Table_of_Balances + "` (";
-			sql += "`user` varchar(128) NOT NULL,";
+			sql += "`user` varchar(255) NOT NULL,";
 			sql += "`balance` int(10) NOT NULL,";
 			sql += "`status` tinyint(2) default NULL,";
 			sql += "PRIMARY KEY (`user`))";
 			sql += "Engine=InnoDB DEFAULT CHARSET=utf8 ";
 			///////////////////////////////////////////////
-			sql += "COMMENT='Rev.2';";
+			sql += "COMMENT='Rev.3';";
 			MySqlCommand cmd = new MySqlCommand(sql, dbcon);
 			cmd.ExecuteNonQuery();
 			cmd.Dispose();
@@ -283,7 +305,7 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 
 			sql += "CREATE TABLE `" + Table_of_TotalSales + "` (";
 			sql += "`UUID` varchar(36) NOT NULL,";
-			sql += "`user` varchar(128) NOT NULL,";
+			sql += "`user` varchar(255) NOT NULL,";
 			sql += "`objectUUID` varchar(36)  NOT NULL,";
 			sql += "`type` int(10) NOT NULL,";
 			sql += "`TotalCount`  int(10) NOT NULL DEFAULT 0,";
@@ -292,7 +314,7 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 			sql += "PRIMARY KEY(`UUID`))";
 			sql += "Engine=InnoDB DEFAULT CHARSET=utf8 ";
 			///////////////////////////////////////////////
-			sql += "COMMENT='Rev.2';";
+			sql += "COMMENT='Rev.3';";
 			MySqlCommand cmd = new MySqlCommand(sql, dbcon);
 			cmd.ExecuteNonQuery();
 			cmd.Dispose();
@@ -307,14 +329,14 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 			string sql = string.Empty;
 
 			sql += "CREATE TABLE `" + Table_of_UserInfo + "` (";
-			sql += "`user` varchar(128) NOT NULL,";
+			sql += "`user` varchar(255) NOT NULL,";
 			sql += "`simip` varchar(64) NOT NULL,";
 			sql += "`avatar` varchar(50) NOT NULL,";
 			sql += "`pass` varchar(36) DEFAULT NULL,";
 			sql += "PRIMARY KEY(`user`))";
 			sql += "Engine=InnoDB DEFAULT CHARSET=utf8 ";
 			///////////////////////////////////////////////
-			sql += "COMMENT='Rev.2';";
+			sql += "COMMENT='Rev.3';";
 			MySqlCommand cmd = new MySqlCommand(sql, dbcon);
 			cmd.ExecuteNonQuery();
 			cmd.Dispose();
@@ -327,8 +349,8 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 
 			sql += "CREATE TABLE `" + Table_of_Transactions + "`(";
 			sql += "`UUID` varchar(36) NOT NULL,";
-			sql += "`sender` varchar(128) NOT NULL,";
-			sql += "`receiver` varchar(128) NOT NULL,";
+			sql += "`sender` varchar(255) NOT NULL,";
+			sql += "`receiver` varchar(255) NOT NULL,";
 			sql += "`amount` int(10) NOT NULL,";
 			sql += "`senderBalance`   int(10) NOT NULL DEFAULT -1,";
 			sql += "`receiverBalance` int(10) NOT NULL DEFAULT -1,";
@@ -344,7 +366,7 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 			sql += "PRIMARY KEY (`UUID`))";
 			sql += "Engine=InnoDB DEFAULT CHARSET=utf8 ";
 			///////////////////////////////////////////////
-			sql += "COMMENT='Rev.9';";
+			sql += "COMMENT='Rev.10';";
 			MySqlCommand cmd = new MySqlCommand(sql, dbcon);
 			cmd.ExecuteNonQuery();
 			cmd.Dispose();
@@ -422,6 +444,21 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 		}
 
 
+		private void UpdateBalancesTable2()
+		{
+			string sql = string.Empty;
+
+			sql += "BEGIN;";
+			sql += "ALTER TABLE `" + Table_of_Balances + "` ";
+			sql += "MODIFY COLUMNS `user` varchar(255) ,";
+			sql += "COMMENT = 'Rev.3';";
+			sql += "COMMIT;";
+			MySqlCommand cmd = new MySqlCommand(sql, dbcon);
+			cmd.ExecuteNonQuery();
+			cmd.Dispose();
+		}
+
+
 		///////////////////////////////////////////////////////////////////////
 
 		private void UpdateTotalSalesTable1()
@@ -439,6 +476,21 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 
 			deleteTotalSalesTable();
 			initTotalSalesTable();
+		}
+
+
+		private void UpdateTotalSalesTable2()
+		{
+			string sql = string.Empty;
+
+			sql += "BEGIN;";
+			sql += "ALTER TABLE `" + Table_of_TotalSales + "` ";
+			sql += "MODIFY COLUMNS `user` varchar(255) ,";
+			sql += "COMMENT = 'Rev.3';";
+			sql += "COMMIT;";
+			MySqlCommand cmd = new MySqlCommand(sql, dbcon);
+			cmd.ExecuteNonQuery();
+			cmd.Dispose();
 		}
 
 
@@ -509,6 +561,20 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 			}
 		}
 
+
+		private void UpdateUserInfoTable2()
+		{
+			string sql = string.Empty;
+
+			sql += "BEGIN;";
+			sql += "ALTER TABLE `" + Table_of_UserInfo + "` ";
+			sql += "MODIFY COLUMNS `user` varchar(255) ,";
+			sql += "COMMENT = 'Rev.3';";
+			sql += "COMMIT;";
+			MySqlCommand cmd = new MySqlCommand(sql, dbcon);
+			cmd.ExecuteNonQuery();
+			cmd.Dispose();
+		}
 
 
 		///////////////////////////////////////////////////////////////////////
@@ -671,6 +737,23 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 		}
 
 
+		/// <summary>
+		/// update transactions table from Rev.9 to Rev.10
+		/// </summary>
+		private void UpdateTransactionsTable9()
+		{
+			string sql = string.Empty;
+
+			sql += "BEGIN;";
+			sql += "ALTER TABLE `" + Table_of_Transactions + "` ";
+			sql += "MODIFY COLUMNS `sender`   varchar(255) ,";
+			sql += "MODIFY COLUMNS `receiver` varchar(255) ,";
+			sql += "COMMENT = 'Rev.10';";
+			sql += "COMMIT;";
+			MySqlCommand cmd = new MySqlCommand(sql, dbcon);
+			cmd.ExecuteNonQuery();
+			cmd.Dispose();
+		}
 
 
 		///////////////////////////////////////////////////////////////////////
