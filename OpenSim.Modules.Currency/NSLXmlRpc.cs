@@ -24,7 +24,8 @@ namespace NSL.Network.XmlRpc
 	{
 		private static readonly ILog m_log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
 
-		private Encoding _encoding = new ASCIIEncoding();
+		//private Encoding _encoding = new ASCIIEncoding();
+		private Encoding _encoding = new UTF8Encoding();
 		private XmlRpcRequestSerializer _serializer = new XmlRpcRequestSerializer();
 		private XmlRpcResponseDeserializer _deserializer = new XmlRpcResponseDeserializer();
 
