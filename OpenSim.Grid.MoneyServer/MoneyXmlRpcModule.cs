@@ -278,9 +278,13 @@ namespace OpenSim.Grid.MoneyServer
 
 			//m_log.InfoFormat("[MONEY RPC]: handleClientLogin: client UUID is {0}", clientUUID);
 
-			if (avatarName=="") {
-				responseData["clientBalance"] = 0;
-				return response;
+			// for HG User
+			if (String.IsNullOrEmpty(avatarName) && !String.IsNullOrEmpty(universalID)) {
+				UUID uuid;
+				string firstname, lastname, tmp;
+				Util.ParseUniversalUserIdentifier(universalID, out uuid, out tmp, out firstname, out lastname, out tmp);
+				avatarName = firstname + " " + lastname;
+				clientUUID = universalID;
 			}
 
 			//Update the session and secure session dictionary
@@ -306,7 +310,7 @@ namespace OpenSim.Grid.MoneyServer
 			{
 				//m_log.InfoFormat("[MONEY RPC]: handleClientLogin: User {0} has logged in, getting balance...", clientUUID);
 				balance = m_moneyDBService.getBalance(clientUUID);
-				//add user if not exist
+				//add user if not exist. (if balance is -1, it means avatar is not exist)
 				if (balance==-1)
 				{
 					if (m_moneyDBService.addUser(clientUUID, m_defaultBalance, 0))
@@ -335,14 +339,6 @@ namespace OpenSim.Grid.MoneyServer
 				//TODO: Add password protection here
 				user.PswHash = UUID.Zero.ToString();
 
-				if (user.Avatar==string.Empty && universalID!=string.Empty) {
-					user.UserID = universalID;
-					UUID uuid;
-					string firstname, lastname, tmp;
-					Util.ParseUniversalUserIdentifier(universalID, out uuid, out tmp, out firstname, out lastname, out tmp);
-					user.Avatar = firstname + " " + lastname;
-				}
-				
 				if (!m_moneyDBService.TryAddUserInfo(user))
 				{
 					m_log.ErrorFormat("[MONEY RPC]: handleClientLogin: Unable to refresh information for user \"{0}\" in DB", avatarName);
