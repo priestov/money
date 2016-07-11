@@ -259,6 +259,7 @@ namespace OpenSim.Grid.MoneyServer
 			Hashtable responseData = new Hashtable();
 			response.Value = responseData;
 
+			string universalID = string.Empty;
 			string clientUUID = string.Empty;
 			string sessionID = string.Empty;
 			string secureID = string.Empty;
@@ -268,6 +269,7 @@ namespace OpenSim.Grid.MoneyServer
 
 			responseData["success"] = false;
 
+			if (requestData.ContainsKey("universalID")) 	  	  universalID = (string)requestData["universalID"];
 			if (requestData.ContainsKey("clientUUID")) 			  clientUUID = (string)requestData["clientUUID"];
 			if (requestData.ContainsKey("clientSessionID")) 	  sessionID = (string)requestData["clientSessionID"];
 			if (requestData.ContainsKey("clientSecureSessionID")) secureID = (string)requestData["clientSecureSessionID"];
@@ -333,6 +335,14 @@ namespace OpenSim.Grid.MoneyServer
 				//TODO: Add password protection here
 				user.PswHash = UUID.Zero.ToString();
 
+				if (user.Avatar==string.Empty && universalID!=string.Empty) {
+					user.UserID = universalID;
+					UUID uuid;
+					string firstname, lastname, tmp;
+					Util.ParseUniversalUserIdentifier(universalID, out uuid, out tmp, out firstname, out lastname, out tmp);
+					user.Avatar = firstname + " " + lastname;
+				}
+				
 				if (!m_moneyDBService.TryAddUserInfo(user))
 				{
 					m_log.ErrorFormat("[MONEY RPC]: handleClientLogin: Unable to refresh information for user \"{0}\" in DB", avatarName);
