@@ -1647,11 +1647,15 @@ namespace OpenSim.Modules.Currency
 					}
 				}
 
-				// Login the Money Server.   
+				AgentCircuitData agent = scene.AuthenticateHandler.GetAgentCircuitData(client.AgentId);
+				string universalID = Util.ProduceUserUniversalIdentifier(agent);
+
+				// Lognn the Money Server.   
 				Hashtable paramTable = new Hashtable();
 				paramTable["openSimServIP"] 		= scene.RegionInfo.ServerURI.Replace(scene.RegionInfo.InternalEndPoint.Port.ToString(), 
 																						 scene.RegionInfo.HttpPort.ToString());
 				paramTable["userName"] 				= userName;
+				paramTable["universalID"]           = universalID;
 				paramTable["clientUUID"] 			= client.AgentId.ToString();
 				paramTable["clientSessionID"] 		= client.SessionId.ToString();
 				paramTable["clientSecureSessionID"] = client.SecureSessionId.ToString();
