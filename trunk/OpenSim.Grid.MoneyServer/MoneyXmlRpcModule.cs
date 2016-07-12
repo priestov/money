@@ -959,21 +959,18 @@ namespace OpenSim.Grid.MoneyServer
 
 				if (senderInfo==null && receiverInfo==null) 
 				{
-					m_log.ErrorFormat("[MONEY RPC]: handleMoveMoney: Sender and Receiver are not yet in DB: {0}, {1}", transaction.Sender, transaction.Receiver);
+					m_log.ErrorFormat("[MONEY RPC]: handleMoveMoney: Sender and Receiver are not yet in DB, or both of them are System: {0}, {1}", 
+																												transaction.Sender, transaction.Receiver);
 					return response;
 				}
 
-m_log.ErrorFormat("[MONEY RPC]: 111111111111111111111111111");
 				bool result = m_moneyDBService.addTransaction(transaction);
 				if (result) 
 				{
-m_log.ErrorFormat("[MONEY RPC]: 222222222222222222222222222");
 					if (amount>0 || (m_enableAmountZero&&amount==0))
 					{
-m_log.ErrorFormat("[MONEY RPC]: 333333333333333333333333333");
 						if (m_moneyDBService.DoTransfer(transactionUUID))
 						{
-m_log.ErrorFormat("[MONEY RPC]: 444444444444444444444444444");
 							transaction = m_moneyDBService.FetchTransaction(transactionUUID);
 							if (transaction!=null && transaction.Status==(int)Status.SUCCESS_STATUS)
 							{
