@@ -118,6 +118,8 @@ namespace OpenSim.Grid.MoneyServer
 
         public int getBalance(string userID)
         {
+            if (userID==UUID.Zero.ToString()) return 999999999;		// for System	
+
             MySQLSuperManager dbm = GetLockedConnection();
             try
             {
@@ -138,6 +140,8 @@ namespace OpenSim.Grid.MoneyServer
 
         public bool withdrawMoney(UUID transactionID, string senderID, int amount)
         {
+			if (senderID==UUID.Zero.ToString()) return true;		// for System
+
             MySQLSuperManager dbm = GetLockedConnection();
             try
             {
@@ -158,6 +162,8 @@ namespace OpenSim.Grid.MoneyServer
 
         public bool giveMoney(UUID transactionID, string receiverID, int amount)
         {
+			if (receiverID==UUID.Zero.ToString()) return true;		// for System
+
             MySQLSuperManager dbm = GetLockedConnection();
             try
             {
