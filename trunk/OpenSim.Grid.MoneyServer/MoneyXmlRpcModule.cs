@@ -273,7 +273,7 @@ namespace OpenSim.Grid.MoneyServer
 			string clientUUID = string.Empty;
 			string sessionID = string.Empty;
 			string secureID = string.Empty;
-			string simIP  = string.Empty;
+			string simIP = string.Empty;
 			string avatarName = string.Empty;
 			int balance = 0;
 
@@ -378,8 +378,6 @@ namespace OpenSim.Grid.MoneyServer
 
 
 
-		//
-		// deleted using ASP.NET  by Fumi.Iseki
 		//
 		/// <summary>
 		/// handle incoming transaction
@@ -548,14 +546,14 @@ namespace OpenSim.Grid.MoneyServer
 				return response;
 			}
 
-			if (requestData.ContainsKey("senderID")) 			senderID = (string)requestData["senderID"];
-			if (requestData.ContainsKey("receiverID")) 			receiverID = (string)requestData["receiverID"];
-			if (requestData.ContainsKey("amount")) 				amount = (Int32)requestData["amount"];
-			if (requestData.ContainsKey("objectID")) 			objectID = (string)requestData["objectID"];
-			if (requestData.ContainsKey("objectName")) 			objectName = (string)requestData["objectName"];
-			if (requestData.ContainsKey("regionHandle")) 		regionHandle = (string)requestData["regionHandle"];
-			if (requestData.ContainsKey("transactionType")) 	transactionType = (Int32)requestData["transactionType"];
-			if (requestData.ContainsKey("description")) 		description = (string)requestData["description"];
+			if (requestData.ContainsKey("senderID")) 		senderID = (string)requestData["senderID"];
+			if (requestData.ContainsKey("receiverID")) 		receiverID = (string)requestData["receiverID"];
+			if (requestData.ContainsKey("amount")) 			amount = (Int32)requestData["amount"];
+			if (requestData.ContainsKey("objectID")) 		objectID = (string)requestData["objectID"];
+			if (requestData.ContainsKey("objectName")) 		objectName = (string)requestData["objectName"];
+			if (requestData.ContainsKey("regionHandle")) 	regionHandle = (string)requestData["regionHandle"];
+			if (requestData.ContainsKey("transactionType")) transactionType = (Int32)requestData["transactionType"];
+			if (requestData.ContainsKey("description")) 	description = (string)requestData["description"];
 
 			m_log.InfoFormat("[MONEY RPC]: handleForceTransaction: Force transfering money from {0} to {1}", senderID, receiverID);
 			int time = (int)((DateTime.Now.Ticks - TicksToEpoch) / 10000000);
@@ -1120,11 +1118,14 @@ namespace OpenSim.Grid.MoneyServer
 
 						if (balance==-1) // User not found
 						{
-							if (m_moneyDBService.addUser(clientUUID, m_defaultBalance, 0))
+							int default_balance = m_defaultBalance;
+							if (m_hg_avatar) default_balance = m_hg_defaultBalance;
+							//
+							if (m_moneyDBService.addUser(clientUUID, default_balance, 0))
 							{
 								responseData["success"] = true;
 								responseData["description"] = "add user successfully";
-								responseData["clientBalance"] = m_defaultBalance;
+								responseData["clientBalance"] = default_balance;
 							}
 							else
 							{
