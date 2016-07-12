@@ -42,7 +42,7 @@ namespace NSL.Network.XmlRpc
 		}
 
 
-		public XmlRpcResponse certSend(String url, X509Certificate2 clientCert, bool checkServerCert, Int32 timeout)
+		public XmlRpcResponse certSend(String url, X509Certificate2 myClientCert, bool checkServerCert, Int32 timeout)
 	  	{
 			m_log.InfoFormat("[MONEY NSL RPC]: XmlRpcResponse certSend: connect to {0}", url);
 
@@ -58,8 +58,8 @@ namespace NSL.Network.XmlRpc
 			request.Timeout = timeout;
 			request.UserAgent = "NSLXmlRpcRequest";
 
-			if (clientCert!=null) request.ClientCertificates.Add(clientCert);	// 自身の証明書
-			if (!checkServerCert) request.Headers.Add("NoVerifyCert", "true");	// 相手の証明書を検証しない
+			if (myClientCert!=null) request.ClientCertificates.Add(myClientCert);	// 自身の証明書
+			if (!checkServerCert)   request.Headers.Add("NoVerifyCert", "true");	// 相手の証明書を検証しない
 
 			Stream stream = request.GetRequestStream();
 			XmlTextWriter xml = new XmlTextWriter(stream, _encoding);

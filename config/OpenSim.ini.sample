@@ -10,12 +10,13 @@
     CurrencyServer = "https://jogrid.net:8008/"
     EconomyModule = DTLNSLMoneyModule
 
-    ;
-    ;ClientCertFilename = "jogrid_region.p12"
-    ;ClientCertPassword = ""
+	; CA
+    ;CheckServerCert = false
+    ;CACertFilename  = "cacert.crt"
 
-    ;CheckServerCert = true
-    ;CACertFilename  = "jogrid_cacert.crt"
+    ; Client Cert
+    ;ClientCertFilename = "region_cert.p12"
+    ;ClientCertPassword = ""
 
     ;
     ;SettlementByWeb   = false
