@@ -1705,8 +1705,13 @@ namespace OpenSim.Modules.Currency
 
 			if (!string.IsNullOrEmpty(m_moneyServURL))
 			{
+				// User Universal Identifer for HG User
+				AgentCircuitData agent = scene.AuthenticateHandler.GetAgentCircuitData(client.AgentId);
+				string universalID = Util.ProduceUserUniversalIdentifier(agent);
+
 				// Log off from the Money Server.   
 				Hashtable paramTable = new Hashtable();
+				paramTable["universalID"]           = universalID;
 				paramTable["clientUUID"] 			= client.AgentId.ToString();
 				paramTable["clientSessionID"] 		= client.SessionId.ToString();
 				paramTable["clientSecureSessionID"] = client.SecureSessionId.ToString();
@@ -1757,7 +1762,7 @@ namespace OpenSim.Modules.Currency
 				}
 			}
 
-
+			//
 			ArrayList arrayParams = new ArrayList();
 			arrayParams.Add(reqParams);
 			XmlRpcResponse moneyServResp = null;
