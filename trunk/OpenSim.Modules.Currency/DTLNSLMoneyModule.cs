@@ -1647,6 +1647,7 @@ namespace OpenSim.Modules.Currency
 					}
 				}
 
+				// User Universal Identifer for HG User
 				AgentCircuitData agent = scene.AuthenticateHandler.GetAgentCircuitData(client.AgentId);
 				string universalID = Util.ProduceUserUniversalIdentifier(agent);
 
