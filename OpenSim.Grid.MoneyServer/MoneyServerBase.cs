@@ -195,7 +195,7 @@ namespace OpenSim.Grid.MoneyServer
 
 				// [MoneyServer]
 				m_config   = moneyConfig.m_config.Configs["MoneyServer"];
-				DEAD_TIME  = m_config.GetInt   ("ExpiredTime", 120);
+				DEAD_TIME  = m_config.GetInt("ExpiredTime", 120);
 
 				// サーバ証明書
 				m_certFilename = m_config.GetString("ServerCertFilename", "");

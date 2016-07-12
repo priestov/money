@@ -57,23 +57,27 @@ namespace OpenSim.Grid.MoneyServer
 	{
 		private static readonly ILog m_log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
 
-		private int	   m_defaultBalance  = 0;
+		private int	   m_defaultBalance    = 0;
 		//
-		private bool   m_forceTransfer   = false;
-		private string m_bankerAvatar	 = "";
+		private bool   m_forceTransfer     = false;
+		private string m_bankerAvatar	   = "";
 
-		private bool   m_scriptSendMoney = false;
-		private string m_scriptAccessKey = "";
-		private string m_scriptIPaddress = "127.0.0.1";
+		private bool   m_scriptSendMoney   = false;
+		private string m_scriptAccessKey   = "";
+		private string m_scriptIPaddress   = "127.0.0.1";
 
-		private bool   m_checkServerCert = false;
-		private string m_cacertFilename  = "";
+		private bool   m_hg_avatar         = false;
+		private bool   m_hg_enable         = false;
+		private int	   m_hg_defaultBalance = 0;
 
-		private string m_certFilename	 = "";
-		private string m_certPassword	 = "";
-		private X509Certificate2 m_cert  = null;
+		private bool   m_checkServerCert   = false;
+		private string m_cacertFilename    = "";
 
-		private string m_sslCommonName   = "";
+		private string m_certFilename	   = "";
+		private string m_certPassword	   = "";
+		private X509Certificate2 m_cert    = null;
+
+		private string m_sslCommonName     = "";
 
 		private NSLCertificateVerify m_certVerify = new NSLCertificateVerify();		// サーバ認証用
 
@@ -140,6 +144,12 @@ namespace OpenSim.Grid.MoneyServer
 
 			m_scriptAccessKey = m_config.GetString("MoneyScriptAccessKey", "");
 			m_scriptIPaddress = m_config.GetString("MoneyScriptIPaddress", "127.0.0.1");
+
+			// Hyper Grid Avatar
+			string hgavatar = m_config.GetString ("enableHGAvatar", "false");
+			if (hgavatar.ToLower()=="true") m_hg_enable = true;
+			m_hg_enable  = m_config.GetBoolean("EnableHGAvatar", m_hg_enable);
+			m_hg_defaultBalance = m_config.GetInt("HGAvatarDefaultBalance", 0);
 
 			// クライアント証明書
 			m_certFilename = m_config.GetString("ClientCertFilename", "");
@@ -277,14 +287,16 @@ namespace OpenSim.Grid.MoneyServer
 			if (requestData.ContainsKey("userName")) 			  avatarName = (string)requestData["userName"];
 
 			//m_log.InfoFormat("[MONEY RPC]: handleClientLogin: client UUID is {0}", clientUUID);
+			m_log.InfoFormat("[MONEY RPC]: avatarName = {0}, universalID = {1}", avatarName, universalID);
 
 			// for HG User
-			if (String.IsNullOrEmpty(avatarName) && !String.IsNullOrEmpty(universalID)) {
+			if (m_hg_enable && String.IsNullOrEmpty(avatarName) && !String.IsNullOrEmpty(universalID)) {
 				UUID uuid;
 				string firstname, lastname, tmp;
 				Util.ParseUniversalUserIdentifier(universalID, out uuid, out tmp, out firstname, out lastname, out tmp);
-				avatarName = firstname + " " + lastname;
-				clientUUID = universalID;
+				avatarName  = firstname + " " + lastname;
+				clientUUID  = universalID;
+				m_hg_avatar = true;
 			}
 
 			//Update the session and secure session dictionary
@@ -306,6 +318,7 @@ namespace OpenSim.Grid.MoneyServer
 				else m_secureSessionDic[clientUUID] = secureID;
 			}
 
+			//
 			try
 			{
 				//m_log.InfoFormat("[MONEY RPC]: handleClientLogin: User {0} has logged in, getting balance...", clientUUID);
@@ -313,11 +326,14 @@ namespace OpenSim.Grid.MoneyServer
 				//add user if not exist. (if balance is -1, it means avatar is not exist)
 				if (balance==-1)
 				{
-					if (m_moneyDBService.addUser(clientUUID, m_defaultBalance, 0))
+					int default_balance = m_defaultBalance;
+					if (m_hg_avatar) default_balance = m_hg_defaultBalance;
+
+					if (m_moneyDBService.addUser(clientUUID, default_balance, 0))
 					{
 						responseData["success"] = true;
 						responseData["description"] = "add user successfully";
-						responseData["clientBalance"] = m_defaultBalance;
+						responseData["clientBalance"] = default_balance;
 					}
 					else
 					{
