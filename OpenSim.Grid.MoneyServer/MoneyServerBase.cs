@@ -59,7 +59,6 @@ namespace OpenSim.Grid.MoneyServer
 
 		private string connectionString = string.Empty;
 		private uint m_moneyServerPort = 8008;
-		//private string m_hostName = "localhost";
 
 		private string m_certFilename	 = "";
 		private string m_certPassword	 = "";
@@ -197,7 +196,6 @@ namespace OpenSim.Grid.MoneyServer
 				// [MoneyServer]
 				m_config   = moneyConfig.m_config.Configs["MoneyServer"];
 				DEAD_TIME  = m_config.GetInt   ("ExpiredTime", 120);
-				//m_hostName = m_config.GetString("HostName", "localhost");	// be not used
 
 				// サーバ証明書
 				m_certFilename = m_config.GetString("ServerCertFilename", "");
