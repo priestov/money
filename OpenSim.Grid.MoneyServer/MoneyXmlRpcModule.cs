@@ -292,7 +292,7 @@ namespace OpenSim.Grid.MoneyServer
 			if (requestData.ContainsKey("userName")) 			  avatarName = (string)requestData["userName"];
 
 			//m_log.InfoFormat("[MONEY RPC]: handleClientLogin: client UUID is {0}", clientUUID);
-			m_log.InfoFormat("[MONEY RPC]: avatarName = {0}, universalID = {1}", avatarName, universalID);
+			//m_log.InfoFormat("[MONEY RPC]: avatarName = {0}, universalID = {1}", avatarName, universalID);
 
 			// for HG User
 			if (m_hg_enable && String.IsNullOrEmpty(avatarName) && !String.IsNullOrEmpty(universalID)) {
@@ -884,7 +884,7 @@ namespace OpenSim.Grid.MoneyServer
 		/// <returns></returns>
 		public XmlRpcResponse handleMoveMoney(XmlRpcRequest request, IPEndPoint remoteClient)
 		{
-			//m_log.InfoFormat("[MONEY RPC]: handleMoveMoney:");
+			m_log.InfoFormat("[MONEY RPC]: handleMoveMoney:");
 
 			GetSSLCommonName(request);
 
@@ -963,13 +963,17 @@ namespace OpenSim.Grid.MoneyServer
 					return response;
 				}
 
+m_log.ErrorFormat("[MONEY RPC]: 111111111111111111111111111");
 				bool result = m_moneyDBService.addTransaction(transaction);
 				if (result) 
 				{
+m_log.ErrorFormat("[MONEY RPC]: 222222222222222222222222222");
 					if (amount>0 || (m_enableAmountZero&&amount==0))
 					{
+m_log.ErrorFormat("[MONEY RPC]: 333333333333333333333333333");
 						if (m_moneyDBService.DoTransfer(transactionUUID))
 						{
+m_log.ErrorFormat("[MONEY RPC]: 444444444444444444444444444");
 							transaction = m_moneyDBService.FetchTransaction(transactionUUID);
 							if (transaction!=null && transaction.Status==(int)Status.SUCCESS_STATUS)
 							{

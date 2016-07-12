@@ -830,6 +830,8 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 		/// <returns></returns>
 		public int getBalance(string userID)
 		{
+			if (userID==UUID.Zero.ToString()) return 999999999;	// System
+
 			string sql = string.Empty;
 			int retValue = -1;
 			sql += "SELECT balance FROM " + Table_of_Balances + " WHERE user = ?userid";
@@ -859,15 +861,17 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 		}
 
 
-		public bool updateBalance(string uuid, int amount)
+		public bool updateBalance(string userID, int amount)
 		{
+			if (userID==UUID.Zero.ToString()) return true;	// System
+
 			bool bRet = false;
 			string sql = string.Empty;
 
-			sql += "UPDATE " + Table_of_Balances + " SET balance = ?amount WHERE user = ?uuid;";
+			sql += "UPDATE " + Table_of_Balances + " SET balance = ?amount WHERE user = ?userID;";
 			MySqlCommand cmd = new MySqlCommand(sql, dbcon);
 			cmd.Parameters.AddWithValue("?amount", amount);
-			cmd.Parameters.AddWithValue("?uuid", uuid);
+			cmd.Parameters.AddWithValue("?userID", userID);
 
 			try
 			{
@@ -886,6 +890,8 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 
 		public bool addUser(string userID, int balance, int status)
 		{
+			if (userID==UUID.Zero.ToString()) return true;	// System
+
 			bool bRet = false;
 			string sql = string.Empty;
 
@@ -909,10 +915,12 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 		/// <param name="userID"></param>
 		private void addUser(string userID)
 		{
+			if (userID==UUID.Zero.ToString()) return;	// System
+
 			string sql = string.Empty;
 
 			sql += "INSERT INTO " + Table_of_Balances + " (`user`,`balance`,`status`) VALUES ";
-			sql += "(?userID,?balance,?status)";
+			sql = "(?userID,?balance,?status)";
 			MySqlCommand cmd = new MySqlCommand(sql, dbcon);
 
 			cmd.Parameters.AddWithValue("?userID",  userID);
@@ -934,18 +942,33 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 		{
 			bool bRet = false;
 			string sql = string.Empty;
+			MySqlCommand cmd = null;
 
-			sql += "BEGIN;";
-			sql += "UPDATE " + Table_of_Transactions + "," + Table_of_Balances;
-			sql += " SET senderBalance = balance - ?amount, "+ Table_of_Transactions + ".status = ?status, balance = balance - ?amount ";
-			sql += " WHERE UUID = ?tranid AND user = sender AND user = ?userid;"; 
-			sql += "COMMIT;";
-			MySqlCommand cmd = new MySqlCommand(sql, dbcon);
+			if (senderID==UUID.Zero.ToString())	// System
+			{
+				sql += "BEGIN;";
+				sql += "UPDATE " + Table_of_Transactions;
+				sql += " SET senderBalance = 0, status = ?status WHERE UUID = ?tranid;"; 
+				sql += "COMMIT;";
 
-			cmd.Parameters.AddWithValue("?amount", amount);
-			cmd.Parameters.AddWithValue("?userid", senderID);
-			cmd.Parameters.AddWithValue("?status", (int)Status.PENDING_STATUS);	//pending
-			cmd.Parameters.AddWithValue("?tranid", transactionID.ToString());
+				cmd = new MySqlCommand(sql, dbcon);
+				cmd.Parameters.AddWithValue("?status", (int)Status.PENDING_STATUS);	//pending
+				cmd.Parameters.AddWithValue("?tranid", transactionID.ToString());
+			}
+			else
+			{
+				sql += "BEGIN;";
+				sql += "UPDATE " + Table_of_Transactions + "," + Table_of_Balances;
+				sql += " SET senderBalance = balance - ?amount, "+ Table_of_Transactions + ".status = ?status, balance = balance - ?amount ";
+				sql += " WHERE UUID = ?tranid AND user = sender AND user = ?userid;"; 
+				sql += "COMMIT;";
+
+				cmd = new MySqlCommand(sql, dbcon);
+				cmd.Parameters.AddWithValue("?amount", amount);
+				cmd.Parameters.AddWithValue("?userid", senderID);
+				cmd.Parameters.AddWithValue("?status", (int)Status.PENDING_STATUS);	//pending
+				cmd.Parameters.AddWithValue("?tranid", transactionID.ToString());
+			}
 
 			try
 			{
@@ -973,18 +996,33 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 		{
 			string sql = string.Empty;
 			bool bRet  = false;
+			MySqlCommand cmd = null;
 
-			sql += "BEGIN;";
-			sql += "UPDATE " + Table_of_Transactions + "," + Table_of_Balances;
-			sql += " SET receiverBalance = balance + ?amount, " + Table_of_Transactions + ".status = ?status, balance = balance + ?amount ";
-			sql += " WHERE UUID = ?tranid AND user = receiver AND user = ?userid;"; 
-			sql += "COMMIT;";
-			MySqlCommand cmd = new MySqlCommand(sql, dbcon);
+			if (receiverID==UUID.Zero.ToString())	// System
+			{
+				sql += "BEGIN;";
+				sql += "UPDATE " + Table_of_Transactions;
+				sql += " SET receiverBalance = 0, status = ?status WHERE UUID = ?tranid;"; 
+				sql += "COMMIT;";
 
-			cmd.Parameters.AddWithValue("?amount", amount);
-			cmd.Parameters.AddWithValue("?userid", receiverID);
-			cmd.Parameters.AddWithValue("?status", (int)Status.SUCCESS_STATUS);	//Success
-			cmd.Parameters.AddWithValue("?tranid", transactionID.ToString());
+				cmd = new MySqlCommand(sql, dbcon);
+				cmd.Parameters.AddWithValue("?status", (int)Status.SUCCESS_STATUS);	//Success
+				cmd.Parameters.AddWithValue("?tranid", transactionID.ToString());
+			}
+			else 
+			{
+				sql += "BEGIN;";
+				sql += "UPDATE " + Table_of_Transactions + "," + Table_of_Balances;
+				sql += " SET receiverBalance = balance + ?amount, " + Table_of_Transactions + ".status = ?status, balance = balance + ?amount ";
+				sql += " WHERE UUID = ?tranid AND user = receiver AND user = ?userid;"; 
+				sql += "COMMIT;";
+
+				cmd = new MySqlCommand(sql, dbcon);
+				cmd.Parameters.AddWithValue("?amount", amount);
+				cmd.Parameters.AddWithValue("?userid", receiverID);
+				cmd.Parameters.AddWithValue("?status", (int)Status.SUCCESS_STATUS);	//Success
+				cmd.Parameters.AddWithValue("?tranid", transactionID.ToString());
+			}
 
 			try
 			{
