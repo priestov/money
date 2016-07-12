@@ -1237,8 +1237,8 @@ namespace OpenSim.Modules.Currency
 				{
 					UUID agentUUID   = UUID.Zero;
 					UUID receiptUUID = UUID.Zero; 	// UUID.Zero means System
-					if (requestParam.Contains("agentUUID")   UUID.TryParse((string)requestParam["agentUUID"], out agentUUID);
-					if (requestParam.Contains("receiptUUID") UUID.TryParse((string)requestParam["receiptUUID"], out receiptUUID);
+					if (requestParam.Contains("agentUUID"))   UUID.TryParse((string)requestParam["agentUUID"], out agentUUID);
+					if (requestParam.Contains("receiptUUID")) UUID.TryParse((string)requestParam["receiptUUID"], out receiptUUID);
 
 					if (requestParam.Contains("amount"))
 					{
