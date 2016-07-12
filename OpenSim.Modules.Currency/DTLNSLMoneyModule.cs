@@ -1237,23 +1237,20 @@ namespace OpenSim.Modules.Currency
 				{
 					UUID agentUUID   = UUID.Zero;
 					UUID receiptUUID = UUID.Zero; 	// UUID.Zero means System
-					UUID.TryParse((string)requestParam["agentUUID"], out agentUUID);
-					if (requestParam.Contains("receiptUUID")) UUID.TryParse((string)requestParam["receiptUUID"], out receiptUUID);
+					if (requestParam.Contains("agentUUID")   UUID.TryParse((string)requestParam["agentUUID"], out agentUUID);
+					if (requestParam.Contains("receiptUUID") UUID.TryParse((string)requestParam["receiptUUID"], out receiptUUID);
 
-					if (agentUUID!=UUID.Zero)
+					if (requestParam.Contains("amount"))
 					{
-						if (requestParam.Contains("amount"))
-						{
-							int amount  = (int)requestParam["amount"];
-							string secretCode = (string)requestParam["secretAccessCode"];
-							string scriptIP   = remoteClient.Address.ToString();
+						int amount  = (int)requestParam["amount"];
+						string secretCode = (string)requestParam["secretAccessCode"];
+						string scriptIP   = remoteClient.Address.ToString();
 
-							MD5 md5 = MD5.Create();
-							byte[] code = md5.ComputeHash(ASCIIEncoding.Default.GetBytes(secretCode + "_" + scriptIP));
-							string hash = BitConverter.ToString(code).ToLower().Replace("-","");
-							//m_log.InfoFormat("[MONEY]: MoveMoneyHandler: SecretCode: {0} + {1} = {2}", secretCode, scriptIP, hash);
-							ret = MoveMoneyFromTo(agentUUID, receiptUUID, amount, hash);
-						}
+						MD5 md5 = MD5.Create();
+						byte[] code = md5.ComputeHash(ASCIIEncoding.Default.GetBytes(secretCode + "_" + scriptIP));
+						string hash = BitConverter.ToString(code).ToLower().Replace("-","");
+						//m_log.InfoFormat("[MONEY]: MoveMoneyHandler: SecretCode: {0} + {1} = {2}", secretCode, scriptIP, hash);
+						ret = MoveMoneyFromTo(agentUUID, receiptUUID, amount, hash);
 					}
 					else {
 						m_log.ErrorFormat("[MONEY]: MoveMoneyHandler: amount is missed");
