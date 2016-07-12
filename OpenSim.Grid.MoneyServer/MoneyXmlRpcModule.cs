@@ -981,12 +981,14 @@ namespace OpenSim.Grid.MoneyServer
 									if (receiverInfo==null) message = string.Format(m_BalanceMessageMoveFrom, amount, "SYSTEM", "");
 									else                    message = string.Format(m_BalanceMessageMoveFrom, amount, receiverInfo.Avatar, "");
 									UpdateBalance(transaction.Sender, message);
+									m_log.InfoFormat("[MONEY RPC]: handleMoveMoney: Update balance of {0}. Message = {1}", transaction.Sender, message);
 								}
 								if (receiverInfo!=null)
 								{
 									if (senderInfo==null) message = string.Format(m_BalanceMessageMoveTo, amount, "SYSTEM", "");
 									else                  message = string.Format(m_BalanceMessageMoveTo, amount, senderInfo.Avatar, "");
 									UpdateBalance(transaction.Receiver, message);
+									m_log.InfoFormat("[MONEY RPC]: handleMoveMoney: Update balance of {0}. Message = {1}", transaction.Receiver, message);
 								}
 								responseData["success"] = true;
 							}
@@ -1443,7 +1445,7 @@ namespace OpenSim.Grid.MoneyServer
 				UserInfo user = m_moneyDBService.FetchUserInfo(userID);
 				if (user!=null) {
 					genericCurrencyXMLRPCRequest(requestTable, "UpdateBalance", user.SimIP);
-					//m_log.InfoFormat("[MONEY RPC]: UpdateBalance: Sended UpdateBalance Request to {0}", user.SimIP.ToString());
+					m_log.InfoFormat("[MONEY RPC]: UpdateBalance: Sended UpdateBalance Request to {0}", user.SimIP.ToString());
 				}
 			}
 		}
