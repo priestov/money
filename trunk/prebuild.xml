@@ -94,7 +94,7 @@
       <Reference name="log4net.dll" path="../../bin"/>
       <Reference name="XMLRPC.dll" path="../../bin"/>
       <Reference name="Mono.Addins.dll" path="../../bin"/>
-      <Reference name="Mono.Security.dll" path=".."/>
+      <Reference name="Mono.Security.dll" path="../../bin">
       <Reference name="OpenMetaverseTypes.dll" path="../../bin"/>
       <Reference name="OpenMetaverse.dll" path="../../bin"/>
       <Reference name="HttpServer_OpenSim.dll" path="../../bin"/>
