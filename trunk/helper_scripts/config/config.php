@@ -7,8 +7,9 @@
 
 // Please set this hepler script URL and directory
 
-if (!defined('ENV_HELPER_URL'))  define('ENV_HELPER_URL',  'http://opensim.tuis.ac.jp/currency/helper/');
-if (!defined('ENV_HELPER_PATH')) define('ENV_HELPER_PATH', '/var/www/html/currency/helper/');
+if (!defined('ENV_HELPER_URL'))  define('ENV_HELPER_URL',  'http://opensim.tuis.ac.jp/helper_scripts/helper');
+//if (!defined('ENV_HELPER_PATH')) define('ENV_HELPER_PATH', '/var/www/html/helper_scripts/helper');
+if (!defined('ENV_HELPER_PATH')) define('ENV_HELPER_PATH', '/home/apache/htdocs/helper_scripts/helper');
 
 
 //////////////////////////////////////////////////////////////////////////////////i
@@ -32,8 +33,6 @@ define('CURRENCY_SCRIPT_KEY', '123456789');
 // Please set same keys with at [Groups] section in OpenSim.ini (case of Aurora-Sim, it is Groups.ini)
 define('XMLGROUP_RKEY', '1234');	// Read Key
 define('XMLGROUP_WKEY', '1234');	// Write key
-
-
 
 
 //////////////////////////////////////////////////////////////////////////////////
@@ -111,6 +110,5 @@ define('SEARCH_CLASSIFIEDS_TBL',	PROFILE_CLASSIFIEDS_TBL);
 
 
 //
-if (!defined('ENV_READED_CONFIG')) define('ENV_READED_CONFIG', 'YES');
+if (!defined('ENV_READ_CONFIG')) define('ENV_READ_CONFIG', 'YES');
 
-?>
