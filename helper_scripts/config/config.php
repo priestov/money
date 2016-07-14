@@ -10,6 +10,7 @@
 if (!defined('ENV_HELPER_URL'))  define('ENV_HELPER_URL',  'http://opensim.tuis.ac.jp/currency/helper/');
 if (!defined('ENV_HELPER_PATH')) define('ENV_HELPER_PATH', '/var/www/html/currency/helper/');
 
+
 //////////////////////////////////////////////////////////////////////////////////i
 // Valiables for OpenSim
 
