@@ -219,22 +219,22 @@ fi  # ALL_SCRIPT
 
 if [ "$ONLY_DWNLD" = "NO" ]; then
     if   [ "$SYMBL_LINK" = "YES" ]; then
-        ln -sf ../config/cron_search.php helper/cron_search.php
-        ln -sf ../config/env_define.php include/env_define.php
-        ln -sf ../config/env_lib.php include/env_lib.php
-        ln -sf ../config/index.html helper/index.html
-        ln -sf ../config/index.html include/index.html
+        ln -sf ../scripts/cron_search.php helper/cron_search.php
+        ln -sf ../scripts/env_define.php include/env_define.php
+        ln -sf ../scripts/env_lib.php include/env_lib.php
+        ln -sf ../scripts/index.html helper/index.html
+        ln -sf ../scripts/index.html include/index.html
         if [ ! -f include/config.php ]; then 
-            ln -sf ../config/config.php include/config.php
+            ln -sf ../scripts/config.php include/config.php
         fi
     elif [ "$SYMBL_LINK" = "NO" ]; then
-        cp -puf config/cron_search.php helper/cron_search.php
-        cp -puf config/env_define.php include/env_define.php
-        cp -puf config/env_lib.php include/env_lib.php
-        cp -puf config/index.html helper/index.html
-        cp -puf config/index.html include/index.html
+        cp -puf scripts/cron_search.php helper/cron_search.php
+        cp -puf scripts/env_define.php include/env_define.php
+        cp -puf scripts/env_lib.php include/env_lib.php
+        cp -puf scripts/index.html helper/index.html
+        cp -puf scripts/index.html include/index.html
         if [ ! -f include/config.php ]; then 
-            cp -puf config/config.php include/config.php
+            cp -puf scripts/config.php include/config.php
         fi
     fi
 fi
