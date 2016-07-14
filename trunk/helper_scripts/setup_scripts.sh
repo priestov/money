@@ -186,13 +186,13 @@ fi
 
 if [ "$ONLY_DWNLD" = "NO" ]; then
     if   [ "$SYMBL_LINK" = "YES" ]; then
-        cp -puf opensim.modules/Messaging/php/mute.php helper/mute.php
-        cp -puf opensim.modules/Profile/php/profile.php  helper/profile.php
-        cp -puf opensim.modules/Profile/php/profile_config.php include/profile_config.php
-        cp -puf opensim.modules/Search/php/parser.php helper/parser.php
-        cp -puf opensim.modules/Search/php/query.php  helper/query.php
-        cp -puf opensim.modules/Search/php/register.php helper/register.php
-        cp -puf opensim.modules/Search/php/search_config.php include/search_config.php
+        ln  opensim.modules/Messaging/php/mute.php helper/mute.php
+        ln  opensim.modules/Profile/php/profile.php  helper/profile.php
+        ln  opensim.modules/Profile/php/profile_config.php include/profile_config.php
+        ln  opensim.modules/Search/php/parser.php helper/parser.php
+        ln  opensim.modules/Search/php/query.php  helper/query.php
+        ln  opensim.modules/Search/php/register.php helper/register.php
+        ln  opensim.modules/Search/php/search_config.php include/search_config.php
         ln -sf  ../opensim.modules/Messaging/sql/mute.sql sql/mute.sql
         ln -sf  ../opensim.modules/Profile/sql/osprofile.sql sql/osprofile.sql
         ln -sf  ../opensim.modules/Search/sql/ossearch.sql sql/ossearch.sql
