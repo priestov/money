@@ -32,4 +32,5 @@ fi
 
 rm -rf helper
 rm -rf include
+rm -rf sql
 

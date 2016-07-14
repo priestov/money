@@ -50,8 +50,9 @@ if [ "$SYMBL_LINK" = "NO" ]; then
     rm -rf include
 fi
 
-mkdir -p helper/sql
+mkdir -p helper
 mkdir -p include
+mkdir -p sql
 
 if [ "$SYMBL_LINK" = "NO" ]; then
     if [ -f 'config.php.temp.$$$' -a ! -L 'config.php.temp.$$$' ]; then 
@@ -102,7 +103,7 @@ fi
 if [ "$ONLY_DWNLD" = "NO" ]; then
     if   [ "$SYMBL_LINK" = "YES" ]; then
         ln -sf ../flotsam_XmlRpcGroup/xmlgroups.php helper/xmlgroups.php
-        ln -sf ../flotsam_XmlRpcGroup/xmlgroups_config.php helper/xmlgroups_config.php
+        ln -sf ../flotsam_XmlRpcGroup/xmlgroups_config.php include/xmlgroups_config.php
         ln -sf ../flotsam_XmlRpcGroup/xmlrpc.php helper/xmlrpc.php
         ln -sf ../flotsam_XmlRpcGroup/xmlrpci.php helper/xmlrpci.php
         if [ -d helper/phpxmlrpclib ]; then
@@ -112,7 +113,7 @@ if [ "$ONLY_DWNLD" = "NO" ]; then
         ln -sf ../../flotsam_XmlRpcGroup/sql/groups.sql helper/sql/groups.sql
     elif [ "$SYMBL_LINK" = "NO" ]; then
         cp -puf flotsam_XmlRpcGroup/xmlgroups.php helper/xmlgroups.php
-        cp -puf flotsam_XmlRpcGroup/xmlgroups_config.php helper/xmlgroups_config.php
+        cp -puf flotsam_XmlRpcGroup/xmlgroups_config.php include/xmlgroups_config.php
         cp -puf flotsam_XmlRpcGroup/xmlrpc.php helper/xmlrpc.php
         cp -puf flotsam_XmlRpcGroup/xmlrpci.php helper/xmlrpci.php
         cp -Rpdf flotsam_XmlRpcGroup/phpxmlrpclib helper/phpxmlrpclib
@@ -185,27 +186,27 @@ fi
 
 if [ "$ONLY_DWNLD" = "NO" ]; then
     if   [ "$SYMBL_LINK" = "YES" ]; then
-        ln -sf ../opensim.modules/Messaging/php/mute.php helper/mute.php
-        ln -sf ../opensim.modules/Profile/php/profile.php  helper/profile.php
-        ln -sf ../opensim.modules/Profile/php/profile_config.php helper/profile_config.php
-        ln -sf ../opensim.modules/Search/php/parser.php helper/parser.php
-        ln -sf ../opensim.modules/Search/php/query.php  helper/query.php
-        ln -sf ../opensim.modules/Search/php/register.php helper/register.php
-        ln -sf ../opensim.modules/Search/php/search_config.php helper/search_config.php
-        ln -sf ../../opensim.modules/Messaging/sql/mute.sql helper/sql/mute.sql
-        ln -sf ../../opensim.modules/Profile/sql/osprofile.sql helper/sql/osprofile.sql
-        ln -sf ../../opensim.modules/Search/sql/ossearch.sql  helper/sql/ossearch.sql
-   elif [ "$SYMBL_LINK" = "NO" ]; then
         cp -puf opensim.modules/Messaging/php/mute.php helper/mute.php
         cp -puf opensim.modules/Profile/php/profile.php  helper/profile.php
-        cp -puf opensim.modules/Profile/php/profile_config.php helper/profile_config.php
+        cp -puf opensim.modules/Profile/php/profile_config.php include/profile_config.php
         cp -puf opensim.modules/Search/php/parser.php helper/parser.php
         cp -puf opensim.modules/Search/php/query.php  helper/query.php
         cp -puf opensim.modules/Search/php/register.php helper/register.php
-        cp -puf opensim.modules/Search/php/search_config.php helper/search_config.php
-        cp -puf opensim.modules/Messaging/sql/mute.sql helper/sql/mute.sql
-        cp -puf opensim.modules/Profile/sql/osprofile.sql helper/sql/osprofile.sql
-        cp -puf opensim.modules/Search/sql/ossearch.sql  helper/sql/ossearch.sql
+        cp -puf opensim.modules/Search/php/search_config.php include/search_config.php
+        ln -sf  ../opensim.modules/Messaging/sql/mute.sql sql/mute.sql
+        ln -sf  ../opensim.modules/Profile/sql/osprofile.sql sql/osprofile.sql
+        ln -sf  ../opensim.modules/Search/sql/ossearch.sql sql/ossearch.sql
+   elif [ "$SYMBL_LINK" = "NO" ]; then
+        cp -puf opensim.modules/Messaging/php/mute.php helper/mute.php
+        cp -puf opensim.modules/Profile/php/profile.php  helper/profile.php
+        cp -puf opensim.modules/Profile/php/profile_config.php include/profile_config.php
+        cp -puf opensim.modules/Search/php/parser.php helper/parser.php
+        cp -puf opensim.modules/Search/php/query.php  helper/query.php
+        cp -puf opensim.modules/Search/php/register.php helper/register.php
+        cp -puf opensim.modules/Search/php/search_config.php include/search_config.php
+        cp -puf opensim.modules/Messaging/sql/mute.sql sql/mute.sql
+        cp -puf opensim.modules/Profile/sql/osprofile.sql sql/osprofile.sql
+        cp -puf opensim.modules/Search/sql/ossearch.sql  sql/ossearch.sql
     fi
 fi
 
@@ -218,7 +219,7 @@ fi  # ALL_SCRIPT
 
 if [ "$ONLY_DWNLD" = "NO" ]; then
     if   [ "$SYMBL_LINK" = "YES" ]; then
-        ln -sf ../config/cron_search.php include/cron_search.php
+        ln -sf ../config/cron_search.php helper/cron_search.php
         ln -sf ../config/env_define.php include/env_define.php
         ln -sf ../config/env_lib.php include/env_lib.php
         ln -sf ../config/index.html helper/index.html
@@ -227,7 +228,7 @@ if [ "$ONLY_DWNLD" = "NO" ]; then
             ln -sf ../config/config.php include/config.php
         fi
     elif [ "$SYMBL_LINK" = "NO" ]; then
-        cp -puf config/cron_search.php include/cron_search.php
+        cp -puf config/cron_search.php helper/cron_search.php
         cp -puf config/env_define.php include/env_define.php
         cp -puf config/env_lib.php include/env_lib.php
         cp -puf config/index.html helper/index.html
