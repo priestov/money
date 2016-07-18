@@ -8,19 +8,33 @@
 if (!defined('ENV_READ_CONFIG')) require_once(realpath(dirname(__FILE__).'/config.php'));
 if ( defined('ENV_READ_DEFINE')) return;
 
-require_once(realpath(ENV_HELPER_PATH.'/../include/profile_config.php'));
-require_once(realpath(ENV_HELPER_PATH.'/../include/search_config.php'));
-require_once(realpath(ENV_HELPER_PATH.'/../include/xmlgroups_config.php'));
-
 
 
 //////////////////////////////////////////////////////////////////////////////////
+// HELPER DB
+if (defined('HELPER_DB_HOST') and HELPER_DB_HOST!='') {
+    define('CMS_DB_HOST',   HELPER_DB_HOST);
+    define('CMS_DB_NAME',   HELPER_DB_NAME);
+    define('CMS_DB_USER',   HELPER_DB_USER);
+    define('CMS_DB_PASS',   HELPER_DB_PASS);
+    define('CMS_DB_MYSQLI', HELPER_DB_MYSQLI);
+}
+
 // Offline Message
-$OFFLINE_DB_HOST   = OPENSIM_DB_HOST;
-$OFFLINE_DB_NAME   = OPENSIM_DB_NAME;
-$OFFLINE_DB_USER   = OPENSIM_DB_USER;
-$OFFLINE_DB_PASS   = OPENSIM_DB_PASS;
-$OFFLINE_DB_MYSQLI = OPENSIM_DB_MYSQLI;
+if (defined('HELPER_DB_HOST') and HELPER_DB_HOST!='') {
+    $OFFLINE_DB_HOST   = HELPER_DB_HOST;
+    $OFFLINE_DB_NAME   = HELPER_DB_NAME;
+    $OFFLINE_DB_USER   = HELPER_DB_USER;
+    $OFFLINE_DB_PASS   = HELPER_DB_PASS;
+    $OFFLINE_DB_MYSQLI = HELPER_DB_MYSQLI;
+}
+else {
+    $OFFLINE_DB_HOST   = OPENSIM_DB_HOST;
+    $OFFLINE_DB_NAME   = OPENSIM_DB_NAME;
+    $OFFLINE_DB_USER   = OPENSIM_DB_USER;
+    $OFFLINE_DB_PASS   = OPENSIM_DB_PASS;
+    $OFFLINE_DB_MYSQLI = OPENSIM_DB_MYSQLI;
+}
 
 // MuteList
 $MUTE_DB_HOST      = $OFFLINE_DB_HOST;
@@ -29,6 +43,13 @@ $MUTE_DB_USER      = $OFFLINE_DB_USER;
 $MUTE_DB_PASS      = $OFFLINE_DB_PASS;
 $MUTE_DB_MYSQLI    = $OFFLINE_DB_MYSQLI;
 
+
+
+//////////////////////////////////////////////////////////////////////////////////
+// for Optional Modules
+require_once(realpath(ENV_HELPER_PATH.'/../include/xmlgroups_config.php'));
+require_once(realpath(ENV_HELPER_PATH.'/../include/profile_config.php'));
+require_once(realpath(ENV_HELPER_PATH.'/../include/search_config.php'));
 
 
 //////////////////////////////////////////////////////////////////////////////////
@@ -72,7 +93,6 @@ if (defined('SEARCH_ALLPARCELS_TBL_BASE')) {
 		define('SEARCH_CLASSIFIEDS_TBL',PROFILE_CLASSIFIEDS_TBL);
 	}
 }
-
 
 
 //
