@@ -110,14 +110,14 @@ if [ "$ONLY_DWNLD" = "NO" ]; then
             rm -rf helper/phpxmlrpclib
         fi
         ln -sf ../flotsam_XmlRpcGroup/phpxmlrpclib helper/phpxmlrpclib
-        ln -sf ../../flotsam_XmlRpcGroup/sql/groups.sql helper/sql/groups.sql
+        ln -sf ../../flotsam_XmlRpcGroup/sql/groups.sql sql/groups.sql
     elif [ "$SYMBL_LINK" = "NO" ]; then
         cp -puf flotsam_XmlRpcGroup/xmlgroups.php helper/xmlgroups.php
         cp -puf flotsam_XmlRpcGroup/xmlgroups_config.php include/xmlgroups_config.php
         cp -puf flotsam_XmlRpcGroup/xmlrpc.php helper/xmlrpc.php
         cp -puf flotsam_XmlRpcGroup/xmlrpci.php helper/xmlrpci.php
         cp -Rpdf flotsam_XmlRpcGroup/phpxmlrpclib helper/phpxmlrpclib
-        cp -puf flotsam_XmlRpcGroup/sql/groups.sql helper/sql/groups.sql
+        cp -puf flotsam_XmlRpcGroup/sql/groups.sql sql/groups.sql
     fi
 fi
 
