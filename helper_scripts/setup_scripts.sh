@@ -42,7 +42,7 @@ if [ "$SHOW_HELP" = "YES" ]; then
 fi
 
 
-if [ -f include/config.php -a ! -L include/config.php ]; then 
+if [ -f include/config.php ]; then 
     mv -f include/config.php 'config.php.temp.$$$'
 fi
 rm -rf helper
@@ -52,7 +52,7 @@ mkdir -p helper
 mkdir -p include
 mkdir -p sql
 
-if [ -f 'config.php.temp.$$$' -a ! -L 'config.php.temp.$$$' ]; then 
+if [ -f 'config.php.temp.$$$' ]; then 
     mv -f 'config.php.temp.$$$' include/config.php
 fi
 
