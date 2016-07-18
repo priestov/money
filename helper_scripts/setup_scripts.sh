@@ -42,22 +42,18 @@ if [ "$SHOW_HELP" = "YES" ]; then
 fi
 
 
-if [ "$SYMBL_LINK" = "NO" ]; then
-    if [ -f include/config.php -a ! -L include/config.php ]; then 
-        mv -f include/config.php 'config.php.temp.$$$'
-    fi
-    rm -rf helper
-    rm -rf include
+if [ -f include/config.php -a ! -L include/config.php ]; then 
+    mv -f include/config.php 'config.php.temp.$$$'
 fi
+rm -rf helper
+rm -rf include
 
 mkdir -p helper
 mkdir -p include
 mkdir -p sql
 
-if [ "$SYMBL_LINK" = "NO" ]; then
-    if [ -f 'config.php.temp.$$$' -a ! -L 'config.php.temp.$$$' ]; then 
-        mv -f 'config.php.temp.$$$' include/config.php
-    fi
+if [ -f 'config.php.temp.$$$' -a ! -L 'config.php.temp.$$$' ]; then 
+    mv -f 'config.php.temp.$$$' include/config.php
 fi
 
 
@@ -224,7 +220,7 @@ if [ "$ONLY_DWNLD" = "NO" ]; then
         ln -sf ../scripts/index.html helper/index.html
         ln -sf ../scripts/index.html include/index.html
         if [ ! -f include/config.php ]; then 
-            ln -sf ../scripts/config.php include/config.php
+            cp -puf scripts/config.php include/config.php
         fi
     elif [ "$SYMBL_LINK" = "NO" ]; then
         cp -puf scripts/cron_search.php helper/cron_search.php
