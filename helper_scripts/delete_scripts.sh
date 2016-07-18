@@ -30,7 +30,17 @@ if [ -d opensim.modules ]; then
     rm -rf opensim.modules
 fi
 
+if [ -f include/config.php ]; then
+    mv -f include/config.php 'config.php.temp.$$$'
+fi
+
 rm -rf helper
 rm -rf include
 rm -rf sql
+
+mkdir -p include
+
+if [ -f 'config.php.temp.$$$'  ]; then
+    mv -f 'config.php.temp.$$$' include/config.php
+fi
 
