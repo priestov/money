@@ -6,18 +6,27 @@
 // Please set this hepler script URL and directory
 
 if (!defined('ENV_HELPER_URL'))  define('ENV_HELPER_URL',  'http://opensim.tuis.ac.jp/helper_scripts/helper');
-if (!defined('ENV_HELPER_PATH')) define('ENV_HELPER_PATH', '/var/www/html/helper_scripts/helper');
+//if (!defined('ENV_HELPER_PATH')) define('ENV_HELPER_PATH', '/var/www/html/helper_scripts/helper');
+if (!defined('ENV_HELPER_PATH')) define('ENV_HELPER_PATH', '/home/apache/htdocs/helper_scripts/helper');
 
 
 //////////////////////////////////////////////////////////////////////////////////i
 // Valiables for OpenSim
 
-// Please set MySQL DB access information
-define('OPENSIM_DB_HOST',  'localhost');
+// Please set MySQL DB access information for OpenSim
+define('OPENSIM_DB_HOST',  '202.26.148.241');
 define('OPENSIM_DB_NAME',  'opensim');
 define('OPENSIM_DB_USER',  'OpensimUser');
 define('OPENSIM_DB_PASS',  'OpensimPass');
 define('OPENSIM_DB_MYSQLI', 1);
+
+// Please set MySQL DB access information for Helper Scripts
+define('HELPER_DB_HOST',  'localhost');
+define('HELPER_DB_NAME',  'opensim_op');
+define('HELPER_DB_USER',  'opensim_usr');
+define('HELPER_DB_PASS',  'opensim_pass');
+define('HELPER_DB_MYSQLI', 1);
+
 
 // for Money Server
 define('USE_CURRENCY_SERVER', 1);
@@ -36,6 +45,8 @@ define('OPENSIM_PG_ONLY', 0);
 
 define('USE_UTC_TIME',	  0);
 define('DATE_FORMAT', 'd.m.Y - H:i');
+
+define('LOGINPAGE_SCRIPT', 1);
 
 
 //////////////////////////////////////////////////////////////////////////////////
