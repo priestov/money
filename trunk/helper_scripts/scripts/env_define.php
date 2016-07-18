@@ -11,17 +11,9 @@ if ( defined('ENV_READ_DEFINE')) return;
 
 
 //////////////////////////////////////////////////////////////////////////////////
-// HELPER DB
-if (defined('HELPER_DB_HOST') and HELPER_DB_HOST!='') {
-    define('CMS_DB_HOST',   HELPER_DB_HOST);
-    define('CMS_DB_NAME',   HELPER_DB_NAME);
-    define('CMS_DB_USER',   HELPER_DB_USER);
-    define('CMS_DB_PASS',   HELPER_DB_PASS);
-    define('CMS_DB_MYSQLI', HELPER_DB_MYSQLI);
-}
 
 // Offline Message
-if (defined('HELPER_DB_HOST') and HELPER_DB_HOST!='') {
+if (defined('HELPER_DB_NAME') and HELPER_DB_NAME!='') {
     $OFFLINE_DB_HOST   = HELPER_DB_HOST;
     $OFFLINE_DB_NAME   = HELPER_DB_NAME;
     $OFFLINE_DB_USER   = HELPER_DB_USER;
@@ -47,9 +39,11 @@ $MUTE_DB_MYSQLI    = $OFFLINE_DB_MYSQLI;
 
 //////////////////////////////////////////////////////////////////////////////////
 // for Optional Modules
+
 require_once(realpath(ENV_HELPER_PATH.'/../include/xmlgroups_config.php'));
 require_once(realpath(ENV_HELPER_PATH.'/../include/profile_config.php'));
 require_once(realpath(ENV_HELPER_PATH.'/../include/search_config.php'));
+
 
 
 //////////////////////////////////////////////////////////////////////////////////
