@@ -8,6 +8,10 @@
 if (!defined('ENV_READ_CONFIG')) require_once(realpath(dirname(__FILE__).'/config.php'));
 if ( defined('ENV_READ_DEFINE')) return;
 
+require_once(realpath(ENV_HELPER_PATH.'/../include/xmlgroups_config.php'));
+require_once(realpath(ENV_HELPER_PATH.'/../include/profile_config.php'));
+require_once(realpath(ENV_HELPER_PATH.'/../include/search_config.php'));
+
 
 
 //////////////////////////////////////////////////////////////////////////////////
@@ -34,15 +38,6 @@ $MUTE_DB_NAME      = $OFFLINE_DB_NAME;
 $MUTE_DB_USER      = $OFFLINE_DB_USER;
 $MUTE_DB_PASS      = $OFFLINE_DB_PASS;
 $MUTE_DB_MYSQLI    = $OFFLINE_DB_MYSQLI;
-
-
-
-//////////////////////////////////////////////////////////////////////////////////
-// for Optional Modules
-
-require_once(realpath(ENV_HELPER_PATH.'/../include/xmlgroups_config.php'));
-require_once(realpath(ENV_HELPER_PATH.'/../include/profile_config.php'));
-require_once(realpath(ENV_HELPER_PATH.'/../include/search_config.php'));
 
 
 
