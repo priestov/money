@@ -13,6 +13,15 @@ require_once(realpath(ENV_HELPER_PATH.'/../include/mysql.func.php'));
 require_once(realpath(ENV_HELPER_PATH.'/../include/opensim.mysql.php'));
 
 
+//
+if (HELPER_DB_HOST!='') {
+	define('CMS_DB_HOST',   HELPER_DB_HOST);
+	define('CMS_DB_NAME',   HELPER_DB_NAME);
+	define('CMS_DB_USER',   HELPER_DB_USER);
+	define('CMS_DB_PASS',   HELPER_DB_PASS);
+	define('CMS_DB_MYSQLI', HELPER_DB_MYSQLI);
+}
+
 
 /////////////////////////////////////////////////////////////////////////////////
 // Functions
@@ -47,7 +56,7 @@ if (isset($LOGINPAGE) and $LOGINPAGE)
 
 	$BOX_TITLE        = 'Attention';
 	$BOX_COLOR        = 'red';
-	$BOX_INFOTEXT     = 'please rewrite env_interface.php';
+	$BOX_INFOTEXT     = 'please rewrite env_lib.php';
 
 	$GRID_NAME        = 'My Grid';
 	$REGION_TTL       = 'My Regions';
