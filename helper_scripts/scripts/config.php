@@ -5,8 +5,7 @@
 
 // Please set this hepler script directory
 
-//if (!defined('ENV_HELPER_PATH')) define('ENV_HELPER_PATH', '/var/www/html/helper_scripts/helper');
-if (!defined('ENV_HELPER_PATH')) define('ENV_HELPER_PATH', '/home/apache/htdocs/helper_scripts/helper');
+if (!defined('ENV_HELPER_PATH')) define('ENV_HELPER_PATH', '/var/www/html/helper_scripts/helper');
 
 
 //////////////////////////////////////////////////////////////////////////////////i
@@ -20,10 +19,11 @@ define('OPENSIM_DB_PASS',  'OpensimPass');
 define('OPENSIM_DB_MYSQLI', 1);
 
 // Please set MySQL DB access information for Helper Scripts
-define('HELPER_DB_HOST',  'localhost');
-define('HELPER_DB_NAME',  'opensim_op');
-define('HELPER_DB_USER',  'opensim_user');
-define('HELPER_DB_PASS',  'opensim_pass');
+// If DB is the same as the DB of OpenSim, you may not set these
+define('HELPER_DB_HOST',  '');
+define('HELPER_DB_NAME',  '');
+define('HELPER_DB_USER',  '');
+define('HELPER_DB_PASS',  '');
 define('HELPER_DB_MYSQLI', 1);
 
 
@@ -36,10 +36,8 @@ define('CURRENCY_SCRIPT_KEY', '123456789');
 
 // Group Module Access Keys
 // Please set same keys with at [Groups] section in OpenSim.ini
-//define('XMLGROUP_RKEY',  '1234');	// Read Key
-//define('XMLGROUP_WKEY',  '1234');	// Write key
-define('XMLGROUP_RKEY',  '68000');	// Read Key
-define('XMLGROUP_WKEY',  '68030');	// Write key
+define('XMLGROUP_RKEY',  '1234');	// Read Key
+define('XMLGROUP_WKEY',  '1234');	// Write key
 
 //
 define('OPENSIM_PG_ONLY', 0);
