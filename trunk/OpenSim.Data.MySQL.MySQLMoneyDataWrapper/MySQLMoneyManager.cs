@@ -36,6 +36,7 @@ using log4net;
 using MySql.Data.MySqlClient;
 using OpenMetaverse;
 
+
 namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 {
 	public class MySQLMoneyManager:IMoneyManager
