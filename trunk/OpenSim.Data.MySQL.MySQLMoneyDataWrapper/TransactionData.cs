@@ -178,7 +178,7 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
         string m_avatarName = string.Empty;
         string m_passwordHash = string.Empty;
         int    m_avatarClass = (int)AvatarClass.LOCAL_AVATAR;
-		string m_universalID = string.Empty;
+		string m_serverURL = string.Empty;
 
         public string UserID
         {
@@ -210,10 +210,10 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
             set { m_avatarClass = value; }
         }
 
-        public string Universal
+        public string ServerURL
         {
-            get { return m_universalID; }
-            set { m_universalID = value; }
+            get { return m_serverURL; }
+            set { m_serverURL = value; }
 		}
     }
 }

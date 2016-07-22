@@ -292,32 +292,33 @@ namespace OpenSim.Grid.MoneyServer
 
 			string firstName = string.Empty;
 			string lastName  = string.Empty;
-			string serverUrl = string.Empty;
+			string serverURL = string.Empty;
 			string securePsw = string.Empty;
 			//
 			if (!String.IsNullOrEmpty(universalID)) {
 				UUID uuid;
-				Util.ParseUniversalUserIdentifier(universalID, out uuid, out serverUrl, out firstName, out lastName, out securePsw);
+				Util.ParseUniversalUserIdentifier(universalID, out uuid, out serverURL, out firstName, out lastName, out securePsw);
 			}
 
-			UserInfo userInfo = m_moneyDBService.FetchUserInfo(clientUUID);
+			// Information from Region Server
+			if (!String.IsNullOrEmpty(hgAvatar)) {
+				if (String.IsNullOrEmpty(userName)) {
+					userName = firstName + " " + lastName;
+				}
+				if (!String.IsNullOrEmpty(userName)) {
+					is_hg_avatar = true;
+				}
+			}
 
+			// Information from DB
+			UserInfo userInfo = m_moneyDBService.FetchUserInfo(clientUUID);
 			if (userInfo!=null) {
-				userName = userInfo.Avatar;
+				if (String.IsNullOrEmpty(userName)) userName = userInfo.Avatar;
 				if (userInfo.Class==(int)AvatarClass.HG_AVATAR) {
 					is_hg_avatar = true;
 				}
 			}
-			else { 	// New Avatar
-				if (!String.IsNullOrEmpty(hgAvatar)) {
-					if (String.IsNullOrEmpty(userName)) {
-						userName = firstName + " " + lastName;
-					}
-					if (!String.IsNullOrEmpty(userName)) {
-						is_hg_avatar = true;
-					}
-				}
-			}
+
 
 			m_log.InfoFormat("[MONEY RPC]: handleClientLogon: Avatar {0} ({1}) is logged on.", userName, clientUUID);
 			if (is_hg_avatar) m_log.InfoFormat("[MONEY RPC]: handleClientLogon: Avatar is a HG avatar.");
@@ -355,7 +356,7 @@ namespace OpenSim.Grid.MoneyServer
 				userInfo.Avatar    = userName;
 				userInfo.PswHash   = UUID.Zero.ToString();
 				userInfo.Class     = (int)AvatarClass.LOCAL_AVATAR;
-				userInfo.Universal = universalID;
+				userInfo.ServerURL = serverURL;
 				if (is_hg_avatar) {
 					if (!String.IsNullOrEmpty(securePsw)) userInfo.PswHash = securePsw;
 					userInfo.Class = (int)AvatarClass.HG_AVATAR;

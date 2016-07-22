@@ -310,9 +310,9 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 			sql += "`user` varchar(36) NOT NULL,";
 			sql += "`simip` varchar(64) NOT NULL,";
 			sql += "`avatar` varchar(50) NOT NULL,";
-			sql += "`pass` varchar(36) DEFAULT NULL,";
+			sql += "`pass` varchar(36) NOT NULL DEFAULT '',";
 			sql += "`class`  tinyint(2) NOT NULL DEFAULT 0,";
-			sql += "`universal` varchar(255) NOT NULL DEFAULT '',";
+			sql += "`serverurl` varchar(255) NOT NULL DEFAULT '',";
 			sql += "PRIMARY KEY(`user`))";
 			sql += "Engine=InnoDB DEFAULT CHARSET=utf8 ";
 			///////////////////////////////////////////////
@@ -571,8 +571,9 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 			sql  = "BEGIN;";
 			sql += "ALTER TABLE `" + Table_of_UserInfo + "` ";
 			sql += "MODIFY COLUMN `user` varchar(36) NOT NULL,";
+			sql += "MODIFY COLUMN `pass` varchar(36) NOT NULL DEFAULT '',";
 			sql += "ADD `class` tinyint(2) NOT NULL DEFAULT 0 AFTER `pass`,";
-			sql += "ADD `universal` varchar(255) NOT NULL DEFAULT '' AFTER `class`,";
+			sql += "ADD `serverurl` varchar(255) NOT NULL DEFAULT '' AFTER `class`,";
 			sql += "COMMENT = 'Rev.4';";
 			sql += "COMMIT;";
 			MySqlCommand cmd = new MySqlCommand(sql, dbcon);
@@ -1554,8 +1555,8 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 			if (userInfo.Avatar==null) return false;
 
 			if (userinfo_rev>=4) {
-				sql  = "INSERT INTO " + Table_of_UserInfo +"(`user`,`simip`,`avatar`,`pass`,`class`,`universal`) VALUES";
-				sql += "(?user,?simip,?avatar,?password,?class,?universal);";
+				sql  = "INSERT INTO " + Table_of_UserInfo +"(`user`,`simip`,`avatar`,`pass`,`class`,`serverurl`) VALUES";
+				sql += "(?user,?simip,?avatar,?password,?class,?serverurl);";
 			}
 			else {
 				sql  = "INSERT INTO " + Table_of_UserInfo +"(`user`,`simip`,`avatar`,`pass`) VALUES";
@@ -1569,7 +1570,7 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 			cmd.Parameters.AddWithValue("?password", userInfo.PswHash);
 			if (userinfo_rev>=4) {
 				cmd.Parameters.AddWithValue("?class", userInfo.Class);
-				cmd.Parameters.AddWithValue("?universal", userInfo.Universal);
+				cmd.Parameters.AddWithValue("?serverurl", userInfo.ServerURL);
 			}
 
 			try {
@@ -1605,7 +1606,7 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 						userInfo.Avatar    = (string)r["avatar"];
 						userInfo.PswHash   = (string)r["pass"];
 						userInfo.Class     = Convert.ToInt32(r["class"]);
-						userInfo.Universal = (string)r["universal"];
+						userInfo.ServerURL = (string)r["serverurl"];
 					}
 					catch (Exception e) {
 						m_log.Error("[MONEY DB]: Fetching UserInfo failed: " + e.ToString());
@@ -1630,13 +1631,13 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 			bool bRet = false;
 			string sql = string.Empty;
 
-			sql = "UPDATE " + Table_of_UserInfo + " SET simip=?simip,avatar=?avatar,pass=?pass,class=?class,universal=?universal WHERE user=?user;";
+			sql = "UPDATE " + Table_of_UserInfo + " SET simip=?simip,avatar=?avatar,pass=?pass,class=?class,serverurl=?serverurl WHERE user=?user;";
 			MySqlCommand cmd = new MySqlCommand(sql, dbcon);
 			cmd.Parameters.AddWithValue("?simip", userInfo.SimIP);
 			cmd.Parameters.AddWithValue("?avatar", userInfo.Avatar);
 			cmd.Parameters.AddWithValue("?pass", userInfo.PswHash);
 			cmd.Parameters.AddWithValue("?class", userInfo.Class);
-			cmd.Parameters.AddWithValue("?universal", userInfo.Universal);
+			cmd.Parameters.AddWithValue("?serverurl", userInfo.ServerURL);
 			cmd.Parameters.AddWithValue("?user", userInfo.UserID);
 
 			if (cmd.ExecuteNonQuery()>0) bRet = true;
