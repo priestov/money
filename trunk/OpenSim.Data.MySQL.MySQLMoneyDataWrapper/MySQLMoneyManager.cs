@@ -312,7 +312,7 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 			sql += "`avatar` varchar(50) NOT NULL,";
 			sql += "`pass` varchar(36) DEFAULT NULL,";
 			sql += "`class`  tinyint(2) NOT NULL DEFAULT 0,";
-			sql += "`universal` varchar(255) NOT NULL,";
+			sql += "`universal` varchar(255) NOT NULL DEFAULT '',";
 			sql += "PRIMARY KEY(`user`))";
 			sql += "Engine=InnoDB DEFAULT CHARSET=utf8 ";
 			///////////////////////////////////////////////
@@ -572,7 +572,7 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 			sql += "ALTER TABLE `" + Table_of_UserInfo + "` ";
 			sql += "MODIFY COLUMN `user` varchar(36) NOT NULL,";
 			sql += "ADD `class` tinyint(2) NOT NULL DEFAULT 0 AFTER `pass`,";
-			sql += "ADD `universal` varchar(255) NOT NULL AFTER `class`,";
+			sql += "ADD `universal` varchar(255) NOT NULL DEFAULT '' AFTER `class`,";
 			sql += "COMMENT = 'Rev.4';";
 			sql += "COMMIT;";
 			MySqlCommand cmd = new MySqlCommand(sql, dbcon);
