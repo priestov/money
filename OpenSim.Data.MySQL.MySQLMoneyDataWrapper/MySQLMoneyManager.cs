@@ -284,7 +284,7 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 			string sql = string.Empty;
 
 			sql += "CREATE TABLE `" + Table_of_Balances + "` (";
-			sql += "`user` varchar(255) NOT NULL,";
+			sql += "`user` varchar(36) NOT NULL,";
 			sql += "`balance` int(10) NOT NULL,";
 			sql += "`status` tinyint(2) default NULL,";
 			sql += "PRIMARY KEY (`user`))";
@@ -303,7 +303,7 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 
 			sql += "CREATE TABLE `" + Table_of_TotalSales + "` (";
 			sql += "`UUID` varchar(36) NOT NULL,";
-			sql += "`user` varchar(255) NOT NULL,";
+			sql += "`user` varchar(36) NOT NULL,";
 			sql += "`objectUUID` varchar(36)  NOT NULL,";
 			sql += "`type` int(10) NOT NULL,";
 			sql += "`TotalCount`  int(10) NOT NULL DEFAULT 0,";
@@ -327,7 +327,7 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 			string sql = string.Empty;
 
 			sql += "CREATE TABLE `" + Table_of_UserInfo + "` (";
-			sql += "`user` varchar(255) NOT NULL,";
+			sql += "`user` varchar(36) NOT NULL,";
 			sql += "`simip` varchar(64) NOT NULL,";
 			sql += "`avatar` varchar(50) NOT NULL,";
 			sql += "`pass` varchar(36) DEFAULT NULL,";
@@ -347,8 +347,8 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 
 			sql += "CREATE TABLE `" + Table_of_Transactions + "`(";
 			sql += "`UUID` varchar(36) NOT NULL,";
-			sql += "`sender` varchar(255) NOT NULL,";
-			sql += "`receiver` varchar(255) NOT NULL,";
+			sql += "`sender` varchar(36) NOT NULL,";
+			sql += "`receiver` varchar(36) NOT NULL,";
 			sql += "`amount` int(10) NOT NULL,";
 			sql += "`senderBalance`   int(10) NOT NULL DEFAULT -1,";
 			sql += "`receiverBalance` int(10) NOT NULL DEFAULT -1,";
