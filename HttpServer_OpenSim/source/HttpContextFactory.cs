@@ -149,7 +149,7 @@ namespace HttpServer
             try
             {
                 //TODO: this may fail
-                // bu Fumi.Iseki
+                // by Fumi.Iseki
                 //sslStream.AuthenticateAsServer(certificate, false, protocol, false);
                 if (_clientCallback == null)
                 {
