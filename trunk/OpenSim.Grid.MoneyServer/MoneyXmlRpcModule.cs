@@ -290,6 +290,16 @@ namespace OpenSim.Grid.MoneyServer
 			if (requestData.ContainsKey("userName")) 			  userName = (string)requestData["userName"];
 			if (requestData.ContainsKey("openSimServIP"))         simIP = (string)requestData["openSimServIP"];
 
+			string firstName = string.Empty;
+			string lastName  = string.Empty;
+			string serverUrl = string.Empty;
+			string avatarPsw = string.Empty;
+			//
+			if (!String.IsNullOrEmpty(universalID)) {
+				UUID uuid;
+				Util.ParseUniversalUserIdentifier(universalID, out uuid, out serverUrl, out firstName, out lastName, out avatarPsw);
+			}
+
 			UserInfo userInfo = m_moneyDBService.FetchUserInfo(clientUUID);
 
 			if (userInfo!=null) {
@@ -301,10 +311,7 @@ namespace OpenSim.Grid.MoneyServer
 			else { 	// New Avatar
 				if (!String.IsNullOrEmpty(hgAvatar)) {
 					if (String.IsNullOrEmpty(userName)) {
-						UUID uuid;
-						string firstname, lastname, tmp;
-						Util.ParseUniversalUserIdentifier(universalID, out uuid, out tmp, out firstname, out lastname, out tmp);
-						userName = firstname + " " + lastname;
+						userName = firstName + " " + lastName;
 					}
 					if (!String.IsNullOrEmpty(userName)) {
 						is_hg_avatar = true;
@@ -320,7 +327,7 @@ namespace OpenSim.Grid.MoneyServer
 				responseData["success"] = true; 
 				responseData["clientBalance"] = 0;
 				if (String.IsNullOrEmpty(userName)) responseData["description"] = "Avatar name is empty. This avatar is NPC or HG avatar?";
-				if (is_hg_avatar && !m_hg_enable)   responseData["description"] = "Avatar is a HG avatar. But this Money Server does not support HG avatar.";
+				if (is_hg_avatar && !m_hg_enable)   responseData["description"] = "This Money Server does not support HG avatars.";
 				m_log.InfoFormat("[MONEY RPC]: handleClientLogon: {0}", responseData["description"]);
 				return response;
 			}
@@ -348,11 +355,15 @@ namespace OpenSim.Grid.MoneyServer
 				userInfo.Avatar  = userName;
 				userInfo.PswHash = UUID.Zero.ToString();
 				userInfo.Class   = (int)AvatarClass.LOCAL_AVATAR;
-				if (is_hg_avatar) userInfo.Class = (int)AvatarClass.HG_AVATAR;
+				if (is_hg_avatar) {
+					if (!String.IsNullOrEmpty(serverUrl)) userInfo.SimIP   = serverUrl;
+					if (!String.IsNullOrEmpty(avatarPsw)) userInfo.PswHash = avatarPsw;
+					userInfo.Class = (int)AvatarClass.HG_AVATAR;
+				}
 				
 				if (!m_moneyDBService.TryAddUserInfo(userInfo)) {
 					m_log.ErrorFormat("[MONEY RPC]: handleClientLogin: Unable to refresh information for user \"{0}\" in DB", userName);
-					responseData["success"] = true;             // for FireStorm
+					responseData["success"] = true;
 					responseData["clientBalance"] = 0;
 					responseData["description"] = "Update or add user information to db failed";
 					return response;
@@ -1481,6 +1492,7 @@ namespace OpenSim.Grid.MoneyServer
 
 			if (m_sessionDic.ContainsKey(clientID) && m_secureSessionDic.ContainsKey(clientID)) {
 				if (m_sessionDic[clientID]==sessionID && m_secureSessionDic[clientID]==secureID) {
+					//
 					if (string.IsNullOrEmpty(transactionID)) {
 						responseData["description"] = "TransactionID is empty";
 						m_log.Error("[MONEY RPC]: handleGetTransaction: TransactionID is empty");
@@ -1523,7 +1535,7 @@ namespace OpenSim.Grid.MoneyServer
 		//
 		public XmlRpcResponse handleWebLogin(XmlRpcRequest request, IPEndPoint remoteClient)
 		{
-			//m_log.InfoFormat("[MONEY RPC]: handleWebLogin:");
+			m_log.InfoFormat("[MONEY RPC]: handleWebLogin:");
 
 			GetSSLCommonName(request);
 
@@ -1562,7 +1574,7 @@ namespace OpenSim.Grid.MoneyServer
 		//
 		public XmlRpcResponse handleWebLogout(XmlRpcRequest request, IPEndPoint remoteClient)
 		{
-			//m_log.InfoFormat("[MONEY RPC]: handleWebLogout:");
+			m_log.InfoFormat("[MONEY RPC]: handleWebLogout:");
 
 			GetSSLCommonName(request);
 
@@ -1604,7 +1616,7 @@ namespace OpenSim.Grid.MoneyServer
 		/// <returns></returns>
 		public XmlRpcResponse handleWebGetBalance(XmlRpcRequest request, IPEndPoint remoteClient)
 		{
-			//m_log.InfoFormat("[MONEY RPC]: handleWebGetBalance:");
+			m_log.InfoFormat("[MONEY RPC]: handleWebGetBalance:");
 
 			GetSSLCommonName(request);
 
@@ -1669,7 +1681,7 @@ namespace OpenSim.Grid.MoneyServer
 		/// <returns></returns>
 		public XmlRpcResponse handleWebGetTransaction(XmlRpcRequest request, IPEndPoint remoteClient)
 		{
-			//m_log.InfoFormat("[MONEY RPC]: handleWebGetTransaction:");
+			m_log.InfoFormat("[MONEY RPC]: handleWebGetTransaction:");
 
 			GetSSLCommonName(request);
 
@@ -1754,7 +1766,7 @@ namespace OpenSim.Grid.MoneyServer
 		/// <returns></returns>
 		public XmlRpcResponse handleWebGetTransactionNum(XmlRpcRequest request, IPEndPoint remoteClient)
 		{
-			//m_log.InfoFormat("[MONEY RPC]: handleWebGetTransactionNum:");
+			m_log.InfoFormat("[MONEY RPC]: handleWebGetTransactionNum:");
 
 			GetSSLCommonName(request);
 
