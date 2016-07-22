@@ -319,16 +319,15 @@ namespace OpenSim.Grid.MoneyServer
 				}
 			}
 
-
 			m_log.InfoFormat("[MONEY RPC]: handleClientLogon: Avatar {0} ({1}) is logged on.", userName, clientUUID);
 			if (is_hg_avatar) m_log.InfoFormat("[MONEY RPC]: handleClientLogon: Avatar is a HG avatar.");
 
 			//
-			if (String.IsNullOrEmpty(userName) || (is_hg_avatar && !m_hg_enable)) {
+			if (String.IsNullOrEmpty(serverURL) || (is_hg_avatar && !m_hg_enable)) {
 				responseData["success"] = true; 
 				responseData["clientBalance"] = 0;
-				if (String.IsNullOrEmpty(userName)) responseData["description"] = "Avatar name is empty. This avatar is NPC or HG avatar?";
-				if (is_hg_avatar && !m_hg_enable)   responseData["description"] = "This Money Server does not support HG avatars.";
+				if (String.IsNullOrEmpty(serverURL)) responseData["description"] = "Server URL is empty. This avatar is NPC?";
+				if (is_hg_avatar && !m_hg_enable)    responseData["description"] = "This Money Server does not support HG avatars.";
 				m_log.InfoFormat("[MONEY RPC]: handleClientLogon: {0}", responseData["description"]);
 				return response;
 			}
