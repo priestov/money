@@ -293,11 +293,11 @@ namespace OpenSim.Grid.MoneyServer
 			string firstName = string.Empty;
 			string lastName  = string.Empty;
 			string serverUrl = string.Empty;
-			string avatarPsw = string.Empty;
+			string securePsw = string.Empty;
 			//
 			if (!String.IsNullOrEmpty(universalID)) {
 				UUID uuid;
-				Util.ParseUniversalUserIdentifier(universalID, out uuid, out serverUrl, out firstName, out lastName, out avatarPsw);
+				Util.ParseUniversalUserIdentifier(universalID, out uuid, out serverUrl, out firstName, out lastName, out securePsw);
 			}
 
 			UserInfo userInfo = m_moneyDBService.FetchUserInfo(clientUUID);
@@ -350,14 +350,14 @@ namespace OpenSim.Grid.MoneyServer
 			//
 			try {
 				if (userInfo==null) userInfo = new UserInfo();
-				userInfo.UserID  = clientUUID;
-				userInfo.SimIP   = simIP;
-				userInfo.Avatar  = userName;
-				userInfo.PswHash = UUID.Zero.ToString();
-				userInfo.Class   = (int)AvatarClass.LOCAL_AVATAR;
+				userInfo.UserID    = clientUUID;
+				userInfo.SimIP     = simIP;
+				userInfo.Avatar    = userName;
+				userInfo.PswHash   = UUID.Zero.ToString();
+				userInfo.Class     = (int)AvatarClass.LOCAL_AVATAR;
+				userInfo.Universal = universalID;
 				if (is_hg_avatar) {
-					if (!String.IsNullOrEmpty(serverUrl)) userInfo.SimIP   = serverUrl;
-					if (!String.IsNullOrEmpty(avatarPsw)) userInfo.PswHash = avatarPsw;
+					if (!String.IsNullOrEmpty(securePsw)) userInfo.PswHash = securePsw;
 					userInfo.Class = (int)AvatarClass.HG_AVATAR;
 				}
 				
