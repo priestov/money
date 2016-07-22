@@ -164,12 +164,20 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
     }
 
 
+    public enum AvatarClass
+    { 
+        LOCAL_AVATAR = 0, 
+        HG_AVATAR    = 1 
+    }
+
+
     public class UserInfo
     {
         string m_userID = string.Empty;
         string m_simIP = string.Empty;
         string m_avatarName = string.Empty;
         string m_passwordHash = string.Empty;
+        int    m_avatarClass = (int)AvatarClass.LOCAL_AVATAR;
 
         public string UserID
         {
@@ -182,15 +190,23 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
             get { return m_simIP; }
             set { m_simIP = value; }
         }
+
         public string Avatar
         {
             get { return m_avatarName; }
             set { m_avatarName = value; }
         }
+
         public string PswHash
         {
             get { return m_passwordHash; }
             set { m_passwordHash = value; }
+        }
+
+        public int Class
+        {
+            get { return m_avatarClass; }
+            set { m_avatarClass = value; }
         }
     }
 }
