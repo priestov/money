@@ -85,7 +85,6 @@ namespace NSL.Certificate.Tools
 	  	}
 
 
-
 		//
 		//
 		//
@@ -106,7 +105,6 @@ namespace NSL.Certificate.Tools
 			//
 			return false;
 		}
-
 
 
 		/*
@@ -188,7 +186,6 @@ namespace NSL.Certificate.Tools
 			return valid;
 		}
 	}
-
 
 
 	//

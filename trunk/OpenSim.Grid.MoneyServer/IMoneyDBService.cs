@@ -66,7 +66,5 @@ namespace OpenSim.Grid.MoneyServer
         bool TryAddUserInfo(UserInfo user);
 
         UserInfo FetchUserInfo(string userID);
-
-
     }
 }

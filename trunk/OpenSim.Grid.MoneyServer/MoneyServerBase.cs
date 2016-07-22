@@ -100,8 +100,7 @@ namespace OpenSim.Grid.MoneyServer
 			checkTimer.Elapsed += new ElapsedEventHandler(CheckTransaction);
 			checkTimer.Start();
 
-			while (true)
-			{
+			while (true) {
 				m_console.Prompt();
 			}
 		}
@@ -131,8 +130,7 @@ namespace OpenSim.Grid.MoneyServer
 				FieldInfo finfo = typeHttpContextFactory.GetField("ClientCertificateValidationCallback");
 				if (finfo!=null) finfo.SetValue(new HttpContextFactory(null, 0, null), null);
 				
-				if (m_certFilename!="")
-				{
+				if (m_certFilename!="") {
 					m_httpServer = new BaseHttpServer(m_moneyServerPort, true, m_certFilename, m_certPassword);
 					if (m_checkClientCert) {
 						if (finfo!=null) {
@@ -146,8 +144,7 @@ namespace OpenSim.Grid.MoneyServer
 						}
 					}
 				}
-				else
-				{
+				else {
 					m_httpServer = new BaseHttpServer(m_moneyServerPort, false);
 				}
 
@@ -156,8 +153,7 @@ namespace OpenSim.Grid.MoneyServer
 				base.StartupSpecific();		// OpenSim/Framework/Servers/BaseOpenSimServer.cs 
 			}
 
-			catch (Exception e)
-			{
+			catch (Exception e) {
 				m_log.ErrorFormat("[MONEY SERVER]: StartupSpecific: Fail to start HTTPS process");
 				m_log.ErrorFormat("[MONEY SERVER]: StartupSpecific: Please Check Certificate File or Password. Exit");
 				m_log.ErrorFormat("[MONEY SERVER]: StartupSpecific: {0}", e);
@@ -166,7 +162,6 @@ namespace OpenSim.Grid.MoneyServer
 
 			//TODO : Add some console commands here
 		}
-
 
 
 		protected void ReadIniConfig()
@@ -227,8 +222,7 @@ namespace OpenSim.Grid.MoneyServer
 				}
 			}
 
-			catch (Exception)
-			{
+			catch (Exception) {
 				m_log.Error("[MONEY SERVER]: ReadIniConfig: Fail to setup configure. Please check MoneyServer.ini. Exit");
 				Environment.Exit(1);
 			}
@@ -238,8 +232,7 @@ namespace OpenSim.Grid.MoneyServer
 		// added by skidz
 		protected void Create_PIDFile(string path)
 		{
-			try
-			{
+			try {
 				string pidstring = System.Diagnostics.Process.GetCurrentProcess().Id.ToString();
 				FileStream fs = File.Create(path);
 				System.Text.ASCIIEncoding enc = new System.Text.ASCIIEncoding();
@@ -248,8 +241,7 @@ namespace OpenSim.Grid.MoneyServer
 				fs.Close();
 				m_pidFile = path;
 			}
-			catch (Exception)
-			{
+			catch (Exception) {
 			}
 		}
 
@@ -301,16 +293,15 @@ namespace OpenSim.Grid.MoneyServer
 		public MoneyServerConfigSource()
 		{
 			string configPath = Path.Combine(Directory.GetCurrentDirectory(), "MoneyServer.ini");
-			if (File.Exists(configPath))
-			{
+			if (File.Exists(configPath)) {
 				m_config = new IniConfigSource(configPath);
 			}
-			else
-			{
+			else {
 				//TODO: create default configuration.
 				//m_config = DefaultConfig();
 			}
 		}
+
 
 		public void Save(string path)
 		{
