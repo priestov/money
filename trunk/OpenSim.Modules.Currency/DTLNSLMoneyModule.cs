@@ -730,12 +730,17 @@ namespace OpenSim.Modules.Currency
 					if (mod!=null) {
 						UUID receiverId = sceneObj.OwnerID;
 						ulong regionHandle = sceneObj.RegionHandle;
-						bool ret = true;
+						bool ret = false;
 						//
 						if (salePrice>=0) {
-							ret = TransferMoney(remoteClient.AgentId, receiverId, salePrice,
+							if (m_enable_server) {
+								ret = TransferMoney(remoteClient.AgentId, receiverId, salePrice,
 												(int)TransactionType.PayObject, sceneObj.UUID, regionHandle, "Object Buy");
 												//(int)MoneyTransactionType.PayObject, sceneObj.UUID, regionHandle, "Object Buy");
+							}
+							else if (salePrice==0) {
+								ret = true;
+							}
 						}
 						if (ret) {
 							mod.BuyObject(remoteClient, categoryID, localID, saleType, salePrice);
@@ -1550,6 +1555,8 @@ namespace OpenSim.Modules.Currency
 						hgAvatar = "true";
 					}
 				}
+				//m_log.InfoFormat("[MONEY]: LoginMoneyServer: AvatarName = {0}, UniversalID = {1}", userName, universalID);
+
 				if (String.IsNullOrEmpty(userName)) {
 					userName = firstName + " " + lastName;
 				}
