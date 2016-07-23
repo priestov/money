@@ -93,7 +93,7 @@ diff -Nur HttpServer.orig/HttpContextFactory.cs HttpServer/HttpContextFactory.cs
 +                else
 +                {
 +                    sslStream = new SslStream(networkStream, false, new RemoteCertificateValidationCallback(_clientCallback));
-+                    sslStream.AuthenticateAsServer(certificate, true, protocol, true);
++                    sslStream.AuthenticateAsServer(certificate, true, protocol, false);
 +                }
 +
                  return CreateContext(true, remoteEndPoint, sslStream, socket);
