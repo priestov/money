@@ -1562,13 +1562,14 @@ namespace OpenSim.Modules.Currency
 						avatarClass = (int)AvatarClass.HG_AVATAR;
 					}
 				}
-				//m_log.InfoFormat("[MONEY]: LoginMoneyServer: AvatarName = {0}, UniversalID = {1}", userName, universalID);
-
 				if (String.IsNullOrEmpty(userName)) {
 					userName = firstName + " " + lastName;
 				}
-				if (m_hgavatar_islocal) avatarClass = (int)AvatarClass.LOCAL_AVATAR;
-				if (m_hgavatar_isguest) avatarClass = (int)AvatarClass.GUEST_AVATAR;
+
+				if (avatarClass==(int)AvatarClass.HG_AVATAR) {
+					if (m_hgavatar_islocal) avatarClass = (int)AvatarClass.LOCAL_AVATAR;
+					if (m_hgavatar_isguest) avatarClass = (int)AvatarClass.GUEST_AVATAR;
+				}
 
 				//
 				// Lognn the Money Server.   
