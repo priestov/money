@@ -51,6 +51,7 @@ using OpenSim.Region.Framework;
 using OpenSim.Region.Framework.Interfaces;
 using OpenSim.Region.Framework.Scenes;
 
+using OpenSim.Data.MySQL.MySQLMoneyDataWrapper;
 using NSL.Certificate.Tools;
 using NSL.Network.XmlRpc;
 
@@ -184,12 +185,13 @@ namespace OpenSim.Modules.Currency
 		private string m_cacertFilename	  = "";
 		private X509Certificate2 m_cert	  = null;
 
-		private bool   m_hgavatar_islocal = false;
-		//
 		private bool   m_use_web_settle	  = false;
 		private string m_settle_url	  	  = "";
 		private string m_settle_message   = "";
 		private bool   m_settle_user  	  = false;
+
+		private bool   m_hgavatar_islocal = false;
+		private bool   m_hgavatar_isguest = false;
 
 		private NSLCertificateVerify m_certVerify = new NSLCertificateVerify();	// サーバ認証用
 
@@ -309,7 +311,8 @@ namespace OpenSim.Modules.Currency
 				EnergyEfficiency 		= economyConfig.GetFloat("EnergyEfficiency", 		EnergyEfficiency);
 
 				// for HG Avatar
-				m_hgavatar_islocal = economyConfig.GetBoolean("HGAvatarIsGridAvatar", m_hgavatar_islocal);
+				m_hgavatar_islocal = economyConfig.GetBoolean("HGAvatarIsGridAvatar",  m_hgavatar_islocal);
+				m_hgavatar_isguest = economyConfig.GetBoolean("HGAvatarIsGuestAvatar", m_hgavatar_isguest);
 			}
 			catch {
 				m_log.ErrorFormat("[MONEY]: Initialise: Faile to read configuration file");
@@ -1539,7 +1542,7 @@ namespace OpenSim.Modules.Currency
 				string firstName   = string.Empty;
 				string lastName    = string.Empty;
 				string serverURL   = string.Empty;
-				string hgAvatar    = string.Empty;
+				int    avatarClass = (int)AvatarClass.LOCAL_AVATAR;
 
 				AgentCircuitData agent = scene.AuthenticateHandler.GetAgentCircuitData(client.AgentId);
 				if (agent!=null) {
@@ -1549,10 +1552,14 @@ namespace OpenSim.Modules.Currency
 						string tmp;
 						Util.ParseUniversalUserIdentifier(universalID, out uuid, out serverURL, out firstName, out lastName, out tmp);
 					}
-					if (String.IsNullOrEmpty(serverURL)) return false; 	// if serverURL is empty, avatar is a NPC
+					// if serverURL is empty, avatar is a NPC
+					if (String.IsNullOrEmpty(serverURL)) {
+						//avatarClass = (int)AvatarClass.NPC_AVATAR;
+						return false;
+					}
 					//
 					if ((agent.teleportFlags & (uint)Constants.TeleportFlags.ViaHGLogin)!=0 || String.IsNullOrEmpty(userName)) {
-						hgAvatar = "true";
+						avatarClass = (int)AvatarClass.HG_AVATAR;
 					}
 				}
 				//m_log.InfoFormat("[MONEY]: LoginMoneyServer: AvatarName = {0}, UniversalID = {1}", userName, universalID);
@@ -1560,14 +1567,15 @@ namespace OpenSim.Modules.Currency
 				if (String.IsNullOrEmpty(userName)) {
 					userName = firstName + " " + lastName;
 				}
-				if (m_hgavatar_islocal) hgAvatar = string.Empty;
+				if (m_hgavatar_islocal) avatarClass = (int)AvatarClass.LOCAL_AVATAR;
+				if (m_hgavatar_isguest) avatarClass = (int)AvatarClass.GUEST_AVATAR;
 
 				//
 				// Lognn the Money Server.   
 				Hashtable paramTable = new Hashtable();
 				paramTable["openSimServIP"] 		= scene.RegionInfo.ServerURI.Replace(scene.RegionInfo.InternalEndPoint.Port.ToString(), 
 																						 scene.RegionInfo.HttpPort.ToString());
-				paramTable["hgAvatar"]              = hgAvatar;
+				paramTable["avatarClass"]           = avatarClass.ToString();
 				paramTable["userName"] 				= userName;
 				paramTable["universalID"]           = universalID;
 				paramTable["clientUUID"] 			= client.AgentId.ToString();
