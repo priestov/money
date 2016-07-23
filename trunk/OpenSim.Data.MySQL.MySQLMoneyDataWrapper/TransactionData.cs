@@ -167,7 +167,9 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
     public enum AvatarClass
     { 
         LOCAL_AVATAR = 0, 
-        HG_AVATAR    = 1 
+        HG_AVATAR    = 1, 
+        NPC_AVATAR   = 2, 
+        GUEST_AVATAR = 9
     }
 
 
