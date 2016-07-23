@@ -159,7 +159,7 @@ namespace HttpServer
                 else
                 {
                     sslStream = new SslStream(networkStream, false, new RemoteCertificateValidationCallback(_clientCallback));
-                    sslStream.AuthenticateAsServer(certificate, true, protocol, false);
+                    sslStream.AuthenticateAsServer(certificate, true, protocol, true);
                 }
 
                 return CreateContext(true, remoteEndPoint, sslStream, socket);

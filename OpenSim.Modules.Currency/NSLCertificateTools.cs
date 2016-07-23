@@ -132,7 +132,7 @@ namespace NSL.Certificate.Tools
 
 			X509Certificate2 certificate2 = new X509Certificate2(certificate);
 			string simplename = certificate2.GetNameInfo(X509NameType.SimpleName, false);
-			m_log.InfoFormat("[NSL CERT VERIFY]: ValidateServerCertificate: Simple Name is \"{0}\"", simplename);
+			//m_log.InfoFormat("[NSL CERT VERIFY]: ValidateServerCertificate: Simple Name is \"{0}\"", simplename);
 
 /*
 			// RemoteCertificateNotAvailableはエラーとする．
@@ -167,7 +167,7 @@ namespace NSL.Certificate.Tools
 
 			X509Certificate2 certificate2 = new X509Certificate2(certificate);
 			string simplename = certificate2.GetNameInfo(X509NameType.SimpleName, false);
-			m_log.InfoFormat("[NSL CERT VERIFY]: ValidateClientCertificate: Simple Name is \"{0}\"", simplename);
+			//m_log.InfoFormat("[NSL CERT VERIFY]: ValidateClientCertificate: Simple Name is \"{0}\"", simplename);
 
 /*
 			// RemoteCertificateNotAvailableはエラーとする．
