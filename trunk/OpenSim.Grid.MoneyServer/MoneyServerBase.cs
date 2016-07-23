@@ -66,8 +66,8 @@ namespace OpenSim.Grid.MoneyServer
 		private string m_clcrlFilename	 = "";
 		private bool   m_checkClientCert = false;
 
-		private int DEAD_TIME;
-		private int MAX_DB_CONNECTION;
+		private int DEAD_TIME            = 120;
+		private int MAX_DB_CONNECTION    = 10;
 
 		private MoneyXmlRpcModule m_moneyXmlRpcModule;
 		private MoneyDBService m_moneyDBService;
@@ -184,37 +184,35 @@ namespace OpenSim.Grid.MoneyServer
 				string password   = db_config.GetString("password", "password");
 				string pooling 	  = db_config.GetString("pooling",  "false");
 				string port 	  = db_config.GetString("port", 	"3306");
-				MAX_DB_CONNECTION = db_config.GetInt   ("MaxConnection", 10);
+				MAX_DB_CONNECTION = db_config.GetInt   ("MaxConnection", MAX_DB_CONNECTION);
 
 				connectionString  = "Server=" + sqlserver + ";Port=" + port + ";Database=" + database + ";User ID=" +
 												username + ";Password=" + password + ";Pooling=" + pooling + ";";
 
 				// [MoneyServer]
 				m_server_config = moneyConfig.m_config.Configs["MoneyServer"];
-				DEAD_TIME = m_server_config.GetInt("ExpiredTime", 120);
+				DEAD_TIME = m_server_config.GetInt("ExpiredTime", DEAD_TIME);
 
 				//
 				// [Certificate]
 				m_cert_config = moneyConfig.m_config.Configs["Certificate"];
 				if (m_cert_config==null) {
 					m_log.Info("[MONEY SERVER]: [Certificate] section is not found. Using [MoneyServer] section instead");
-					m_cert_config = moneyConfig.m_config.Configs["MoneyServer"];
+					m_cert_config = m_server_config;
 				}
 
 				// HTTPS Server Cert (Server Mode)
 				// サーバ証明書
-				m_certFilename = m_cert_config.GetString("ServerCertFilename", "");
-				m_certPassword = m_cert_config.GetString("ServerCertPassword", "");
+				m_certFilename = m_cert_config.GetString("ServerCertFilename", m_certFilename);
+				m_certPassword = m_cert_config.GetString("ServerCertPassword", m_certPassword);
 				if (m_certFilename!="") {
 					m_log.Info("[MONEY SERVER]: ReadIniConfig: Execute HTTPS comunication. Cert file is " + m_certFilename);
 				}
 
 				// クライアント認証
-				string checkcert = m_cert_config.GetString("CheckClientCert", "false");
-				if (checkcert.ToLower()=="true") m_checkClientCert = true;
-
-				m_cacertFilename = m_cert_config.GetString("CACertFilename", "");
-				m_clcrlFilename  = m_cert_config.GetString("ClientCrlFilename", "");
+				m_checkClientCert = m_cert_config.GetBoolean("CheckClientCert",  m_checkClientCert);
+				m_cacertFilename  = m_cert_config.GetString("CACertFilename",    m_cacertFilename);
+				m_clcrlFilename   = m_cert_config.GetString("ClientCrlFilename", m_clcrlFilename);
 				//
 				if (m_checkClientCert && m_cacertFilename!="") {
 					m_certVerify.SetPrivateCA(m_cacertFilename);

@@ -170,7 +170,7 @@ namespace OpenSim.Modules.Currency
 		private static readonly ILog m_log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
 
 		//private bool  m_enabled = true;
-		private bool  m_sellEnabled = false;
+		private bool  m_sellEnabled   = false;
 		private bool  m_enable_server = true;	// enable Money Server
 
 		private IConfigSource m_config;
@@ -208,22 +208,22 @@ namespace OpenSim.Modules.Currency
 		public event ObjectPaid OnObjectPaid;
 
 		// Price
-		private int   ObjectCount 			  = 0;
-		private int   PriceEnergyUnit 		  = 0;
-		private int   PriceGroupCreate 		  = 0;
-		private int   PriceObjectClaim 		  = 0;
-		private float PriceObjectRent 		  = 0f;
-		private float PriceObjectScaleFactor  = 0f;
-		private int   PriceParcelClaim 		  = 0;
-		private int   PriceParcelRent		  = 0;
-		private float PriceParcelClaimFactor  = 0f;
-		private int   PricePublicObjectDecay  = 0;
-		private int   PricePublicObjectDelete = 0;
-		private int   PriceRentLight 		  = 0;
-		private int   PriceUpload 			  = 0;
-		private int   TeleportMinPrice 		  = 0;
-		private float TeleportPriceExponent   = 0f;
-		private float EnergyEfficiency 		  = 0f;
+		private int   ObjectCount 			  	= 0;
+		private int   PriceEnergyUnit 			= 100;
+		private int   PriceObjectClaim 			= 10;
+		private int   PricePublicObjectDecay 	= 4;
+		private int   PricePublicObjectDelete 	= 4;
+		private int   PriceParcelClaim 			= 1;
+		private float PriceParcelClaimFactor 	= 1.0f;
+		private int   PriceUpload 				= 0;
+		private int   PriceRentLight			= 5;
+		private float PriceObjectRent 			= 1.0f;
+		private float PriceObjectScaleFactor 	= 10.0f;
+		private int   PriceParcelRent 			= 1;
+		private int   PriceGroupCreate 			= 0;
+		private int   TeleportMinPrice 			= 2;
+		private float TeleportPriceExponent 	= 2.0f;
+		private float EnergyEfficiency 			= 1.0f;
 
 		#endregion
 
@@ -262,22 +262,20 @@ namespace OpenSim.Modules.Currency
 					m_log.InfoFormat("[MONEY]: The DTL/NSL MoneyModule is enabled");
 				}
 
-				m_sellEnabled  = economyConfig.GetBoolean("SellEnabled", false);
-				m_moneyServURL = economyConfig.GetString("CurrencyServer");
+				m_sellEnabled  = economyConfig.GetBoolean("SellEnabled", m_sellEnabled);
+				m_moneyServURL = economyConfig.GetString("CurrencyServer", m_moneyServURL);
 
 				// クライアント証明書
-				m_certFilename = economyConfig.GetString("ClientCertFilename", "");
-				m_certPassword = economyConfig.GetString("ClientCertPassword", "");
+				m_certFilename = economyConfig.GetString("ClientCertFilename", m_certFilename);
+				m_certPassword = economyConfig.GetString("ClientCertPassword", m_certPassword);
 				if (m_certFilename!="") {
 					m_cert = new X509Certificate2(m_certFilename, m_certPassword);
 					m_log.InfoFormat("[MONEY]: Issue Authentication of Client. Cert File is " + m_certFilename);
 				}
 
 				// サーバ認証
-				string checkcert = economyConfig.GetString("CheckServerCert", "false");
-				if (checkcert.ToLower()=="true") m_checkServerCert = true;
-
-				m_cacertFilename = economyConfig.GetString("CACertFilename", "");
+				m_checkServerCert = economyConfig.GetBoolean("CheckServerCert", m_checkServerCert);
+				m_cacertFilename  = economyConfig.GetString("CACertFilename",  m_cacertFilename);
 				if (m_cacertFilename!="") {
 					m_certVerify.SetPrivateCA(m_cacertFilename);
 					m_log.InfoFormat("[MONEY]: Execute Authentication of Server. CA Cert File is " + m_cacertFilename);
@@ -289,30 +287,29 @@ namespace OpenSim.Modules.Currency
 
 
 				// Settlement
-				m_use_web_settle = economyConfig.GetBoolean("SettlementByWeb", false);
-				m_settle_url	 = economyConfig.GetString ("SettlementURL", "");
-				m_settle_message = economyConfig.GetString ("SettlementMessage", "");
+				m_use_web_settle = economyConfig.GetBoolean("SettlementByWeb",   m_use_web_settle);
+				m_settle_url	 = economyConfig.GetString ("SettlementURL",     m_settle_url);
+				m_settle_message = economyConfig.GetString ("SettlementMessage", m_settle_message);
 
 				// Price
-				PriceEnergyUnit 		= economyConfig.GetInt	("PriceEnergyUnit", 		100);
-				PriceObjectClaim 		= economyConfig.GetInt	("PriceObjectClaim", 		10);
-				PricePublicObjectDecay 	= economyConfig.GetInt	("PricePublicObjectDecay", 	4);
-				PricePublicObjectDelete = economyConfig.GetInt	("PricePublicObjectDelete", 4);
-				PriceParcelClaim 		= economyConfig.GetInt	("PriceParcelClaim", 		1);
-				PriceParcelClaimFactor 	= economyConfig.GetFloat("PriceParcelClaimFactor", 	1f);
-				PriceUpload 			= economyConfig.GetInt	("PriceUpload", 			0);
-				PriceRentLight			= economyConfig.GetInt	("PriceRentLight",			5);
-				PriceObjectRent 		= economyConfig.GetFloat("PriceObjectRent", 		1);
-				PriceObjectScaleFactor 	= economyConfig.GetFloat("PriceObjectScaleFactor", 	10);
-				PriceParcelRent 		= economyConfig.GetInt	("PriceParcelRent", 		1);
-				PriceGroupCreate 		= economyConfig.GetInt	("PriceGroupCreate", 		0);
-				TeleportMinPrice 		= economyConfig.GetInt	("TeleportMinPrice", 		2);
-				TeleportPriceExponent 	= economyConfig.GetFloat("TeleportPriceExponent", 	2f);
-				EnergyEfficiency 		= economyConfig.GetFloat("EnergyEfficiency", 		1);
+				PriceEnergyUnit 		= economyConfig.GetInt	("PriceEnergyUnit", 		PriceEnergyUnit);
+				PriceObjectClaim 		= economyConfig.GetInt	("PriceObjectClaim", 		PriceObjectClaim);
+				PricePublicObjectDecay 	= economyConfig.GetInt	("PricePublicObjectDecay", 	PricePublicObjectDecay);
+				PricePublicObjectDelete = economyConfig.GetInt	("PricePublicObjectDelete", PricePublicObjectDelete);
+				PriceParcelClaim 		= economyConfig.GetInt	("PriceParcelClaim", 		PriceParcelClaim);
+				PriceParcelClaimFactor 	= economyConfig.GetFloat("PriceParcelClaimFactor", 	PriceParcelClaimFactor);
+				PriceUpload 			= economyConfig.GetInt	("PriceUpload", 			PriceUpload);
+				PriceRentLight			= economyConfig.GetInt	("PriceRentLight",			PriceRentLight);
+				PriceObjectRent 		= economyConfig.GetFloat("PriceObjectRent", 		PriceObjectRent);
+				PriceObjectScaleFactor 	= economyConfig.GetFloat("PriceObjectScaleFactor", 	PriceObjectScaleFactor);
+				PriceParcelRent 		= economyConfig.GetInt	("PriceParcelRent", 		PriceParcelRent);
+				PriceGroupCreate 		= economyConfig.GetInt	("PriceGroupCreate", 		PriceGroupCreate);
+				TeleportMinPrice 		= economyConfig.GetInt	("TeleportMinPrice", 		TeleportMinPrice);
+				TeleportPriceExponent 	= economyConfig.GetFloat("TeleportPriceExponent", 	TeleportPriceExponent);
+				EnergyEfficiency 		= economyConfig.GetFloat("EnergyEfficiency", 		EnergyEfficiency);
 
 				// for HG Avatar
-				m_hgavatar_islocal = economyConfig.GetBoolean("HGAvatarIsGridAvatar", false);
-
+				m_hgavatar_islocal = economyConfig.GetBoolean("HGAvatarIsGridAvatar", m_hgavatar_islocal);
 			}
 			catch {
 				m_log.ErrorFormat("[MONEY]: Initialise: Faile to read configuration file");

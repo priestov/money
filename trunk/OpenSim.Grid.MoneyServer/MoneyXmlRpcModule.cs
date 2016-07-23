@@ -57,7 +57,7 @@ namespace OpenSim.Grid.MoneyServer
 	{
 		private static readonly ILog m_log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
 
-		private int	   m_defaultBalance    = 0;
+		private int	   m_defaultBalance    = 1000;
 		//
 		private bool   m_forceTransfer     = false;
 		private string m_bankerAvatar	   = "";
@@ -68,6 +68,7 @@ namespace OpenSim.Grid.MoneyServer
 
 		private bool   m_hg_enable         = false;
 		private int	   m_hg_defaultBalance = 0;
+		private bool   m_trustRegionAvatar = false;
 
 		private bool   m_checkServerCert   = false;
 		private string m_cacertFilename    = "";
@@ -135,63 +136,56 @@ namespace OpenSim.Grid.MoneyServer
 
 			////////////////////////////////////////////////////////////////////////
 			// [MoneyServer] Section
-			m_defaultBalance = m_server_config.GetInt("DefaultBalance", 1000);
+			m_defaultBalance = m_server_config.GetInt("DefaultBalance", m_defaultBalance);
 
-			string ftrans   = m_server_config.GetString ("enableForceTransfer", "false");
-			if (ftrans.ToLower()=="true") m_forceTransfer = true;
 			m_forceTransfer = m_server_config.GetBoolean("EnableForceTransfer", m_forceTransfer);
 
-			string banker  = m_server_config.GetString("BankerAvatar", "");
+			string banker  = m_server_config.GetString("BankerAvatar", m_bankerAvatar);
 			m_bankerAvatar = banker.ToLower();
 
-			string sendmoney  = m_server_config.GetString ("enableScriptSendMoney", "false");
-			if (sendmoney.ToLower()=="true") m_scriptSendMoney = true;
-			m_scriptSendMoney = m_server_config.GetBoolean("EnableScriptSendMoney", m_scriptSendMoney);
-
-			m_scriptAccessKey = m_server_config.GetString("MoneyScriptAccessKey", "");
-			m_scriptIPaddress = m_server_config.GetString("MoneyScriptIPaddress", "127.0.0.1");
+			m_enableAmountZero = m_server_config.GetBoolean("EnableAmountZero",      m_enableAmountZero);
+			m_scriptSendMoney  = m_server_config.GetBoolean("EnableScriptSendMoney", m_scriptSendMoney);
+			m_scriptAccessKey  = m_server_config.GetString("MoneyScriptAccessKey",   m_scriptAccessKey);
+			m_scriptIPaddress  = m_server_config.GetString("MoneyScriptIPaddress",   m_scriptIPaddress);
 
 			// Hyper Grid Avatar
-			string hgavatar = m_server_config.GetString ("enableHGAvatar", "false");
-			if (hgavatar.ToLower()=="true") m_hg_enable = true;
 			m_hg_enable  = m_server_config.GetBoolean("EnableHGAvatar", m_hg_enable);
-			m_hg_defaultBalance = m_server_config.GetInt("HGAvatarDefaultBalance", 0);
+			m_hg_defaultBalance = m_server_config.GetInt("HGAvatarDefaultBalance", m_hg_defaultBalance);
+			m_trustRegionAvatar = m_server_config.GetBoolean("TrustRegionAvatar",  m_trustRegionAvatar);
 
 			// Update Balance Messages
-			m_BalanceMessageLandSale	 = m_server_config.GetString("BalanceMessageLandSale", 	m_BalanceMessageLandSale);
+			m_BalanceMessageLandSale	 = m_server_config.GetString("BalanceMessageLandSale", 		m_BalanceMessageLandSale);
 			m_BalanceMessageRcvLandSale	 = m_server_config.GetString("BalanceMessageRcvLandSale", 	m_BalanceMessageRcvLandSale);
 			m_BalanceMessageSendGift	 = m_server_config.GetString("BalanceMessageSendGift",		m_BalanceMessageSendGift);
 			m_BalanceMessageReceiveGift  = m_server_config.GetString("BalanceMessageReceiveGift",	m_BalanceMessageReceiveGift);
-			m_BalanceMessagePayCharge	 = m_server_config.GetString("BalanceMessagePayCharge",	m_BalanceMessagePayCharge);
+			m_BalanceMessagePayCharge	 = m_server_config.GetString("BalanceMessagePayCharge",		m_BalanceMessagePayCharge);
 			m_BalanceMessageBuyObject	 = m_server_config.GetString("BalanceMessageBuyObject", 	m_BalanceMessageBuyObject); 
 			m_BalanceMessageSellObject	 = m_server_config.GetString("BalanceMessageSellObject", 	m_BalanceMessageSellObject); 
-			m_BalanceMessageGetMoney	 = m_server_config.GetString("BalanceMessageGetMoney", 	m_BalanceMessageGetMoney); 
-			m_BalanceMessageBuyMoney	 = m_server_config.GetString("BalanceMessageBuyMoney", 	m_BalanceMessageBuyMoney); 
-			m_BalanceMessageReceiveMoney = m_server_config.GetString("BalanceMessageReceiveMoney", m_BalanceMessageReceiveMoney);
-			m_BalanceMessageRollBack	 = m_server_config.GetString("BalanceMessageRollBack", 	m_BalanceMessageRollBack);
-			m_BalanceMessageMoveFrom	 = m_server_config.GetString("BalanceMessageMoveFrom", 	m_BalanceMessageMoveFrom);
+			m_BalanceMessageGetMoney	 = m_server_config.GetString("BalanceMessageGetMoney", 		m_BalanceMessageGetMoney); 
+			m_BalanceMessageBuyMoney	 = m_server_config.GetString("BalanceMessageBuyMoney", 		m_BalanceMessageBuyMoney); 
+			m_BalanceMessageReceiveMoney = m_server_config.GetString("BalanceMessageReceiveMoney", 	m_BalanceMessageReceiveMoney);
+			m_BalanceMessageRollBack	 = m_server_config.GetString("BalanceMessageRollBack", 		m_BalanceMessageRollBack);
+			m_BalanceMessageMoveFrom	 = m_server_config.GetString("BalanceMessageMoveFrom", 		m_BalanceMessageMoveFrom);
 			m_BalanceMessageMoveTo	 	 = m_server_config.GetString("BalanceMessageMoveTo", 		m_BalanceMessageMoveTo);
 
-			string enableAmountZero = m_server_config.GetString("EnableAmountZero", "false");
-			if (enableAmountZero.ToLower()=="true") m_enableAmountZero = true;
 
 			////////////////////////////////////////////////////////////////////////
 			// [Certificate] Section
 
 			// XML RPC to Region Server (Client Mode)
 			// クライアント証明書
-			m_certFilename = m_cert_config.GetString("ClientCertFilename", "");
-			m_certPassword = m_cert_config.GetString("ClientCertPassword", "");
+			m_certFilename = m_cert_config.GetString("ClientCertFilename", m_certFilename);
+			m_certPassword = m_cert_config.GetString("ClientCertPassword", m_certPassword);
 			if (m_certFilename!="") {
 				m_clientCert = new X509Certificate2(m_certFilename, m_certPassword);
 				m_log.Info("[MONEY RPC]: Initialise: Issue Authentication of Client. Cert file is " + m_cacertFilename);
 			}
 
 			// サーバ認証
-			string checkcert = m_cert_config.GetString("CheckServerCert", "false");
-			if (checkcert.ToLower()=="true") m_checkServerCert = true;
+			m_checkServerCert = m_cert_config.GetBoolean("CheckServerCert", m_checkServerCert);
 
-			m_cacertFilename = m_cert_config.GetString("CACertFilename", "");
+			// CA
+			m_cacertFilename = m_cert_config.GetString("CACertFilename", m_cacertFilename);
 			if (m_checkServerCert && m_cacertFilename!="") {
 				m_certVerify.SetPrivateCA(m_cacertFilename);
 				ServicePointManager.ServerCertificateValidationCallback = new RemoteCertificateValidationCallback(m_certVerify.ValidateServerCertificate);
@@ -335,8 +329,10 @@ namespace OpenSim.Grid.MoneyServer
 			UserInfo userInfo = m_moneyDBService.FetchUserInfo(clientUUID);
 			if (userInfo!=null) {
 				if (String.IsNullOrEmpty(userName)) userName = userInfo.Avatar;
-				if (userInfo.Class==(int)AvatarClass.HG_AVATAR) {
-					is_hg_avatar = true;
+				if (!m_trustRegionAvatar) {
+					if (userInfo.Class==(int)AvatarClass.HG_AVATAR) {
+						is_hg_avatar = true;
+					}
 				}
 			}
 
