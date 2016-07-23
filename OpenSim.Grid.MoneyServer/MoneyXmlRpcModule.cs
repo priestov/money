@@ -293,7 +293,7 @@ namespace OpenSim.Grid.MoneyServer
 			string simIP = string.Empty;
 			string userName = string.Empty;
 			int    balance = 0;
-			int	   avatarClass = (int)AvatarClass.LOCAL_AVATAR; 
+			int	   avatarClass = (int)AvatarClass.UNKNOWN_AVATAR; 
 
 			responseData["success"] = false;
 
@@ -323,7 +323,7 @@ namespace OpenSim.Grid.MoneyServer
 			UserInfo userInfo = m_moneyDBService.FetchUserInfo(clientUUID);
 			if (userInfo!=null) {
 				if (String.IsNullOrEmpty(userName)) userName = userInfo.Avatar;
-				if (!m_trustRegionAvatar) {
+				if (!m_trustRegionAvatar || avatarClass==(int)AvatarClass.UNKNOWN_AVATAR) {
 					avatarClass = userInfo.Class;
 				}
 			}
@@ -332,15 +332,19 @@ namespace OpenSim.Grid.MoneyServer
 			m_log.InfoFormat("[MONEY RPC]: handleClientLogon: Avatar Class is {0}", avatarClass);
 
 			//
-			if (String.IsNullOrEmpty(serverURL) || (avatarClass==(int)AvatarClass.HG_AVATAR && !m_hg_enable)) {
+			// Check Avatar
+			if (String.IsNullOrEmpty(serverURL) || (avatarClass==(int)AvatarClass.HG_AVATAR && !m_hg_enable) || (avatarClass==(int)AvatarClass.UNKNOWN_AVATAR)) {
 				responseData["success"] = true; 
 				responseData["clientBalance"] = 0;
 				//
 				if (String.IsNullOrEmpty(serverURL)) {
 					responseData["description"] = "Server URL is empty. Avatar is a NPC?";
 				}
-				if (avatarClass==(int)AvatarClass.HG_AVATAR && !m_hg_enable) {
+				else if (avatarClass==(int)AvatarClass.HG_AVATAR && !m_hg_enable) {
 					responseData["description"] = "Avatar is a HG avatar. But this Money Server does not support HG avatars.";
+				}
+				else if (avatarClass==(int)AvatarClass.UNKNOWN_AVATAR) {
+					responseData["description"] = "Avatar is a Unknown avatar.";
 				}
 				m_log.InfoFormat("[MONEY RPC]: handleClientLogon: {0}", responseData["description"]);
 				return response;
