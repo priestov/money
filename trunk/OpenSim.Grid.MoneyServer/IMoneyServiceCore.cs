@@ -32,6 +32,9 @@ using System.Text;
 using OpenSim.Framework.Servers;
 using OpenSim.Framework.Servers.HttpServer;
 
+using Nini.Config;
+
+
 namespace OpenSim.Grid.MoneyServer
 {
     public interface IMoneyServiceCore
@@ -40,5 +43,10 @@ namespace OpenSim.Grid.MoneyServer
         Dictionary<string, string> GetSessionDic();
         Dictionary<string, string> GetSecureSessionDic();
         Dictionary<string, string> GetWebSessionDic();
+
+		//
+		IConfig  GetServerConfig();
+		IConfig  GetCertConfig();
+		bool     IsCheckClientCert();
     }
 }

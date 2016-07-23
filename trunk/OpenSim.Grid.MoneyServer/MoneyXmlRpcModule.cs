@@ -74,7 +74,7 @@ namespace OpenSim.Grid.MoneyServer
 
 		private string m_certFilename	   = "";
 		private string m_certPassword	   = "";
-		private X509Certificate2 m_cert    = null;
+		private X509Certificate2 m_clientCert = null;
 
 		private string m_sslCommonName     = "";
 
@@ -124,14 +124,17 @@ namespace OpenSim.Grid.MoneyServer
 		}
 
 
-		public void Initialise(string opensimVersion, IConfig server_config, IConfig cert_config, IMoneyDBService moneyDBService, IMoneyServiceCore moneyCore) 
+	//	public void Initialise(string opensimVersion, IConfig server_config, IConfig cert_config, IMoneyDBService moneyDBService, IMoneyServiceCore moneyCore) 
+		public void Initialise(string opensimVersion, IMoneyDBService moneyDBService, IMoneyServiceCore moneyCore) 
 		{
 			//m_opensimVersion = opensimVersion;
 			m_moneyDBService = moneyDBService;
 			m_moneyCore = moneyCore;
-			m_server_config = server_config;		// [MoneyServer] Section
-			m_cert_config   = cert_config;			// [Certificate] Section
+			m_server_config = m_moneyCore.GetServerConfig();	// [MoneyServer] Section
+			m_cert_config   = m_moneyCore.GetCertConfig();		// [Certificate] Section
 
+			////////////////////////////////////////////////////////////////////////
+			// [MoneyServer] Section
 			m_defaultBalance = m_server_config.GetInt("DefaultBalance", 1000);
 
 			string ftrans   = m_server_config.GetString ("enableForceTransfer", "false");
@@ -172,13 +175,15 @@ namespace OpenSim.Grid.MoneyServer
 			string enableAmountZero = m_server_config.GetString("EnableAmountZero", "false");
 			if (enableAmountZero.ToLower()=="true") m_enableAmountZero = true;
 
-			//
+			////////////////////////////////////////////////////////////////////////
+			// [Certificate] Section
+
 			// XML RPC to Region Server (Client Mode)
 			// クライアント証明書
 			m_certFilename = m_cert_config.GetString("ClientCertFilename", "");
 			m_certPassword = m_cert_config.GetString("ClientCertPassword", "");
 			if (m_certFilename!="") {
-				m_cert = new X509Certificate2(m_certFilename, m_certPassword);
+				m_clientCert = new X509Certificate2(m_certFilename, m_certPassword);
 				m_log.Info("[MONEY RPC]: Initialise: Issue Authentication of Client. Cert file is " + m_cacertFilename);
 			}
 
@@ -274,6 +279,17 @@ namespace OpenSim.Grid.MoneyServer
 			Hashtable responseData = new Hashtable();
 			response.Value = responseData;
 
+			// Check Client Cert
+			if (m_moneyCore.IsCheckClientCert()) {
+				if (GetSSLCommonName()=="") {
+					m_log.ErrorFormat("[MONEY RPC]: handleClientLogin: Warnning: Check Client Cert is set, but SSL Common Name is empty.");
+					responseData["success"] = false;
+					responseData["clientBalance"] = 0;
+					responseData["description"] = "SSL Common Name is empty";
+					return response;
+				}
+			}
+
 			string universalID = string.Empty;
 			string clientUUID = string.Empty;
 			string sessionID = string.Empty;
@@ -366,7 +382,7 @@ namespace OpenSim.Grid.MoneyServer
 				}
 				
 				if (!m_moneyDBService.TryAddUserInfo(userInfo)) {
-					m_log.ErrorFormat("[MONEY RPC]: handleClientLogin: Unable to refresh information for user \"{0}\" in DB", userName);
+					m_log.ErrorFormat("[MONEY RPC]: handleClientLogin: Unable to refresh information for user \"{0}\" in DB.", userName);
 					responseData["success"] = true;
 					responseData["clientBalance"] = 0;
 					responseData["description"] = "Update or add user information to db failed";
@@ -433,7 +449,7 @@ namespace OpenSim.Grid.MoneyServer
 			string clientUUID = string.Empty;
 			if (requestData.ContainsKey("clientUUID"))  clientUUID = (string)requestData["clientUUID"];
 
-			m_log.InfoFormat("[MONEY RPC]: handleClientLogout: User {0} is logging off", clientUUID);
+			m_log.InfoFormat("[MONEY RPC]: handleClientLogout: User {0} is logging off.", clientUUID);
 			try {
 				lock (m_sessionDic) {
 					if (m_sessionDic.ContainsKey(clientUUID)) {
@@ -448,7 +464,7 @@ namespace OpenSim.Grid.MoneyServer
 				}
 			}
 			catch (Exception e) {
-				m_log.Error("[MONEY RPC]: handleClientLogout: Failed to delete user session " + e.ToString() );
+				m_log.Error("[MONEY RPC]: handleClientLogout: Failed to delete user session: " + e.ToString() );
 				responseData["success"] = false;
 				return response;
 			}
@@ -560,14 +576,13 @@ namespace OpenSim.Grid.MoneyServer
 								return response;
 							}
 						}
-						// add transaction failed
-						else {
-							m_log.ErrorFormat("[MONEY RPC]: handleTransaction: Add transaction for user {0} failed", senderID);
+						else { 	// add transaction failed
+							m_log.ErrorFormat("[MONEY RPC]: handleTransaction: Add transaction for user {0} failed.", senderID);
 						}
 						return response;
 					}
 					catch (Exception e) {
-						m_log.Error("[MONEY RPC]: handleTransaction: Exception occurred while adding transaction " + e.ToString());
+						m_log.Error("[MONEY RPC]: handleTransaction: Exception occurred while adding transaction: " + e.ToString());
 					}
 					return response;
 				}
@@ -684,14 +699,13 @@ namespace OpenSim.Grid.MoneyServer
 						return response;
 					}
 				}
-				// add transaction failed
-				else {
-					m_log.ErrorFormat("[MONEY RPC]: handleForceTransaction: Add force transaction for user {0} failed", senderID);
+				else { 	// add transaction failed
+					m_log.ErrorFormat("[MONEY RPC]: handleForceTransaction: Add force transaction for user {0} failed.", senderID);
 				}
 				return response;
 			}
 			catch (Exception e) {
-				m_log.Error("[MONEY RPC]: handleForceTransaction: Exception occurred while adding force transaction " + e.ToString());
+				m_log.Error("[MONEY RPC]: handleForceTransaction: Exception occurred while adding force transaction: " + e.ToString());
 			}
 			return response;
 		}
@@ -785,14 +799,13 @@ namespace OpenSim.Grid.MoneyServer
 					}
 					return response;
 				}
-				// add transaction failed
-				else {
-					m_log.ErrorFormat("[MONEY RPC]: handleAddBankerMoney: Add force transaction for user {0} failed", senderID);
+				else { 	// add transaction failed
+					m_log.ErrorFormat("[MONEY RPC]: handleAddBankerMoney: Add force transaction for user {0} failed.", senderID);
 				}
 				return response;
 			}
 			catch (Exception e) {
-				m_log.Error("[MONEY RPC]: handleAddBankerMoney: Exception occurred while adding money transaction " + e.ToString());
+				m_log.Error("[MONEY RPC]: handleAddBankerMoney: Exception occurred while adding money transaction: " + e.ToString());
 			}
 			return response;
 		}
@@ -849,7 +862,7 @@ namespace OpenSim.Grid.MoneyServer
 
 			if (secretCode.ToLower()!=hash) {
 				m_log.Error("[MONEY RPC]: handleSendMoney: Not allowed send money to avatar!!");
-				m_log.Error("[MONEY RPC]: handleSendMoney: Not match Script Key");
+				m_log.Error("[MONEY RPC]: handleSendMoney: Not match the Script Access Key.");
 				responseData["message"] = "not allowed send money to avatar! not match Script Key";
 				return response;
 			}
@@ -897,14 +910,13 @@ namespace OpenSim.Grid.MoneyServer
 					}
 					return response;
 				}
-				// add transaction failed
-				else {
-					m_log.ErrorFormat("[MONEY RPC]: handleSendMoney: Add force transaction for user {0} failed", senderID);
+				else { 	// add transaction failed
+					m_log.ErrorFormat("[MONEY RPC]: handleSendMoney: Add force transaction for user {0} failed.", senderID);
 				}
 				return response;
 			}
 			catch (Exception e) {
-				m_log.Error("[MONEY RPC]: handleSendMoney: Exception occurred while adding money transaction " + e.ToString());
+				m_log.Error("[MONEY RPC]: handleSendMoney: Exception occurred while adding money transaction: " + e.ToString());
 			}
 			return response;
 		}
@@ -963,7 +975,7 @@ namespace OpenSim.Grid.MoneyServer
 
 			if (secretCode.ToLower()!=hash) {
 				m_log.Error("[MONEY RPC]: handleMoveMoney: Not allowed send money to avatar!!");
-				m_log.Error("[MONEY RPC]: handleMoveMoney: Not match Script Key");
+				m_log.Error("[MONEY RPC]: handleMoveMoney: Not match Script Access Key.");
 				responseData["message"] = "not allowed send money to avatar! not match Script Key";
 				return response;
 			}
@@ -1027,14 +1039,13 @@ namespace OpenSim.Grid.MoneyServer
 					}
 					return response;
 				}
-				// add transaction failed
-				else {
-					m_log.ErrorFormat("[MONEY RPC]: handleMoveMoney: Move force transaction for user {0} failed", transaction.Sender);
+				else { 	// add transaction failed
+					m_log.ErrorFormat("[MONEY RPC]: handleMoveMoney: Move force transaction for user {0} failed.", transaction.Sender);
 				}
 				return response;
 			}
 			catch (Exception e) {
-				m_log.Error("[MONEY RPC]: handleMoveMoney: Exception occurred while adding money transaction " + e.ToString());
+				m_log.Error("[MONEY RPC]: handleMoveMoney: Exception occurred while adding money transaction: " + e.ToString());
 			}
 			return response;
 		}
@@ -1116,14 +1127,13 @@ namespace OpenSim.Grid.MoneyServer
 								return response;
 							}
 						}
-						// add transaction failed
-						else {
-							m_log.ErrorFormat("[MONEY RPC]: handlePayMoneyCharge: Pay money transaction for user {0} failed", senderID);
+						else { 	// add transaction failed
+							m_log.ErrorFormat("[MONEY RPC]: handlePayMoneyCharge: Pay money transaction for user {0} failed.", senderID);
 						}
 						return response;
 					}
 					catch (Exception e) {
-						m_log.Error("[MONEY RPC]: handlePayMoneyCharge: Exception occurred while pay money transaction " + e.ToString());
+						m_log.Error("[MONEY RPC]: handlePayMoneyCharge: Exception occurred while pay money transaction: " + e.ToString());
 					}
 					return response;
 				}
@@ -1206,17 +1216,17 @@ namespace OpenSim.Grid.MoneyServer
 								if (responseTable!=null && responseTable.ContainsKey("success")) {
 									//User not online or failed to get object ?
 									if (!(bool)responseTable["success"]) {
-										m_log.ErrorFormat("[MONEY RPC]: NotifyTransfer: User {0} can't get the object, rolling back", transaction.Sender);
+										m_log.ErrorFormat("[MONEY RPC]: NotifyTransfer: User {0} can't get the object, rolling back.", transaction.Sender);
 										if (RollBackTransaction(transaction)) {
-											m_log.ErrorFormat("[MONEY RPC]: NotifyTransfer: Transaction {0} failed but roll back succeeded", transactionUUID.ToString());
+											m_log.ErrorFormat("[MONEY RPC]: NotifyTransfer: Transaction {0} failed but roll back succeeded.", transactionUUID.ToString());
 										}
 										else {
-											m_log.ErrorFormat("[MONEY RPC]: NotifyTransfer: Transaction {0} failed and roll back failed as well", 
+											m_log.ErrorFormat("[MONEY RPC]: NotifyTransfer: Transaction {0} failed and roll back failed as well.", 
 																														transactionUUID.ToString());
 										}
 									}
 									else {
-										m_log.InfoFormat("[MONEY RPC]: NotifyTransfer: Transaction {0} finished successfully", transactionUUID.ToString());
+										m_log.InfoFormat("[MONEY RPC]: NotifyTransfer: Transaction {0} finished successfully.", transactionUUID.ToString());
 										return true;
 									}
 								}
@@ -1226,7 +1236,7 @@ namespace OpenSim.Grid.MoneyServer
 						return true;
 					}
 				}
-				m_log.ErrorFormat("[MONEY RPC]: NotifyTransfer: Transaction {0} failed", transactionUUID.ToString());
+				m_log.ErrorFormat("[MONEY RPC]: NotifyTransfer: Transaction {0} failed.", transactionUUID.ToString());
 			}
 			catch (Exception e) {
 				m_log.ErrorFormat("[MONEY RPC]: NotifyTransfer: exception occurred when transaction {0}: {1}", transactionUUID.ToString(), e.ToString());
@@ -1309,7 +1319,7 @@ namespace OpenSim.Grid.MoneyServer
 
 			if (m_checkServerCert) {
 				if (!uri.StartsWith("https://")) {
-					m_log.InfoFormat("[MONEY RPC]: genericCurrencyXMLRPCRequest: CheckServerCert is true, but protocol is not HTTPS. Please check INI file");
+					m_log.InfoFormat("[MONEY RPC]: genericCurrencyXMLRPCRequest: CheckServerCert is true, but protocol is not HTTPS. Please check INI file.");
 					//return null; 
 				}
 			}
@@ -1327,7 +1337,7 @@ namespace OpenSim.Grid.MoneyServer
 				//XmlRpcRequest moneyModuleReq = new XmlRpcRequest(method, arrayParams);
 				//moneyServResp = moneyModuleReq.Send(uri, MONEYMODULE_REQUEST_TIMEOUT);
 				NSLXmlRpcRequest moneyModuleReq = new NSLXmlRpcRequest(method, arrayParams);
-				moneyServResp = moneyModuleReq.certSend(uri, m_cert, m_checkServerCert, MONEYMODULE_REQUEST_TIMEOUT);
+				moneyServResp = moneyModuleReq.certSend(uri, m_clientCert, m_checkServerCert, MONEYMODULE_REQUEST_TIMEOUT);
 			}
 			catch (Exception ex) {
 				m_log.ErrorFormat("[MONEY RPC]: genericCurrencyXMLRPCRequest: Unable to connect to Region Server {0}", uri);
@@ -1395,7 +1405,7 @@ namespace OpenSim.Grid.MoneyServer
 
 			if(m_moneyDBService.withdrawMoney(transaction.TransUUID, transaction.Receiver, transaction.Amount)) {
 				if(m_moneyDBService.giveMoney(transaction.TransUUID, transaction.Sender, transaction.Amount)) {
-					m_log.InfoFormat("[MONEY RPC]: RollBackTransaction: Transaction {0} successfully", transaction.TransUUID.ToString());
+					m_log.InfoFormat("[MONEY RPC]: RollBackTransaction: Transaction {0} is successfully.", transaction.TransUUID.ToString());
 					m_moneyDBService.updateTransactionStatus(transaction.TransUUID, (int)Status.FAILED_STATUS, 
 																	"The buyer failed to get the object, roll back the transaction");
 					UserInfo senderInfo   = m_moneyDBService.FetchUserInfo(transaction.Sender);
@@ -1442,7 +1452,7 @@ namespace OpenSim.Grid.MoneyServer
 			}
 
 			if (string.IsNullOrEmpty(secureCode) || string.IsNullOrEmpty(transactionID)) {
-				m_log.Error("[MONEY RPC]: handleCancelTransfer: secureCode or transactionID can't be empty");
+				m_log.Error("[MONEY RPC]: handleCancelTransfer: secureCode and/or transactionID are empty.");
 				return response;
 			}
 
@@ -1450,7 +1460,7 @@ namespace OpenSim.Grid.MoneyServer
 			UserInfo user = m_moneyDBService.FetchUserInfo(transaction.Sender);
 		 
 			try {
-				m_log.InfoFormat("[MONEY RPC]: handleCancelTransfer: User {0} wanted to cancel the transaction", user.Avatar);
+				m_log.InfoFormat("[MONEY RPC]: handleCancelTransfer: User {0} wanted to cancel the transaction.", user.Avatar);
 				if (m_moneyDBService.ValidateTransfer(secureCode, transactionUUID)) {
 					m_log.InfoFormat("[MONEY RPC]: handleCancelTransfer: User {0} has canceled the transaction {1}", user.Avatar, transactionID);
 					m_moneyDBService.updateTransactionStatus(transactionUUID, (int)Status.FAILED_STATUS, 
@@ -1499,7 +1509,7 @@ namespace OpenSim.Grid.MoneyServer
 					//
 					if (string.IsNullOrEmpty(transactionID)) {
 						responseData["description"] = "TransactionID is empty";
-						m_log.Error("[MONEY RPC]: handleGetTransaction: TransactionID is empty");
+						m_log.Error("[MONEY RPC]: handleGetTransaction: TransactionID is empty.");
 						return response;
 					}
 
@@ -1534,9 +1544,12 @@ namespace OpenSim.Grid.MoneyServer
 		}
 
 
-		//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+		//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		//
+		// In development
+		//
+
 		public XmlRpcResponse handleWebLogin(XmlRpcRequest request, IPEndPoint remoteClient)
 		{
 			m_log.InfoFormat("[MONEY RPC]: handleWebLogin:");
@@ -1569,7 +1582,7 @@ namespace OpenSim.Grid.MoneyServer
 				else m_webSessionDic[userID] = webSessionID;
 			}
 
-			m_log.InfoFormat("[MONEY RPC]: handleWebLogin: User {0} has logged in from web", userID);
+			m_log.InfoFormat("[MONEY RPC]: handleWebLogin: User {0} has logged in from web.", userID);
 			responseData["success"] = true;
 			return response;
 		}
@@ -1607,7 +1620,7 @@ namespace OpenSim.Grid.MoneyServer
 				}
 			}
 
-			m_log.InfoFormat("[MONEY RPC]: handleWebLogout: User {0} has logged out from web", userID);
+			m_log.InfoFormat("[MONEY RPC]: handleWebLogout: User {0} has logged out from web.", userID);
 			responseData["success"] = true;
 			return response;
 		}
@@ -1808,5 +1821,6 @@ namespace OpenSim.Grid.MoneyServer
 			return response;
 		}
 	}
+
 }
 
