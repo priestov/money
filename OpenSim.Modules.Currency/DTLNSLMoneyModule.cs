@@ -206,7 +206,6 @@ namespace OpenSim.Modules.Currency
 		// Events  
 		public event ObjectPaid OnObjectPaid;
 
-
 		// Price
 		private int   ObjectCount 			  = 0;
 		private int   PriceEnergyUnit 		  = 0;

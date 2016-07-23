@@ -264,8 +264,28 @@ namespace OpenSim.Grid.MoneyServer
 			m_moneyDBService.Initialise(connectionString, MAX_DB_CONNECTION);
 
 			m_moneyXmlRpcModule = new MoneyXmlRpcModule();
-			m_moneyXmlRpcModule.Initialise(m_version, m_server_config, m_cert_config, m_moneyDBService, this);
+//			m_moneyXmlRpcModule.Initialise(m_version, m_server_config, m_cert_config, m_moneyDBService, this);
+			m_moneyXmlRpcModule.Initialise(m_version, m_moneyDBService, this);
 			m_moneyXmlRpcModule.PostInitialise();
+		}
+
+
+		//
+		public bool IsCheckClientCert()
+		{
+			return m_checkClientCert;
+		}
+
+
+		public IConfig GetServerConfig()
+		{
+			return m_server_config;
+		}
+
+
+		public IConfig GetCertConfig()
+		{
+			return m_cert_config;
 		}
 
 
@@ -296,6 +316,7 @@ namespace OpenSim.Grid.MoneyServer
 
 
 
+	//
 	class MoneyServerConfigSource
 	{
 		public IniConfigSource m_config;
