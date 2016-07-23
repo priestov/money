@@ -78,7 +78,8 @@ namespace OpenSim.Grid.MoneyServer
 		private Dictionary<string, string> m_secureSessionDic = new Dictionary<string, string>();
 		private Dictionary<string, string> m_webSessionDic = new Dictionary<string, string>();
 
-		IConfig m_config;
+		IConfig m_server_config;
+		IConfig m_cert_config;
 
 
 		public MoneyServerBase()
@@ -189,26 +190,31 @@ namespace OpenSim.Grid.MoneyServer
 												username + ";Password=" + password + ";Pooling=" + pooling + ";";
 
 				// [MoneyServer]
-				m_config  = moneyConfig.m_config.Configs["MoneyServer"];
-				DEAD_TIME = m_config.GetInt("ExpiredTime", 120);
+				m_server_config = moneyConfig.m_config.Configs["MoneyServer"];
+				DEAD_TIME = m_server_config.GetInt("ExpiredTime", 120);
 
+				//
 				// [Certificate]
-				m_config  = moneyConfig.m_config.Configs["Certificate"];
-				if (m_config==null) m_config  = moneyConfig.m_config.Configs["MoneyServer"];
+				m_cert_config = moneyConfig.m_config.Configs["Certificate"];
+				if (m_cert_config==null) {
+					m_log.Info("[MONEY SERVER]: [Certificate] section is not found. Using [MoneyServer] section instead");
+					m_cert_config = moneyConfig.m_config.Configs["MoneyServer"];
+				}
 
+				// HTTPS Server Cert (Server Mode)
 				// サーバ証明書
-				m_certFilename = m_config.GetString("ServerCertFilename", "");
-				m_certPassword = m_config.GetString("ServerCertPassword", "");
+				m_certFilename = m_cert_config.GetString("ServerCertFilename", "");
+				m_certPassword = m_cert_config.GetString("ServerCertPassword", "");
 				if (m_certFilename!="") {
 					m_log.Info("[MONEY SERVER]: ReadIniConfig: Execute HTTPS comunication. Cert file is " + m_certFilename);
 				}
 
 				// クライアント認証
-				string checkcert = m_config.GetString("CheckClientCert", "false");
+				string checkcert = m_cert_config.GetString("CheckClientCert", "false");
 				if (checkcert.ToLower()=="true") m_checkClientCert = true;
 
-				m_cacertFilename = m_config.GetString("CACertFilename", "");
-				m_clcrlFilename  = m_config.GetString("ClientCrlFilename", "");
+				m_cacertFilename = m_cert_config.GetString("CACertFilename", "");
+				m_clcrlFilename  = m_cert_config.GetString("ClientCrlFilename", "");
 				//
 				if (m_checkClientCert && m_cacertFilename!="") {
 					m_certVerify.SetPrivateCA(m_cacertFilename);
@@ -258,7 +264,7 @@ namespace OpenSim.Grid.MoneyServer
 			m_moneyDBService.Initialise(connectionString, MAX_DB_CONNECTION);
 
 			m_moneyXmlRpcModule = new MoneyXmlRpcModule();
-			m_moneyXmlRpcModule.Initialise(m_version, m_config, m_moneyDBService, this);
+			m_moneyXmlRpcModule.Initialise(m_version, m_server_config, m_cert_config, m_moneyDBService, this);
 			m_moneyXmlRpcModule.PostInitialise();
 		}
 
