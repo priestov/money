@@ -303,7 +303,7 @@ namespace OpenSim.Grid.MoneyServer
 			if (requestData.ContainsKey("universalID")) 	  	  universalID = (string)requestData["universalID"];
 			if (requestData.ContainsKey("userName")) 			  userName = (string)requestData["userName"];
 			if (requestData.ContainsKey("openSimServIP"))         simIP = (string)requestData["openSimServIP"];
-			if (requestData.ContainsKey("avatarClass")) 	  	  avatarClass = (Int32)requestData["avatarClass"];
+			if (requestData.ContainsKey("avatarClass")) 	  	  avatarClass = Convert.ToInt32(requestData["avatarClass"]);
 
 			//
 			string firstName = string.Empty;
@@ -503,11 +503,11 @@ namespace OpenSim.Grid.MoneyServer
 			if (requestData.ContainsKey("receiverID")) 			  receiverID = (string)requestData["receiverID"];
 			if (requestData.ContainsKey("senderSessionID")) 	  senderSessionID = (string)requestData["senderSessionID"];
 			if (requestData.ContainsKey("senderSecureSessionID")) senderSecureSessionID = (string)requestData["senderSecureSessionID"];
-			if (requestData.ContainsKey("amount")) 				  amount = (Int32)requestData["amount"];
+			if (requestData.ContainsKey("amount")) 				  amount = Convert.ToInt32(requestData["amount"]);
 			if (requestData.ContainsKey("objectID")) 			  objectID = (string)requestData["objectID"];
 			if (requestData.ContainsKey("objectName")) 			  objectName = (string)requestData["objectName"];
 			if (requestData.ContainsKey("regionHandle")) 		  regionHandle = (string)requestData["regionHandle"];
-			if (requestData.ContainsKey("transactionType")) 	  transactionType = (Int32)requestData["transactionType"];
+			if (requestData.ContainsKey("transactionType")) 	  transactionType = Convert.ToInt32(requestData["transactionType"]);
 			if (requestData.ContainsKey("description")) 		  description = (string)requestData["description"];
 
 			if (m_sessionDic.ContainsKey(senderID) && m_secureSessionDic.ContainsKey(senderID)) {
@@ -627,11 +627,11 @@ namespace OpenSim.Grid.MoneyServer
 
 			if (requestData.ContainsKey("senderID")) 		senderID = (string)requestData["senderID"];
 			if (requestData.ContainsKey("receiverID")) 		receiverID = (string)requestData["receiverID"];
-			if (requestData.ContainsKey("amount")) 			amount = (Int32)requestData["amount"];
+			if (requestData.ContainsKey("amount")) 			amount = Convert.ToInt32(requestData["amount"]);
 			if (requestData.ContainsKey("objectID")) 		objectID = (string)requestData["objectID"];
 			if (requestData.ContainsKey("objectName")) 		objectName = (string)requestData["objectName"];
 			if (requestData.ContainsKey("regionHandle")) 	regionHandle = (string)requestData["regionHandle"];
-			if (requestData.ContainsKey("transactionType")) transactionType = (Int32)requestData["transactionType"];
+			if (requestData.ContainsKey("transactionType")) transactionType = Convert.ToInt32(requestData["transactionType"]);
 			if (requestData.ContainsKey("description")) 	description = (string)requestData["description"];
 
 			m_log.InfoFormat("[MONEY RPC]: handleForceTransaction: Force transfering money from {0} to {1}", senderID, receiverID);
@@ -733,9 +733,9 @@ namespace OpenSim.Grid.MoneyServer
 			UUID transactionUUID = UUID.Random();
 
 			if (requestData.ContainsKey("bankerID")) 		bankerID = (string)requestData["bankerID"];
-			if (requestData.ContainsKey("amount")) 			amount = (Int32)requestData["amount"];
+			if (requestData.ContainsKey("amount")) 			amount = Convert.ToInt32(requestData["amount"]);
 			if (requestData.ContainsKey("regionHandle")) 	regionHandle = (string)requestData["regionHandle"];
-			if (requestData.ContainsKey("transactionType")) transactionType = (Int32)requestData["transactionType"];
+			if (requestData.ContainsKey("transactionType")) transactionType = Convert.ToInt32(requestData["transactionType"]);
 			if (requestData.ContainsKey("description")) 	description = (string)requestData["description"];
 
 			// Check Banker Avatar
@@ -841,8 +841,8 @@ namespace OpenSim.Grid.MoneyServer
 			}
 
 			if (requestData.ContainsKey("avatarID")) 		 avatarID = (string)requestData["avatarID"];
-			if (requestData.ContainsKey("amount")) 			 amount = (Int32)requestData["amount"];
-			if (requestData.ContainsKey("transactionType"))  transactionType = (Int32)requestData["transactionType"];
+			if (requestData.ContainsKey("amount")) 			 amount = Convert.ToInt32(requestData["amount"]);
+			if (requestData.ContainsKey("transactionType"))  transactionType = Convert.ToInt32(requestData["transactionType"]);
 			if (requestData.ContainsKey("description")) 	 description = (string)requestData["description"];
 			if (requestData.ContainsKey("secretAccessCode")) secretCode = (string)requestData["secretAccessCode"];
 
@@ -954,8 +954,8 @@ namespace OpenSim.Grid.MoneyServer
 
 			if (requestData.ContainsKey("avatarID")) 		 avatarID  = (string)requestData["avatarID"];
 			if (requestData.ContainsKey("receiptID")) 		 receiptID = (string)requestData["receiptID"];
-			if (requestData.ContainsKey("amount")) 			 amount = (Int32)requestData["amount"];
-			if (requestData.ContainsKey("transactionType"))  transactionType = (Int32)requestData["transactionType"];
+			if (requestData.ContainsKey("amount")) 			 amount = Convert.ToInt32(requestData["amount"]);
+			if (requestData.ContainsKey("transactionType"))  transactionType = Convert.ToInt32(requestData["transactionType"]);
 			if (requestData.ContainsKey("description")) 	 description = (string)requestData["description"];
 			if (requestData.ContainsKey("secretAccessCode")) secretCode = (string)requestData["secretAccessCode"];
 
@@ -1080,9 +1080,9 @@ namespace OpenSim.Grid.MoneyServer
 			if (requestData.ContainsKey("senderID")) 			  senderID = (string)requestData["senderID"];
 			if (requestData.ContainsKey("senderSessionID")) 	  senderSessionID = (string)requestData["senderSessionID"];
 			if (requestData.ContainsKey("senderSecureSessionID")) senderSecureSessionID = (string)requestData["senderSecureSessionID"];
-			if (requestData.ContainsKey("amount")) 				  amount = (Int32)requestData["amount"];
+			if (requestData.ContainsKey("amount")) 				  amount = Convert.ToInt32(requestData["amount"]);
 			if (requestData.ContainsKey("regionHandle")) 		  regionHandle = (string)requestData["regionHandle"];
-			if (requestData.ContainsKey("transactionType")) 	  transactionType = (Int32)requestData["transactionType"];
+			if (requestData.ContainsKey("transactionType")) 	  transactionType = Convert.ToInt32(requestData["transactionType"]);
 			if (requestData.ContainsKey("description")) 		  description = (string)requestData["description"];
 
 			if (m_sessionDic.ContainsKey(senderID) && m_secureSessionDic.ContainsKey(senderID)) {
