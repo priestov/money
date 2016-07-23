@@ -189,8 +189,12 @@ namespace OpenSim.Grid.MoneyServer
 												username + ";Password=" + password + ";Pooling=" + pooling + ";";
 
 				// [MoneyServer]
-				m_config   = moneyConfig.m_config.Configs["MoneyServer"];
-				DEAD_TIME  = m_config.GetInt("ExpiredTime", 120);
+				m_config  = moneyConfig.m_config.Configs["MoneyServer"];
+				DEAD_TIME = m_config.GetInt("ExpiredTime", 120);
+
+				// [Certificate]
+				m_config  = moneyConfig.m_config.Configs["Certificate"];
+				if (m_config==null) m_config  = moneyConfig.m_config.Configs["MoneyServer"];
 
 				// サーバ証明書
 				m_certFilename = m_config.GetString("ServerCertFilename", "");
