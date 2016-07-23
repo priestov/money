@@ -310,6 +310,7 @@ namespace OpenSim.Grid.MoneyServer
 			if (requestData.ContainsKey("userName")) 			  userName = (string)requestData["userName"];
 			if (requestData.ContainsKey("openSimServIP"))         simIP = (string)requestData["openSimServIP"];
 
+			//
 			string firstName = string.Empty;
 			string lastName  = string.Empty;
 			string serverURL = string.Empty;

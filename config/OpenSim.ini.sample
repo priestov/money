@@ -31,3 +31,7 @@
     ;; Money Unit fee to create groups.  Default is 0.
     PriceGroupCreate = 10
 
+    ; for HG Avatar
+    ; HG Avatar is assumed to be a Local Grid Avatar
+    ;HGAvatarIsGridAvatar = false
+

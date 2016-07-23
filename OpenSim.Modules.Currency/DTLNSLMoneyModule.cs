@@ -184,6 +184,7 @@ namespace OpenSim.Modules.Currency
 		private string m_cacertFilename	  = "";
 		private X509Certificate2 m_cert	  = null;
 
+		private bool   m_hgavatar_islocal = false;
 		//
 		private bool   m_use_web_settle	  = false;
 		private string m_settle_url	  	  = "";
@@ -308,6 +309,10 @@ namespace OpenSim.Modules.Currency
 				TeleportMinPrice 		= economyConfig.GetInt	("TeleportMinPrice", 		2);
 				TeleportPriceExponent 	= economyConfig.GetFloat("TeleportPriceExponent", 	2f);
 				EnergyEfficiency 		= economyConfig.GetFloat("EnergyEfficiency", 		1);
+
+				// for HG Avatar
+				m_hgavatar_islocal = economyConfig.GetBoolean("HGAvatarIsGridAvatar", false);
+
 			}
 			catch {
 				m_log.ErrorFormat("[MONEY]: Initialise: Faile to read configuration file");
@@ -1515,8 +1520,6 @@ namespace OpenSim.Modules.Currency
 			if (!string.IsNullOrEmpty(m_moneyServURL)) {
 				Scene scene = (Scene)client.Scene;
 				string userName = string.Empty;
-				string universalID = string.Empty;
-				string hgAvatar = string.Empty;
 
 				// Get the username for the login user.
 				if (client.Scene is Scene) {
@@ -1528,15 +1531,34 @@ namespace OpenSim.Modules.Currency
 					}
 				}
 
-				// User Universal Identifer for HG User
+				//////////////////////////////////////////////////////////
+				// User Universal Identifer for Grid User/HG User/NPC
+				string universalID = string.Empty;
+				string firstName   = string.Empty;
+				string lastName    = string.Empty;
+				string serverURL   = string.Empty;
+				string hgAvatar    = string.Empty;
+
 				AgentCircuitData agent = scene.AuthenticateHandler.GetAgentCircuitData(client.AgentId);
 				if (agent!=null) {
 					universalID = Util.ProduceUserUniversalIdentifier(agent);
+					if (!String.IsNullOrEmpty(universalID)) {
+						UUID uuid;
+						string tmp;
+						Util.ParseUniversalUserIdentifier(universalID, out uuid, out serverURL, out firstName, out lastName, out tmp);
+					}
+					if (String.IsNullOrEmpty(serverURL)) return false; 	// if serverURL is empty, avatar is a NPC
+					//
 					if ((agent.teleportFlags & (uint)Constants.TeleportFlags.ViaHGLogin)!=0 || String.IsNullOrEmpty(userName)) {
 						hgAvatar = "true";
 					}
 				}
+				if (String.IsNullOrEmpty(userName)) {
+					userName = firstName + " " + lastName;
+				}
+				if (m_hgavatar_islocal) hgAvatar = string.Empty;
 
+				//
 				// Lognn the Money Server.   
 				Hashtable paramTable = new Hashtable();
 				paramTable["openSimServIP"] 		= scene.RegionInfo.ServerURI.Replace(scene.RegionInfo.InternalEndPoint.Port.ToString(), 
