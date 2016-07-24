@@ -55,30 +55,30 @@ namespace OpenSim.Grid.MoneyServer
 {
 	class MoneyXmlRpcModule
 	{
-		private static readonly ILog m_log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
+		private static readonly ILog m_log  = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
 
-		private int	   m_defaultBalance    = 1000;
+		private int	   m_defaultBalance     = 1000;
 		//
-		private bool   m_forceTransfer     = false;
-		private string m_bankerAvatar	   = "";
+		private bool   m_forceTransfer      = false;
+		private string m_bankerAvatar	    = "";
 
-		private bool   m_scriptSendMoney   = false;
-		private string m_scriptAccessKey   = "";
-		private string m_scriptIPaddress   = "127.0.0.1";
+		private bool   m_scriptSendMoney    = false;
+		private string m_scriptAccessKey    = "";
+		private string m_scriptIPaddress    = "127.0.0.1";
 
-		private bool   m_hg_enable         = false;
-		private bool   m_trustRegionAvatar = false;
-		private int	   m_hg_defaultBalance = 0;
-		private int	   m_gs_defaultBalance = 0;
+		private bool   m_hg_enable          = false;
+		private bool   m_gst_enable         = false;
+		private int	   m_hg_defaultBalance  = 0;
+		private int	   m_gst_defaultBalance = 0;
 
-		private bool   m_checkServerCert   = false;
-		private string m_cacertFilename    = "";
+		private bool   m_checkServerCert    = false;
+		private string m_cacertFilename     = "";
 
-		private string m_certFilename	   = "";
-		private string m_certPassword	   = "";
+		private string m_certFilename	    = "";
+		private string m_certPassword	    = "";
 		private X509Certificate2 m_clientCert = null;
 
-		private string m_sslCommonName     = "";
+		private string m_sslCommonName      = "";
 
 		private NSLCertificateVerify m_certVerify = new NSLCertificateVerify();		// サーバ認証用
 
@@ -150,10 +150,10 @@ namespace OpenSim.Grid.MoneyServer
 			m_scriptIPaddress  = m_server_config.GetString("MoneyScriptIPaddress",   m_scriptIPaddress);
 
 			// Hyper Grid Avatar
-			m_hg_enable  = m_server_config.GetBoolean("EnableHGAvatar", m_hg_enable);
-			m_trustRegionAvatar = m_server_config.GetBoolean("TrustRegionAvatar",     m_trustRegionAvatar);
-			m_hg_defaultBalance = m_server_config.GetInt("HGAvatarDefaultBalance",    m_hg_defaultBalance);
-			m_gs_defaultBalance = m_server_config.GetInt("GuestAvatarDefaultBalance", m_gs_defaultBalance);
+			m_hg_enable  = m_server_config.GetBoolean("EnableHGAvatar",    m_hg_enable);
+			m_gst_enable = m_server_config.GetBoolean("EnableGuestAvatar", m_gst_enable);
+			m_hg_defaultBalance  = m_server_config.GetInt("HGAvatarDefaultBalance",    m_hg_defaultBalance);
+			m_gst_defaultBalance = m_server_config.GetInt("GuestAvatarDefaultBalance", m_gst_defaultBalance);
 
 			// Update Balance Messages
 			m_BalanceMessageLandSale	 = m_server_config.GetString("BalanceMessageLandSale", 		m_BalanceMessageLandSale);
@@ -275,12 +275,14 @@ namespace OpenSim.Grid.MoneyServer
 			Hashtable responseData = new Hashtable();
 			response.Value = responseData;
 
+			responseData["success"] = true;
+			responseData["clientBalance"] = 0;
+
 			// Check Client Cert
 			if (m_moneyCore.IsCheckClientCert()) {
 				if (GetSSLCommonName()=="") {
 					m_log.ErrorFormat("[MONEY RPC]: handleClientLogin: Warnning: Check Client Cert is set, but SSL Common Name is empty.");
 					responseData["success"] = false;
-					responseData["clientBalance"] = 0;
 					responseData["description"] = "SSL Common Name is empty";
 					return response;
 				}
@@ -294,8 +296,6 @@ namespace OpenSim.Grid.MoneyServer
 			string userName = string.Empty;
 			int    balance = 0;
 			int	   avatarClass = (int)AvatarClass.UNKNOWN_AVATAR; 
-
-			responseData["success"] = false;
 
 			if (requestData.ContainsKey("clientUUID")) 			  clientUUID = (string)requestData["clientUUID"];
 			if (requestData.ContainsKey("clientSessionID")) 	  sessionID = (string)requestData["clientSessionID"];
@@ -323,29 +323,42 @@ namespace OpenSim.Grid.MoneyServer
 			UserInfo userInfo = m_moneyDBService.FetchUserInfo(clientUUID);
 			if (userInfo!=null) {
 				if (String.IsNullOrEmpty(userName)) userName = userInfo.Avatar;
-				if (!m_trustRegionAvatar || avatarClass==(int)AvatarClass.UNKNOWN_AVATAR) {
+				if (avatarClass==(int)AvatarClass.UNKNOWN_AVATAR) {
 					avatarClass = userInfo.Class;
 				}
 			}
 
-			m_log.InfoFormat("[MONEY RPC]: handleClientLogon: Avatar {0} ({1}) is logged on.", userName, clientUUID);
-			m_log.InfoFormat("[MONEY RPC]: handleClientLogon: Avatar Class is {0}", avatarClass);
+			m_log.InfoFormat("[MONEY RPC]: handleClientLogon: Avatar {0} ({1}) is logged on. Avatar Class is {2}", userName, clientUUID, avatarClass);
 
 			//
 			// Check Avatar
-			if (String.IsNullOrEmpty(serverURL) || (avatarClass==(int)AvatarClass.HG_AVATAR && !m_hg_enable) || (avatarClass==(int)AvatarClass.UNKNOWN_AVATAR)) {
-				responseData["success"] = true; 
-				responseData["clientBalance"] = 0;
-				//
-				if (String.IsNullOrEmpty(serverURL)) {
-					responseData["description"] = "Server URL is empty. Avatar is a NPC?";
-				}
-				else if (avatarClass==(int)AvatarClass.HG_AVATAR && !m_hg_enable) {
-					responseData["description"] = "Avatar is a HG avatar. But this Money Server does not support HG avatars.";
-				}
-				else if (avatarClass==(int)AvatarClass.UNKNOWN_AVATAR) {
-					responseData["description"] = "Avatar is a Unknown avatar.";
-				}
+			if (String.IsNullOrEmpty(serverURL)) {
+				responseData["description"] = "Server URL is empty. Avatar is a NPC?";
+				m_log.InfoFormat("[MONEY RPC]: handleClientLogon: {0}", responseData["description"]);
+				return response;
+			}
+			else if (avatarClass==(int)AvatarClass.GUEST_AVATAR && !m_gst_enable) {
+				responseData["description"] = "Avatar is a Guest avatar. But this Money Server does not support Guest avatars.";
+				m_log.InfoFormat("[MONEY RPC]: handleClientLogon: {0}", responseData["description"]);
+				return response;
+			}
+			else if (avatarClass==(int)AvatarClass.HG_AVATAR && !m_hg_enable) {
+				responseData["description"] = "Avatar is a HG avatar. But this Money Server does not support HG avatars.";
+				m_log.InfoFormat("[MONEY RPC]: handleClientLogon: {0}", responseData["description"]);
+				return response;
+			}
+			else if (avatarClass==(int)AvatarClass.NPC_AVATAR) {
+				responseData["description"] = "Avatar is a NPC.";
+				m_log.InfoFormat("[MONEY RPC]: handleClientLogon: {0}", responseData["description"]);
+				return response;
+			}
+			else if (avatarClass==(int)AvatarClass.FOREIGN_AVATAR) {
+				responseData["description"] = "Avatar is a Foreign avatar.";
+				m_log.InfoFormat("[MONEY RPC]: handleClientLogon: {0}", responseData["description"]);
+				return response;
+			}
+			else if (avatarClass==(int)AvatarClass.UNKNOWN_AVATAR) {
+				responseData["description"] = "Avatar is a Unknown avatar.";
 				m_log.InfoFormat("[MONEY RPC]: handleClientLogon: {0}", responseData["description"]);
 				return response;
 			}
@@ -378,16 +391,14 @@ namespace OpenSim.Grid.MoneyServer
 				
 				if (!m_moneyDBService.TryAddUserInfo(userInfo)) {
 					m_log.ErrorFormat("[MONEY RPC]: handleClientLogin: Unable to refresh information for user \"{0}\" in DB.", userName);
-					responseData["success"] = true;
-					responseData["clientBalance"] = 0;
 					responseData["description"] = "Update or add user information to db failed";
 					return response;
 				}
 			}
 			catch (Exception e) {
 				m_log.ErrorFormat("[MONEY RPC]: handleClientLogin: Can't update userinfo for user {0}: {1}", clientUUID, e.ToString());
+				responseData["success"] = false;
 				responseData["description"] = "Exception occured" + e.ToString();
-				responseData["clientBalance"] = 0;
 				return response;
 			}
 
@@ -399,21 +410,18 @@ namespace OpenSim.Grid.MoneyServer
 				if (balance==-1) {
 					int default_balance = m_defaultBalance;
 					if (avatarClass==(int)AvatarClass.HG_AVATAR)    default_balance = m_hg_defaultBalance;
-					if (avatarClass==(int)AvatarClass.GUEST_AVATAR) default_balance = m_gs_defaultBalance;
+					if (avatarClass==(int)AvatarClass.GUEST_AVATAR) default_balance = m_gst_defaultBalance;
 
 					if (m_moneyDBService.addUser(clientUUID, default_balance, 0)) {
-						responseData["success"] = true;
 						responseData["description"] = "add user successfully";
 						responseData["clientBalance"] = default_balance;
 					}
 					else {
 						responseData["description"] = "add user failed";
-						responseData["clientBalance"] = 0;
 					}
 				}
 				//Success
 				else if (balance >= 0) {
-					responseData["success"] = true;
 					responseData["description"] = "get user balance successfully";
 					responseData["clientBalance"] = balance;
 				}
@@ -422,8 +430,8 @@ namespace OpenSim.Grid.MoneyServer
 			}
 			catch (Exception e) {
 				m_log.ErrorFormat("[MONEY RPC]: handleClientLogin: Can't get balance of user {0}: {1}", clientUUID, e.ToString());
+				responseData["success"] = false;
 				responseData["description"] = "Exception occured" + e.ToString();
-				responseData["clientBalance"] = 0;
 			}
 
 			return response;

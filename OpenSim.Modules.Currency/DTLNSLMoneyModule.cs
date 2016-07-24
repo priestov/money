@@ -190,8 +190,7 @@ namespace OpenSim.Modules.Currency
 		private string m_settle_message   = "";
 		private bool   m_settle_user  	  = false;
 
-		private bool   m_hgavatar_islocal = false;
-		private bool   m_hgavatar_isguest = false;
+		private int    m_hg_avatarClass   = (int)AvatarClass.HG_AVATAR;
 
 		private NSLCertificateVerify m_certVerify = new NSLCertificateVerify();	// サーバ認証用
 
@@ -277,7 +276,7 @@ namespace OpenSim.Modules.Currency
 
 				// サーバ認証
 				m_checkServerCert = economyConfig.GetBoolean("CheckServerCert", m_checkServerCert);
-				m_cacertFilename  = economyConfig.GetString("CACertFilename",  m_cacertFilename);
+				m_cacertFilename  = economyConfig.GetString("CACertFilename",   m_cacertFilename);
 				if (m_cacertFilename!="") {
 					m_certVerify.SetPrivateCA(m_cacertFilename);
 					m_log.InfoFormat("[MONEY]: Execute Authentication of Server. CA Cert File is " + m_cacertFilename);
@@ -311,8 +310,13 @@ namespace OpenSim.Modules.Currency
 				EnergyEfficiency 		= economyConfig.GetFloat("EnergyEfficiency", 		EnergyEfficiency);
 
 				// for HG Avatar
-				m_hgavatar_islocal = economyConfig.GetBoolean("HGAvatarIsGridAvatar",  m_hgavatar_islocal);
-				m_hgavatar_isguest = economyConfig.GetBoolean("HGAvatarIsGuestAvatar", m_hgavatar_isguest);
+				string avatar_class = economyConfig.GetString("HGAvatarAs", "HGAvatar").ToLower();
+				if      (avatar_class=="localavatar")   m_hg_avatarClass = (int)AvatarClass.LOCAL_AVATAR;
+				else if (avatar_class=="guestavatar")   m_hg_avatarClass = (int)AvatarClass.GUEST_AVATAR;
+				else if (avatar_class=="hgavatar")      m_hg_avatarClass = (int)AvatarClass.HG_AVATAR;
+				else if (avatar_class=="foreignavatar") m_hg_avatarClass = (int)AvatarClass.FOREIGN_AVATAR;
+				else                                    m_hg_avatarClass = (int)AvatarClass.UNKNOWN_AVATAR;
+
 			}
 			catch {
 				m_log.ErrorFormat("[MONEY]: Initialise: Faile to read configuration file");
@@ -1536,8 +1540,8 @@ namespace OpenSim.Modules.Currency
 					}
 				}
 
-				//////////////////////////////////////////////////////////
-				// User Universal Identifer for Grid User/HG User/NPC
+				//////////////////////////////////////////////////////////////
+				// User Universal Identifer for Grid Avatar, HG Avatar or NPC
 				string universalID = string.Empty;
 				string firstName   = string.Empty;
 				string lastName    = string.Empty;
@@ -1554,8 +1558,7 @@ namespace OpenSim.Modules.Currency
 					}
 					// if serverURL is empty, avatar is a NPC
 					if (String.IsNullOrEmpty(serverURL)) {
-						//avatarClass = (int)AvatarClass.NPC_AVATAR;
-						return false;
+						avatarClass = (int)AvatarClass.NPC_AVATAR;
 					}
 					//
 					if ((agent.teleportFlags & (uint)Constants.TeleportFlags.ViaHGLogin)!=0 || String.IsNullOrEmpty(userName)) {
@@ -1565,11 +1568,10 @@ namespace OpenSim.Modules.Currency
 				if (String.IsNullOrEmpty(userName)) {
 					userName = firstName + " " + lastName;
 				}
-
-				if (avatarClass==(int)AvatarClass.HG_AVATAR) {
-					if (m_hgavatar_islocal) avatarClass = (int)AvatarClass.LOCAL_AVATAR;
-					if (m_hgavatar_isguest) avatarClass = (int)AvatarClass.GUEST_AVATAR;
-				}
+				
+				//
+				if (avatarClass==(int)AvatarClass.NPC_AVATAR) return false;
+				if (avatarClass==(int)AvatarClass.HG_AVATAR)  avatarClass = m_hg_avatarClass;
 
 				//
 				// Lognn the Money Server.   

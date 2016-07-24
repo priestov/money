@@ -25,10 +25,9 @@
     ;; Money Unit fee to create groups.  Default is 0.
     PriceGroupCreate = 10
 
-    ;; for HG Avatar
-    ;; HGAvatarIsGridAvatar:  HG Avatar is assumed to be a Local Grid Avatar
-    ;; HGAvatarIsGuestAvatar: HG Avatar is assumed to be a guest Avatar
-	;; HGAvatarIsGuestAvatar has higher priority than HGAvatarIsGridAvatar.
-    ;HGAvatarIsGridAvatar  = false
-    ;HGAvatarIsGuestAvatar = false
+    ;; Avatar Class for HG Avatar
+    ;; {ForeignAvatar, HGAvatar, GuestAvatar, LocalAvatar} HGAvatar
+    ;; HG Avatar is assumed as a specified avatar class. Default is HGAvatar
+    ;; Processing for each avatar class is dependent on Money Server.
+    ;HGAvatarAs = "HGAvatar"
 
