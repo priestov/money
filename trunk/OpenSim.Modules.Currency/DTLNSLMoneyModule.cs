@@ -606,6 +606,13 @@ namespace OpenSim.Modules.Currency
 		}
 
 
+		// for OnMakeChildAgent event
+		private void MakeChildAgent(ScenePresence avatar)
+		{
+			//m_log.InfoFormat("[MONEY]: MakeChildAgent:");
+		}
+
+
 /*
 		// for OnMoneyTransferRequest event  (for Aurora-Sim)
 		private void MoneyTransferRequest(UUID sourceID, UUID destID, int amount, int transactionType, string description)
@@ -662,17 +669,11 @@ namespace OpenSim.Modules.Currency
 		}
 
 
-		// for OnMakeChildAgent event
-		private void MakeChildAgent(ScenePresence avatar)
-		{
-		}
-
-
 		/**/
 		// for OnValidateLandBuy event
 		private void ValidateLandBuy(Object sender, EventManager.LandBuyArgs landBuyEvent)
 		{
-			//m_log.InfoFormat("[MONEY]: ValidateLandBuy:");
+			m_log.InfoFormat("[MONEY]: ValidateLandBuy:");
 			
 			IClientAPI senderClient = GetLocateClient(landBuyEvent.agentId);
 			if (senderClient!=null) {
