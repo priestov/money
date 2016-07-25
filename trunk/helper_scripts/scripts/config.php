@@ -5,6 +5,7 @@
 
 // Please set this hepler script directory
 
+if (!defined('ENV_HELPER_URL'))  define('ENV_HELPER_URL',  'http://opensim.tuis.ac.jp/helper_scripts/helper');
 if (!defined('ENV_HELPER_PATH')) define('ENV_HELPER_PATH', '/var/www/html/helper_scripts/helper');
 
 
@@ -51,6 +52,7 @@ define('LOGINPAGE_SCRIPT', 1);
 //////////////////////////////////////////////////////////////////////////////////
 // System
  
+define('SYSURL', ENV_HELPER_URL);
 $GLOBALS['xmlrpc_internalencoding'] = 'UTF-8';
 
 if (USE_UTC_TIME) date_default_timezone_set('UTC');
