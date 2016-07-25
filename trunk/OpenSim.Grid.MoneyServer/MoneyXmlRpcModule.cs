@@ -93,10 +93,9 @@ namespace OpenSim.Grid.MoneyServer
 		private string m_BalanceMessageSellObject  	= "{1} bought the Object {2} by L${0}.";
 		private string m_BalanceMessageGetMoney  	= "Got the Money L${0} from {1}.";
 		private string m_BalanceMessageBuyMoney  	= "Bought the Money L${0}.";
-		private string m_BalanceMessageReceiveMoney = "Received L${0} from System.";
 		private string m_BalanceMessageRollBack		= "RollBack the Transaction: L${0} from/to {1}.";
-		private string m_BalanceMessageMoveFrom		= "Paid the Money L${0} to {1}.";
-		private string m_BalanceMessageMoveTo		= "Received L${0} from {1}.";
+		private string m_BalanceMessageSendMoney	= "Paid the Money L${0} to {1}.";
+		private string m_BalanceMessageReceiveMoney = "Received L${0} from {1}.";
 
 		private bool m_enableAmountZero = false;
 
@@ -126,7 +125,6 @@ namespace OpenSim.Grid.MoneyServer
 		}
 
 
-	//	public void Initialise(string opensimVersion, IConfig server_config, IConfig cert_config, IMoneyDBService moneyDBService, IMoneyServiceCore moneyCore) 
 		public void Initialise(string opensimVersion, IMoneyDBService moneyDBService, IMoneyServiceCore moneyCore) 
 		{
 			//m_opensimVersion = opensimVersion;
@@ -165,10 +163,9 @@ namespace OpenSim.Grid.MoneyServer
 			m_BalanceMessageSellObject	 = m_server_config.GetString("BalanceMessageSellObject", 	m_BalanceMessageSellObject); 
 			m_BalanceMessageGetMoney	 = m_server_config.GetString("BalanceMessageGetMoney", 		m_BalanceMessageGetMoney); 
 			m_BalanceMessageBuyMoney	 = m_server_config.GetString("BalanceMessageBuyMoney", 		m_BalanceMessageBuyMoney); 
-			m_BalanceMessageReceiveMoney = m_server_config.GetString("BalanceMessageReceiveMoney", 	m_BalanceMessageReceiveMoney);
 			m_BalanceMessageRollBack	 = m_server_config.GetString("BalanceMessageRollBack", 		m_BalanceMessageRollBack);
-			m_BalanceMessageMoveFrom	 = m_server_config.GetString("BalanceMessageMoveFrom", 		m_BalanceMessageMoveFrom);
-			m_BalanceMessageMoveTo	 	 = m_server_config.GetString("BalanceMessageMoveTo", 		m_BalanceMessageMoveTo);
+			m_BalanceMessageSendMoney    = m_server_config.GetString("BalanceMessageSendMoney", 	m_BalanceMessageSendMoney);
+			m_BalanceMessageReceiveMoney = m_server_config.GetString("BalanceMessageReceiveMoney", 	m_BalanceMessageReceiveMoney);
 
 
 			////////////////////////////////////////////////////////////////////////
@@ -223,8 +220,8 @@ namespace OpenSim.Grid.MoneyServer
 			m_httpServer.AddXmlRPCHandler("ForceTransferMoney", handleForceTransaction);		// added
 			m_httpServer.AddXmlRPCHandler("PayMoneyCharge", handlePayMoneyCharge);				// added
 			m_httpServer.AddXmlRPCHandler("AddBankerMoney", handleAddBankerMoney);				// added
-			m_httpServer.AddXmlRPCHandler("SendMoney", handleSendMoney);						// added
-			m_httpServer.AddXmlRPCHandler("MoveMoney", handleMoveMoney);						// added
+			m_httpServer.AddXmlRPCHandler("SendMoney", handleScriptTransaction);				// added
+			m_httpServer.AddXmlRPCHandler("MoveMoney", handleScriptTransaction);				// added
 
 			// this is from original DTL. not check yet.
 			m_httpServer.AddXmlRPCHandler("WebLogin", handleWebLogin);
@@ -719,6 +716,136 @@ namespace OpenSim.Grid.MoneyServer
 		// added by Fumi.Iseki
 		//
 		/// <summary>
+		/// handle scripted sending money transaction.
+		/// </summary>
+		/// <param name="request"></param>
+		/// <returns></returns>
+		public XmlRpcResponse handleScriptTransaction(XmlRpcRequest request, IPEndPoint remoteClient)
+		{
+			//m_log.InfoFormat("[MONEY RPC]: handleScriptTransaction:");
+
+			GetSSLCommonName(request);
+
+			Hashtable requestData = (Hashtable)request.Params[0];
+			XmlRpcResponse response = new XmlRpcResponse();
+			Hashtable responseData  = new Hashtable();
+			response.Value = responseData;
+
+			int	   amount = 0;
+			int	   transactionType = 0;
+			string senderID    = UUID.Zero.ToString();
+			string receiverID  = UUID.Zero.ToString();
+			string clientIP    = remoteClient.Address.ToString();
+			string secretCode  = string.Empty;
+			string description = "Scripted Send Money from/to Avatar on";
+
+			responseData["success"] = false;
+			UUID transactionUUID = UUID.Random();
+			
+			if (!m_scriptSendMoney || m_scriptAccessKey=="") {
+				m_log.Error("[MONEY RPC]: handleScriptTransaction: Not allowed send money to avatar!!");
+				m_log.Error("[MONEY RPC]: handleScriptTransaction: Set enableScriptSendMoney and MoneyScriptAccessKey at [MoneyServer] in MoneyServer.ini");
+				responseData["message"] = "not allowed set money to avatar!";
+				return response;
+			}
+
+			if (requestData.ContainsKey("senderID")) 		 senderID   = (string)requestData["senderID"];
+			if (requestData.ContainsKey("receiverID")) 		 receiverID = (string)requestData["receiverID"];
+			if (requestData.ContainsKey("amount")) 			 amount = Convert.ToInt32(requestData["amount"]);
+			if (requestData.ContainsKey("transactionType"))  transactionType = Convert.ToInt32(requestData["transactionType"]);
+			if (requestData.ContainsKey("description")) 	 description = (string)requestData["description"];
+			if (requestData.ContainsKey("secretAccessCode")) secretCode = (string)requestData["secretAccessCode"];
+
+			MD5 md5 = MD5.Create();
+			byte[] code = md5.ComputeHash(ASCIIEncoding.Default.GetBytes(m_scriptAccessKey + "_" + clientIP));
+			string hash = BitConverter.ToString(code).ToLower().Replace("-", "");
+			code = md5.ComputeHash(ASCIIEncoding.Default.GetBytes(hash + "_" + m_scriptIPaddress));
+			hash = BitConverter.ToString(code).ToLower().Replace("-", "");
+
+			if (secretCode.ToLower()!=hash) {
+				m_log.Error("[MONEY RPC]: handleScriptTransaction: Not allowed send money to avatar!!");
+				m_log.Error("[MONEY RPC]: handleScriptTransaction: Not match Script Access Key.");
+				responseData["message"] = "not allowed send money to avatar! not match Script Key";
+				return response;
+			}
+
+			m_log.InfoFormat("[MONEY RPC]: handleScriptTransaction: Send money from {0} to {1}", senderID, receiverID);
+			int time = (int)((DateTime.Now.Ticks - TicksToEpoch) / 10000000);
+
+			try {
+				TransactionData transaction = new TransactionData();
+				transaction.TransUUID  = transactionUUID;
+				transaction.Sender     = senderID;
+				transaction.Receiver   = receiverID;
+				transaction.Amount     = amount;
+				transaction.ObjectUUID = UUID.Zero.ToString();
+				transaction.RegionHandle = "0";
+				transaction.Type = transactionType;
+				transaction.Time = time;
+				transaction.SecureCode = UUID.Random().ToString();
+				transaction.Status = (int)Status.PENDING_STATUS;
+				transaction.CommonName  = GetSSLCommonName();
+				transaction.Description = description + " " + DateTime.Now.ToString();
+
+				UserInfo senderInfo   = null;
+				UserInfo receiverInfo = null;
+				if (transaction.Sender  !=UUID.Zero.ToString()) senderInfo   = m_moneyDBService.FetchUserInfo(transaction.Sender);
+				if (transaction.Receiver!=UUID.Zero.ToString()) receiverInfo = m_moneyDBService.FetchUserInfo(transaction.Receiver);
+
+				if (senderInfo==null && receiverInfo==null) {
+					m_log.ErrorFormat("[MONEY RPC]: handleScriptTransaction: Sender and Receiver are not yet in DB, or both of them are System: {0}, {1}", 
+																												transaction.Sender, transaction.Receiver);
+					return response;
+				}
+
+				bool result = m_moneyDBService.addTransaction(transaction);
+				if (result) {
+					if (amount>0 || (m_enableAmountZero&&amount==0)) {
+						if (m_moneyDBService.DoTransfer(transactionUUID)) {
+							transaction = m_moneyDBService.FetchTransaction(transactionUUID);
+							if (transaction!=null && transaction.Status==(int)Status.SUCCESS_STATUS) {
+								m_log.InfoFormat("[MONEY RPC]: handleScriptTransaction: ScriptTransaction money finished successfully, now update balance {0}", 
+																															transactionUUID.ToString());
+								string message = string.Empty;
+								if (senderInfo!=null) {
+									if (receiverInfo==null) message = string.Format(m_BalanceMessageSendMoney, amount, "SYSTEM", "");
+									else                    message = string.Format(m_BalanceMessageSendMoney, amount, receiverInfo.Avatar, "");
+									UpdateBalance(transaction.Sender, message);
+									m_log.InfoFormat("[MONEY RPC]: handleScriptTransaction: Update balance of {0}. Message = {1}", transaction.Sender, message);
+								}
+								if (receiverInfo!=null) {
+									if (senderInfo==null) message = string.Format(m_BalanceMessageReceiveMoney, amount, "SYSTEM", "");
+									else                  message = string.Format(m_BalanceMessageReceiveMoney, amount, senderInfo.Avatar, "");
+									UpdateBalance(transaction.Receiver, message);
+									m_log.InfoFormat("[MONEY RPC]: handleScriptTransaction: Update balance of {0}. Message = {1}", transaction.Receiver, message);
+								}
+
+
+								responseData["success"] = true;
+							}
+						}
+					}
+					else if (amount==0) {
+						responseData["success"] = true;		// No messages for L$0 add
+					}
+					return response;
+				}
+				else { 	// add transaction failed
+					m_log.ErrorFormat("[MONEY RPC]: handleScriptTransaction: Add force transaction for user {0} failed.", transaction.Sender);
+				}
+				return response;
+			}
+			catch (Exception e) {
+				m_log.Error("[MONEY RPC]: handleScriptTransaction: Exception occurred while adding money transaction: " + e.ToString());
+			}
+			return response;
+		}
+
+
+		//
+		// added by Fumi.Iseki
+		//
+		/// <summary>
 		/// handle adding money transaction.
 		/// </summary>
 		/// <param name="request"></param>
@@ -813,247 +940,6 @@ namespace OpenSim.Grid.MoneyServer
 			}
 			return response;
 		}
-
-
-		//
-		// added by Fumi.Iseki
-		//
-		/// <summary>
-		/// handle sending money transaction.
-		/// </summary>
-		/// <param name="request"></param>
-		/// <returns></returns>
-		public XmlRpcResponse handleSendMoney(XmlRpcRequest request, IPEndPoint remoteClient)
-		{
-			//m_log.InfoFormat("[MONEY RPC]: handleSendMoney:");
-
-			GetSSLCommonName(request);
-
-			Hashtable requestData = (Hashtable)request.Params[0];
-			XmlRpcResponse response = new XmlRpcResponse();
-			Hashtable responseData  = new Hashtable();
-			response.Value = responseData;
-
-			int	   amount = 0;
-			int	   transactionType = 0;
-			string senderID    = UUID.Zero.ToString();
-			string avatarID    = string.Empty;
-			string description = "Send Money to Avatar on";
-			string clientIP    = remoteClient.Address.ToString();
-			string secretCode  = string.Empty;
-
-			responseData["success"] = false;
-			UUID transactionUUID = UUID.Random();
-			
-			if (!m_scriptSendMoney || m_scriptAccessKey=="") {
-				m_log.Error("[MONEY RPC]: handleSendMoney: Not allowed send money to avatar!!");
-				m_log.Error("[MONEY RPC]: handleSendMoney: Set enableScriptSendMoney and MoneyScriptAccessKey at [MoneyServer] in MoneyServer.ini");
-				responseData["message"] = "not allowed set money to avatar!";
-				return response;
-			}
-
-			if (requestData.ContainsKey("avatarID")) 		 avatarID = (string)requestData["avatarID"];
-			if (requestData.ContainsKey("amount")) 			 amount = Convert.ToInt32(requestData["amount"]);
-			if (requestData.ContainsKey("transactionType"))  transactionType = Convert.ToInt32(requestData["transactionType"]);
-			if (requestData.ContainsKey("description")) 	 description = (string)requestData["description"];
-			if (requestData.ContainsKey("secretAccessCode")) secretCode = (string)requestData["secretAccessCode"];
-
-			MD5 md5 = MD5.Create();
-			byte[] code = md5.ComputeHash(ASCIIEncoding.Default.GetBytes(m_scriptAccessKey + "_" + clientIP));
-			string hash = BitConverter.ToString(code).ToLower().Replace("-", "");
-			code = md5.ComputeHash(ASCIIEncoding.Default.GetBytes(hash + "_" + m_scriptIPaddress));
-			hash = BitConverter.ToString(code).ToLower().Replace("-", "");
-
-			if (secretCode.ToLower()!=hash) {
-				m_log.Error("[MONEY RPC]: handleSendMoney: Not allowed send money to avatar!!");
-				m_log.Error("[MONEY RPC]: handleSendMoney: Not match the Script Access Key.");
-				responseData["message"] = "not allowed send money to avatar! not match Script Key";
-				return response;
-			}
-
-			m_log.InfoFormat("[MONEY RPC]: handleSendMoney: Send money to avatar {0}", avatarID);
-			int time = (int)((DateTime.Now.Ticks - TicksToEpoch) / 10000000);
-
-			try {
-				TransactionData transaction = new TransactionData();
-				transaction.TransUUID  = transactionUUID;
-				transaction.Sender     = senderID;
-				transaction.Receiver   = avatarID;
-				transaction.Amount     = amount;
-				transaction.ObjectUUID = UUID.Zero.ToString();
-				transaction.RegionHandle = "0";
-				transaction.Type = transactionType;
-				transaction.Time = time;
-				transaction.SecureCode = UUID.Random().ToString();
-				transaction.Status = (int)Status.PENDING_STATUS;
-				transaction.CommonName  = GetSSLCommonName();
-				transaction.Description = description + " " + DateTime.Now.ToString();
-
-				UserInfo receiverInfo = m_moneyDBService.FetchUserInfo(transaction.Receiver);
-				if (receiverInfo==null) {
-					m_log.ErrorFormat("[MONEY RPC]: handleSendMoney: Avatar is not yet in DB: {0}", transaction.Receiver);
-					return response;
-				}
-
-				bool result = m_moneyDBService.addTransaction(transaction);
-				if (result) {
-					if (amount>0 || (m_enableAmountZero&&amount==0)) {
-						if (m_moneyDBService.DoAddMoney(transactionUUID)) {
-							transaction = m_moneyDBService.FetchTransaction(transactionUUID);
-							if (transaction!=null && transaction.Status==(int)Status.SUCCESS_STATUS) {
-								m_log.InfoFormat("[MONEY RPC]: handleSendMoney: Sending money finished successfully, now update balance {0}", 
-																															transactionUUID.ToString());
-								string message = string.Format(m_BalanceMessageReceiveMoney, amount, "SYSTEM", "");
-								UpdateBalance(transaction.Receiver, message);
-								responseData["success"] = true;
-							}
-						}
-					}
-					else if (amount==0) {
-						responseData["success"] = true;		// No messages for L$0 add
-					}
-					return response;
-				}
-				else { 	// add transaction failed
-					m_log.ErrorFormat("[MONEY RPC]: handleSendMoney: Add force transaction for user {0} failed.", senderID);
-				}
-				return response;
-			}
-			catch (Exception e) {
-				m_log.Error("[MONEY RPC]: handleSendMoney: Exception occurred while adding money transaction: " + e.ToString());
-			}
-			return response;
-		}
-
-
-
-		//
-		// added by Fumi.Iseki
-		//
-		/// <summary>
-		/// handle moving money transaction.
-		/// </summary>
-		/// <param name="request"></param>
-		/// <returns></returns>
-		public XmlRpcResponse handleMoveMoney(XmlRpcRequest request, IPEndPoint remoteClient)
-		{
-			//m_log.InfoFormat("[MONEY RPC]: handleMoveMoney:");
-
-			GetSSLCommonName(request);
-
-			Hashtable requestData = (Hashtable)request.Params[0];
-			XmlRpcResponse response = new XmlRpcResponse();
-			Hashtable responseData  = new Hashtable();
-			response.Value = responseData;
-
-			int	   amount = 0;
-			int	   transactionType = 0;
-			string avatarID    = UUID.Zero.ToString();
-			string receiptID   = UUID.Zero.ToString();
-			string description = "Move Money from/to Avatar on";
-			string clientIP    = remoteClient.Address.ToString();
-			string secretCode  = string.Empty;
-
-			responseData["success"] = false;
-			UUID transactionUUID = UUID.Random();
-			
-			if (!m_scriptSendMoney || m_scriptAccessKey=="") {
-				m_log.Error("[MONEY RPC]: handleMoveMoney: Not allowed send money to avatar!!");
-				m_log.Error("[MONEY RPC]: handleMoveMoney: Set enableScriptSendMoney and MoneyScriptAccessKey at [MoneyServer] in MoneyServer.ini");
-				responseData["message"] = "not allowed set money to avatar!";
-				return response;
-			}
-
-			if (requestData.ContainsKey("avatarID")) 		 avatarID  = (string)requestData["avatarID"];
-			if (requestData.ContainsKey("receiptID")) 		 receiptID = (string)requestData["receiptID"];
-			if (requestData.ContainsKey("amount")) 			 amount = Convert.ToInt32(requestData["amount"]);
-			if (requestData.ContainsKey("transactionType"))  transactionType = Convert.ToInt32(requestData["transactionType"]);
-			if (requestData.ContainsKey("description")) 	 description = (string)requestData["description"];
-			if (requestData.ContainsKey("secretAccessCode")) secretCode = (string)requestData["secretAccessCode"];
-
-			MD5 md5 = MD5.Create();
-			byte[] code = md5.ComputeHash(ASCIIEncoding.Default.GetBytes(m_scriptAccessKey + "_" + clientIP));
-			string hash = BitConverter.ToString(code).ToLower().Replace("-", "");
-			code = md5.ComputeHash(ASCIIEncoding.Default.GetBytes(hash + "_" + m_scriptIPaddress));
-			hash = BitConverter.ToString(code).ToLower().Replace("-", "");
-
-			if (secretCode.ToLower()!=hash) {
-				m_log.Error("[MONEY RPC]: handleMoveMoney: Not allowed send money to avatar!!");
-				m_log.Error("[MONEY RPC]: handleMoveMoney: Not match Script Access Key.");
-				responseData["message"] = "not allowed send money to avatar! not match Script Key";
-				return response;
-			}
-
-			m_log.InfoFormat("[MONEY RPC]: handleMoveMoney: Move money from {0} to {1}", avatarID, receiptID);
-			int time = (int)((DateTime.Now.Ticks - TicksToEpoch) / 10000000);
-
-			try {
-				TransactionData transaction = new TransactionData();
-				transaction.TransUUID  = transactionUUID;
-				transaction.Sender     = avatarID;
-				transaction.Receiver   = receiptID;
-				transaction.Amount     = amount;
-				transaction.ObjectUUID = UUID.Zero.ToString();
-				transaction.RegionHandle = "0";
-				transaction.Type = transactionType;
-				transaction.Time = time;
-				transaction.SecureCode = UUID.Random().ToString();
-				transaction.Status = (int)Status.PENDING_STATUS;
-				transaction.CommonName  = GetSSLCommonName();
-				transaction.Description = description + " " + DateTime.Now.ToString();
-
-				UserInfo senderInfo   = null;
-				UserInfo receiverInfo = null;
-				if (transaction.Sender  !=UUID.Zero.ToString()) senderInfo   = m_moneyDBService.FetchUserInfo(transaction.Sender);
-				if (transaction.Receiver!=UUID.Zero.ToString()) receiverInfo = m_moneyDBService.FetchUserInfo(transaction.Receiver);
-
-				if (senderInfo==null && receiverInfo==null) {
-					m_log.ErrorFormat("[MONEY RPC]: handleMoveMoney: Sender and Receiver are not yet in DB, or both of them are System: {0}, {1}", 
-																												transaction.Sender, transaction.Receiver);
-					return response;
-				}
-
-				bool result = m_moneyDBService.addTransaction(transaction);
-				if (result) {
-					if (amount>0 || (m_enableAmountZero&&amount==0)) {
-						if (m_moneyDBService.DoTransfer(transactionUUID)) {
-							transaction = m_moneyDBService.FetchTransaction(transactionUUID);
-							if (transaction!=null && transaction.Status==(int)Status.SUCCESS_STATUS) {
-								m_log.InfoFormat("[MONEY RPC]: handleMoveMoney: Moving money finished successfully, now update balance {0}", 
-																															transactionUUID.ToString());
-								string message = string.Empty;
-								if (senderInfo!=null) {
-									if (receiverInfo==null) message = string.Format(m_BalanceMessageMoveFrom, amount, "SYSTEM", "");
-									else                    message = string.Format(m_BalanceMessageMoveFrom, amount, receiverInfo.Avatar, "");
-									UpdateBalance(transaction.Sender, message);
-									m_log.InfoFormat("[MONEY RPC]: handleMoveMoney: Update balance of {0}. Message = {1}", transaction.Sender, message);
-								}
-								if (receiverInfo!=null) {
-									if (senderInfo==null) message = string.Format(m_BalanceMessageMoveTo, amount, "SYSTEM", "");
-									else                  message = string.Format(m_BalanceMessageMoveTo, amount, senderInfo.Avatar, "");
-									UpdateBalance(transaction.Receiver, message);
-									m_log.InfoFormat("[MONEY RPC]: handleMoveMoney: Update balance of {0}. Message = {1}", transaction.Receiver, message);
-								}
-								responseData["success"] = true;
-							}
-						}
-					}
-					else if (amount==0) {
-						responseData["success"] = true;		// No messages for L$0 add
-					}
-					return response;
-				}
-				else { 	// add transaction failed
-					m_log.ErrorFormat("[MONEY RPC]: handleMoveMoney: Move force transaction for user {0} failed.", transaction.Sender);
-				}
-				return response;
-			}
-			catch (Exception e) {
-				m_log.Error("[MONEY RPC]: handleMoveMoney: Exception occurred while adding money transaction: " + e.ToString());
-			}
-			return response;
-		}
-
 
 
 		//
