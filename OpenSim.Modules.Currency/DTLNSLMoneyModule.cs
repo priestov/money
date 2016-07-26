@@ -741,7 +741,7 @@ namespace OpenSim.Modules.Currency
 						bool ret = false;
 						//
 						if (salePrice>=0) {
-							if (m_enable_server) {
+							if (!string.IsNullOrEmpty(m_moneyServURL)) {
 								ret = TransferMoney(remoteClient.AgentId, receiverId, salePrice,
 												(int)TransactionType.PayObject, sceneObj.UUID, regionHandle, "Object Buy");
 												//(int)MoneyTransactionType.PayObject, sceneObj.UUID, regionHandle, "Object Buy");
