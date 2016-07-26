@@ -377,6 +377,8 @@ namespace OpenSim.Modules.Currency
 
 		public void RemoveRegion(Scene scene)
 		{
+/*
+//			有効にすると，終了時に Event Mager がエラーを起こすので，コメントアウト
 			if (scene==null) return;
 
 			lock (m_sceneList) {
@@ -389,6 +391,7 @@ namespace OpenSim.Modules.Currency
 				scene.EventManager.OnValidateLandBuy -= ValidateLandBuy;
 				scene.EventManager.OnLandBuy 		 -= processLandBuy;
             }
+*/
 		}
 
 
@@ -499,19 +502,24 @@ namespace OpenSim.Modules.Currency
 		public bool UploadCovered(UUID agentID, int amount)
 		{
 			IClientAPI client = GetLocateClient(agentID);
-			int balance = QueryBalanceFromMoneyServer(client);
 
-			if (balance<amount) return false;
-			return true;
+			if (m_enable_server || string.IsNullOrEmpty(m_moneyServURL)) {
+				int balance = QueryBalanceFromMoneyServer(client);
+				if (balance>=amount) return true;
+			}
+			return false;
 		}
 
 
 		public bool AmountCovered(UUID agentID, int amount)
 		{
 			IClientAPI client = GetLocateClient(agentID);
-			int balance = QueryBalanceFromMoneyServer(client);
-			if (balance<amount) return false;
-			return true;
+
+			if (m_enable_server || string.IsNullOrEmpty(m_moneyServURL)) {
+				int balance = QueryBalanceFromMoneyServer(client);
+				if (balance>=amount) return true;
+			}
+			return false;
 		}
 
 
@@ -529,6 +537,7 @@ namespace OpenSim.Modules.Currency
 			ApplyCharge(agentID, amount, TransactionType.GroupCreate, text);
 		}
 		*/
+
 
 		public void ApplyCharge(UUID agentID, int amount, MoneyTransactionType type)
 		{
@@ -812,12 +821,14 @@ namespace OpenSim.Modules.Currency
 			//IClientAPI user = GetLocateClient(agentId);
 
 			if (user!=null) {
-				//Scene s = GetLocateScene(user.AgentId);
-				Scene s = (Scene)user.Scene;
-				user.SendEconomyData(EnergyEfficiency, s.RegionInfo.ObjectCapacity, ObjectCount, PriceEnergyUnit, PriceGroupCreate,
+				if (m_enable_server || string.IsNullOrEmpty(m_moneyServURL)) {
+					//Scene s = GetLocateScene(user.AgentId);
+					Scene s = (Scene)user.Scene;
+					user.SendEconomyData(EnergyEfficiency, s.RegionInfo.ObjectCapacity, ObjectCount, PriceEnergyUnit, PriceGroupCreate,
 									 PriceObjectClaim, PriceObjectRent, PriceObjectScaleFactor, PriceParcelClaim, PriceParcelClaimFactor,
 									 PriceParcelRent, PricePublicObjectDecay, PricePublicObjectDelete, PriceRentLight, PriceUpload,
 									 TeleportMinPrice, TeleportPriceExponent);
+				}
 			}
 		}
 
@@ -1642,7 +1653,9 @@ namespace OpenSim.Modules.Currency
 			#endregion
 
 			// Viewerへ設定を通知する．
-			OnEconomyDataRequest(client);
+			if (ret || string.IsNullOrEmpty(m_moneyServURL)) {
+				 OnEconomyDataRequest(client);
+			}
 
 			return ret;
 		}
