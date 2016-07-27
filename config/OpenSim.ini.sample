@@ -3,7 +3,7 @@
     ;; Enables selling things for $0.  Default is true.
     SellEnabled = true
 
-    CurrencyServer = "https://jogrid.net:8008/"
+    ;CurrencyServer = "" ;;  ex.) "https://jogrid.net:8008/"  Default is ""
     EconomyModule = DTLNSLMoneyModule
 
     ;
@@ -32,7 +32,7 @@
     ;; Avatar Class for HG Avatar
     ;; {ForeignAvatar, HGAvatar, GuestAvatar, LocalAvatar} HGAvatar
     ;; HG Avatar is assumed as a specified avatar class. Default is HGAvatar
-    ;; Processing for each avatar class is dependent on Money Server.
+    ;; Processing for each avatar class is dependent on Money Server settings.
     ;HGAvatarAs = "HGAvatar"
 
     ;
