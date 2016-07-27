@@ -89,12 +89,12 @@
       <Reference name="System.Xml"/>
       <Reference name="System.Drawing"/>
       <Reference name="System.Runtime.Remoting"/>
+      <Reference name="Mono.Security.dll"/>
       <Reference name="Axiom.MathLib.dll" path="../../bin/"/>
       <Reference name="Nini.dll" path="../../bin/"/>
       <Reference name="log4net.dll" path="../../bin/"/>
       <Reference name="XMLRPC.dll" path="../../bin/"/>
       <Reference name="Mono.Addins.dll" path="../../bin/"/>
-      <Reference name="Mono.Security.dll" path="../../bin/"/>
       <Reference name="OpenMetaverseTypes.dll" path="../../bin/"/>
       <Reference name="OpenMetaverse.dll" path="../../bin/"/>
       <Reference name="HttpServer_OpenSim.dll" path="../../bin/"/>
@@ -131,13 +131,13 @@
       <Reference name="System.Data"/>
       <Reference name="System.Drawing"/>
       <Reference name="System.Runtime.Remoting"/>
+      <Reference name="Mono.Security.dll" />
       <Reference name="Axiom.MathLib.dll" path="../../bin/"/>
       <Reference name="Nini.dll" path="../../bin/"/>
       <Reference name="log4net.dll" path="../../bin/"/>
       <Reference name="XMLRPC.dll" path="../../bin/"/>
       <Reference name="MySql.Data" path="../../bin/"/>
       <Reference name="Mono.Addins.dll" path="../../bin/"/>
-      <Reference name="Mono.Security.dll" path="../../bin/"/>
       <Reference name="OpenMetaverseTypes.dll" path="../../bin/"/>
       <Reference name="OpenMetaverse.dll" path="../../bin/"/>
       <Reference name="HttpServer_OpenSim.dll" path="../../bin"/>
