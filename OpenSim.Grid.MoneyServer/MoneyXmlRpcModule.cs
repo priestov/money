@@ -272,7 +272,7 @@ namespace OpenSim.Grid.MoneyServer
 			Hashtable responseData = new Hashtable();
 			response.Value = responseData;
 
-			responseData["success"] = true;
+			responseData["success"] = false;
 			responseData["clientBalance"] = 0;
 
 			// Check Client Cert
@@ -330,37 +330,31 @@ namespace OpenSim.Grid.MoneyServer
 			//
 			// Check Avatar
 			if (String.IsNullOrEmpty(serverURL)) {
-				responseData["success"] = false;
 				responseData["description"] = "Server URL is empty. Avatar is a NPC?";
 				m_log.InfoFormat("[MONEY RPC]: handleClientLogon: {0}", responseData["description"]);
 				return response;
 			}
 			else if (avatarClass==(int)AvatarClass.GUEST_AVATAR && !m_gst_enable) {
-				responseData["success"] = false;
 				responseData["description"] = "Avatar is a Guest avatar. But this Money Server does not support Guest avatars.";
 				m_log.InfoFormat("[MONEY RPC]: handleClientLogon: {0}", responseData["description"]);
 				return response;
 			}
 			else if (avatarClass==(int)AvatarClass.HG_AVATAR && !m_hg_enable) {
-				responseData["success"] = false;
 				responseData["description"] = "Avatar is a HG avatar. But this Money Server does not support HG avatars.";
 				m_log.InfoFormat("[MONEY RPC]: handleClientLogon: {0}", responseData["description"]);
 				return response;
 			}
 			else if (avatarClass==(int)AvatarClass.NPC_AVATAR) {
-				responseData["success"] = false;
 				responseData["description"] = "Avatar is a NPC.";
 				m_log.InfoFormat("[MONEY RPC]: handleClientLogon: {0}", responseData["description"]);
 				return response;
 			}
 			else if (avatarClass==(int)AvatarClass.FOREIGN_AVATAR) {
-				responseData["success"] = false;
 				responseData["description"] = "Avatar is a Foreign avatar.";
 				m_log.InfoFormat("[MONEY RPC]: handleClientLogon: {0}", responseData["description"]);
 				return response;
 			}
 			else if (avatarClass==(int)AvatarClass.UNKNOWN_AVATAR) {
-				responseData["success"] = false;
 				responseData["description"] = "Avatar is a Unknown avatar.";
 				m_log.InfoFormat("[MONEY RPC]: handleClientLogon: {0}", responseData["description"]);
 				return response;
@@ -394,13 +388,13 @@ namespace OpenSim.Grid.MoneyServer
 				
 				if (!m_moneyDBService.TryAddUserInfo(userInfo)) {
 					m_log.ErrorFormat("[MONEY RPC]: handleClientLogin: Unable to refresh information for user \"{0}\" in DB.", userName);
+					responseData["success"] = true;     	// for FireStorm
 					responseData["description"] = "Update or add user information to db failed";
 					return response;
 				}
 			}
 			catch (Exception e) {
 				m_log.ErrorFormat("[MONEY RPC]: handleClientLogin: Can't update userinfo for user {0}: {1}", clientUUID, e.ToString());
-				responseData["success"] = false;
 				responseData["description"] = "Exception occured" + e.ToString();
 				return response;
 			}
@@ -416,6 +410,7 @@ namespace OpenSim.Grid.MoneyServer
 					if (avatarClass==(int)AvatarClass.GUEST_AVATAR) default_balance = m_gst_defaultBalance;
 
 					if (m_moneyDBService.addUser(clientUUID, default_balance, 0)) {
+						responseData["success"] = true;
 						responseData["description"] = "add user successfully";
 						responseData["clientBalance"] = default_balance;
 					}
@@ -425,6 +420,7 @@ namespace OpenSim.Grid.MoneyServer
 				}
 				//Success
 				else if (balance >= 0) {
+					responseData["success"] = true;
 					responseData["description"] = "get user balance successfully";
 					responseData["clientBalance"] = balance;
 				}
@@ -433,7 +429,6 @@ namespace OpenSim.Grid.MoneyServer
 			}
 			catch (Exception e) {
 				m_log.ErrorFormat("[MONEY RPC]: handleClientLogin: Can't get balance of user {0}: {1}", clientUUID, e.ToString());
-				responseData["success"] = false;
 				responseData["description"] = "Exception occured" + e.ToString();
 			}
 
