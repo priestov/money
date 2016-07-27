@@ -174,6 +174,7 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 						UpdateTransactionsTable8();
 						UpdateTransactionsTable9();
 						UpdateTransactionsTable10();
+						UpdateTransactionsTable11();
 						break;
 					  case 3: //Rev.3
 						UpdateTransactionsTable3();
@@ -184,6 +185,7 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 						UpdateTransactionsTable8();
 						UpdateTransactionsTable9();
 						UpdateTransactionsTable10();
+						UpdateTransactionsTable11();
 						break;
 					  case 4: //Rev.4
 						UpdateTransactionsTable4();
@@ -193,6 +195,7 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 						UpdateTransactionsTable8();
 						UpdateTransactionsTable9();
 						UpdateTransactionsTable10();
+						UpdateTransactionsTable11();
 						break;
 					  case 5: //Rev.5
 						UpdateTransactionsTable5();
@@ -201,6 +204,7 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 						UpdateTransactionsTable8();
 						UpdateTransactionsTable9();
 						UpdateTransactionsTable10();
+						UpdateTransactionsTable11();
 						break;
 					  case 6: //Rev.6
 						UpdateTransactionsTable6();
@@ -208,24 +212,32 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 						UpdateTransactionsTable8();
 						UpdateTransactionsTable9();
 						UpdateTransactionsTable10();
+						UpdateTransactionsTable11();
 						break;
 					  case 7: //Rev.7
 						UpdateTransactionsTable7();
 						UpdateTransactionsTable8();
 						UpdateTransactionsTable9();
 						UpdateTransactionsTable10();
+						UpdateTransactionsTable11();
 						break;
 					  case 8: //Rev.8
 						UpdateTransactionsTable8();
 						UpdateTransactionsTable9();
 						UpdateTransactionsTable10();
+						UpdateTransactionsTable11();
 						break;
 					  case 9: //Rev.9
 						UpdateTransactionsTable9();
 						UpdateTransactionsTable10();
+						UpdateTransactionsTable11();
 						break;
 					  case 10: //Rev.10
 						UpdateTransactionsTable10();
+						UpdateTransactionsTable11();
+						break;
+					  case 11: //Rev.11
+						UpdateTransactionsTable11();
 						break;
 					}
 				}
@@ -685,15 +697,16 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 			dbReader.Close();
 			cmd.Dispose();
 
+			sql = "UPDATE " + Table_of_Transactions + " SET sender = ?sender , receiver = ?receiver WHERE UUID = ?uuid;";
 			for (int i=0; i<resultCount; i++) {
 				string sender   = Regex.Replace(row[i, 1], @"@.+$", "");
 				string receiver = Regex.Replace(row[i, 2], @"@.+$", "");
-				sql = "UPDATE " + Table_of_Transactions + " SET sender = ?sender , receiver = ?receiver WHERE UUID = ?uuid;";
 				cmd = new MySqlCommand(sql, dbcon);
 				cmd.Parameters.AddWithValue("?uuid", row[i,0]);
 				cmd.Parameters.AddWithValue("?sender", sender);
 				cmd.Parameters.AddWithValue("?receiver", receiver);
 				cmd.ExecuteNonQuery();
+				cmd.Dispose();
 			}
 
 			sql  = "BEGIN;";
@@ -774,6 +787,53 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 			sql += "COMMENT = 'Rev.11';";
 			sql += "COMMIT;";
 			MySqlCommand cmd = new MySqlCommand(sql, dbcon);
+			cmd.ExecuteNonQuery();
+			cmd.Dispose();
+		}
+
+		/// <summary>
+		/// update transactions table from Rev.11 to Rev.12
+        /// change type of BirthGift from 1000 to 900
+		/// </summary>
+		private void UpdateTransactionsTable11()
+		{
+			//m_log.Info("[MONEY DB]: Converting Transaction Table...");
+			string sql = string.Empty;
+
+			sql = "SELECT COUNT(*) FROM `" + Table_of_Transactions + "` WHERE type=1000";
+			MySqlCommand cmd = new MySqlCommand(sql, dbcon);
+			int resultCount = int.Parse(cmd.ExecuteScalar().ToString()); 
+			cmd.Dispose();
+
+			if (resultCount>0) {
+				sql = "SELECT UUID FROM `" + Table_of_Transactions + "` WHERE type=1000";
+				cmd = new MySqlCommand(sql, dbcon);
+				MySqlDataReader dbReader = cmd.ExecuteReader();
+
+				int l = 0;
+				string[] row = new string[resultCount];
+				while (dbReader.Read()) {
+					row[l] = dbReader.GetString(0);
+					l++;
+				}
+				dbReader.Close();
+				cmd.Dispose();
+
+				sql = "UPDATE `" + Table_of_Transactions + "` SET type=900 WHERE UUID=?uuid";
+				for (int i=0; i<resultCount; i++) {
+					cmd = new MySqlCommand(sql, dbcon);
+					cmd.Parameters.AddWithValue("?uuid", row[i]);
+					cmd.ExecuteNonQuery();
+					cmd.Dispose();
+				}
+			}
+
+			//
+			sql  = "BEGIN;";
+			sql += "ALTER TABLE `" + Table_of_Transactions + "` ";
+			sql += "COMMENT = 'Rev.12';";
+			sql += "COMMIT;";
+			cmd = new MySqlCommand(sql, dbcon);
 			cmd.ExecuteNonQuery();
 			cmd.Dispose();
 		}
