@@ -67,41 +67,54 @@ namespace OpenSim.Modules.Currency
 	//
 	public enum TransactionType : int
 	{
+		None             	= 0,
+		// Extend
+		BirthGift        	= 900,
 		// One-Time Charges
-		BirthGift        = 1000,
-		GroupCreate	 	 = 1002,
-		GroupJoin		 = 1004,
-		UploadCharge	 = 1101,
-		LandAuction		 = 1102,
-		ClassifiedCharge = 1103,
+		ObjectClaim      	= 1000,
+		LandClaim        	= 1001,
+		GroupCreate	 	 	= 1002,
+		GroupJoin		 	= 1004,
+		TeleportCharge   	= 1100,
+		UploadCharge	 	= 1101,
+		LandAuction		 	= 1102,
+		ClassifiedCharge 	= 1103,
 		// Recurrent Charges
-		ParcelDirFee	 = 2003,
-		ClassifiedRenew  = 2005,
-		ScheduledFee	 = 2900,
+		ObjectTax        	= 2000,
+		LandTax          	= 2001,
+		LightTax         	= 2002,
+		ParcelDirFee	 	= 2003,
+		GroupTax         	= 2004,
+		ClassifiedRenew  	= 2005,
+		ScheduledFee	 	= 2900,
 		// Inventory Transactions
-		GiveInventory    = 3000,
+		GiveInventory    	= 3000,
 		// Transfers Between Users
-		ObjectSale		 = 5000,
-		Gift			 = 5001,
-		LandSale		 = 5002,
-		ReferBonus		 = 5003,
-		InvntorySale	 = 5004,
-		RefundPurchase	 = 5005,
-		LandPassSale	 = 5006,
-		DwellBonus		 = 5007,
-		PayObject		 = 5008,
-		ObjectPays		 = 5009,
-		BuyMoney		 = 5010,
-		MoveMoney		 = 5011,
+		ObjectSale		 	= 5000,
+		Gift			 	= 5001,
+		LandSale		 	= 5002,
+		ReferBonus		 	= 5003,
+		InvntorySale	 	= 5004,
+		RefundPurchase	 	= 5005,
+		LandPassSale	 	= 5006,
+		DwellBonus		 	= 5007,
+		PayObject		 	= 5008,
+		ObjectPays		 	= 5009,
+		BuyMoney		 	= 5010,
+		MoveMoney		 	= 5011,
 		// Group Transactions
-		GroupLiability   = 6003,
-		GroupDividend    = 6004,
+		GroupLandDeed    	= 6001,
+		GroupObjectDeed  	= 6002,
+		GroupLiability   	= 6003,
+		GroupDividend    	= 6004,
+		GroupMembershipDues = 6005,
 		// Stipend Credits
-		StipendBasic     = 7000
+		StipendBasic     	= 10000
 	}
 
 
 /*
+	// Refer to OpenMetaverse
 	public enum OpenMetaverse.MoneyTransactionType : int
 	{
 		None = 0,
@@ -378,7 +391,7 @@ namespace OpenSim.Modules.Currency
 		public void RemoveRegion(Scene scene)
 		{
 /*
-//			有効にすると，終了時に Event Mager がエラーを起こすので，コメントアウト
+//			有効にすると，終了時に Event Manager がエラーを起こすので，コメントアウト
 			if (scene==null) return;
 
 			lock (m_sceneList) {
@@ -397,6 +410,7 @@ namespace OpenSim.Modules.Currency
 
 		public void RegionLoaded(Scene scene)
 		{
+			//m_log.InfoFormat("[MONEY]: RegionLoaded:");
 		}
 
 
@@ -421,11 +435,13 @@ namespace OpenSim.Modules.Currency
 
 		public void PostInitialise()
 		{
+			//m_log.InfoFormat("[MONEY]: PostInitialise:");
 		}
 
 
 		public void Close()
 		{
+			//m_log.InfoFormat("[MONEY]: Close:");
 		}
 
 		#endregion
@@ -526,17 +542,8 @@ namespace OpenSim.Modules.Currency
 		public void ApplyUploadCharge(UUID agentID, int amount, string text)
 		{
 			ulong region = GetLocateScene(agentID).RegionInfo.RegionHandle;
-			//PayMoneyCharge(agentID, amount, (int)MoneyTransactionType.UploadCharge, region, text);
 			PayMoneyCharge(agentID, amount, (int)TransactionType.UploadCharge, region, text);
 		}
-
-
-		/*
-		public void ApplyCharge(UUID agentID, int amount, string text)
-		{
-			ApplyCharge(agentID, amount, TransactionType.GroupCreate, text);
-		}
-		*/
 
 
 		public void ApplyCharge(UUID agentID, int amount, MoneyTransactionType type)
@@ -587,7 +594,6 @@ namespace OpenSim.Modules.Currency
 		}
 
 
-
 		public void OnMakeRootAgent(ScenePresence agent)
 		{
 			//m_log.InfoFormat("[MONEY]: OnMakeRootAgent:");
@@ -600,7 +606,7 @@ namespace OpenSim.Modules.Currency
 
 			client.OnMoneyBalanceRequest 	+= OnMoneyBalanceRequest;
 			client.OnRequestPayPrice 		+= OnRequestPayPrice;
-			client.OnObjectBuy				+= OnObjectBuy;				// for OpenSim 
+			client.OnObjectBuy				+= OnObjectBuy;
 		}	   
 
 
@@ -621,20 +627,6 @@ namespace OpenSim.Modules.Currency
 			//m_log.InfoFormat("[MONEY]: MakeChildAgent:");
 		}
 
-
-/*
-		// for OnMoneyTransferRequest event  (for Aurora-Sim)
-		private void MoneyTransferRequest(UUID sourceID, UUID destID, int amount, int transactionType, string description)
-		{
-			//m_log.InfoFormat("[MONEY]: MoneyTransferRequest: type = {0} {1} {2}", transactionType, amount, description);
-
-			//if (transactionType==(int)MoneyTransactionType.UploadCharge) return;
-			if (transactionType==(int)TransactionType.UploadCharge) return;
-			EventManager.MoneyTransferArgs moneyEvent = new EventManager.MoneyTransferArgs(sourceID, destID, amount, transactionType, description);
-			Scene scene = GetLocateScene(sourceID);
-			MoneyTransferAction(scene, moneyEvent);
-		}
-*/
 
 		// for OnMoneyTransfer event  (for OpenSim)
 		private void MoneyTransferAction(Object sender, EventManager.MoneyTransferArgs moneyEvent)
@@ -668,21 +660,20 @@ namespace OpenSim.Modules.Currency
 				Scene scene  = (Scene)sender;
 				regionHandle = scene.RegionInfo.RegionHandle;
 
-				//if (moneyEvent.transactiontype==(int)MoneyTransactionType.PayObject)
 				if (moneyEvent.transactiontype==(int)TransactionType.PayObject) {
 					objectID = scene.GetSceneObjectPart(moneyEvent.receiver).UUID;
 				}
 			}
 
 			TransferMoney(moneyEvent.sender, receiver, moneyEvent.amount, moneyEvent.transactiontype, objectID, regionHandle, "OnMoneyTransfer event");
+			return;
 		}
 
 
-		/**/
 		// for OnValidateLandBuy event
 		private void ValidateLandBuy(Object sender, EventManager.LandBuyArgs landBuyEvent)
 		{
-			m_log.InfoFormat("[MONEY]: ValidateLandBuy:");
+			//m_log.InfoFormat("[MONEY]: ValidateLandBuy:");
 			
 			IClientAPI senderClient = GetLocateClient(landBuyEvent.agentId);
 			if (senderClient!=null) {
@@ -693,10 +684,10 @@ namespace OpenSim.Modules.Currency
 					}
 				}
 			}
+			return;
 		}
 
 
-		/**/
 		// for LandBuy even
 		private void processLandBuy(Object sender, EventManager.LandBuyArgs landBuyEvent)
 		{
@@ -718,10 +709,10 @@ namespace OpenSim.Modules.Currency
 					}
 				}
 			}
+			return;
 		}
 
 
-		/**/
 		// for OnObjectBuy event
 		public void OnObjectBuy(IClientAPI remoteClient, UUID agentID, UUID sessionID, 
 								UUID groupID, UUID categoryID, uint localID, byte saleType, int salePrice)
@@ -730,7 +721,7 @@ namespace OpenSim.Modules.Currency
 
 			// Handle the parameters error.   
 			if (!m_sellEnabled) return;
-			if (remoteClient==null || salePrice<0) return;		// for L$0 Sell
+			if (remoteClient==null || salePrice<0) return;
 
 			// Get the balance from money server.   
 			int balance = QueryBalanceFromMoneyServer(remoteClient);
@@ -753,9 +744,8 @@ namespace OpenSim.Modules.Currency
 							if (!string.IsNullOrEmpty(m_moneyServURL)) {
 								ret = TransferMoney(remoteClient.AgentId, receiverId, salePrice,
 												(int)TransactionType.PayObject, sceneObj.UUID, regionHandle, "Object Buy");
-												//(int)MoneyTransactionType.PayObject, sceneObj.UUID, regionHandle, "Object Buy");
 							}
-							else if (salePrice==0) {
+							else if (salePrice==0) {	// amount is 0 with No Money Server
 								ret = true;
 							}
 						}
@@ -769,6 +759,7 @@ namespace OpenSim.Modules.Currency
 					return;
 				}
 			}
+			return;
 		}
 
 
@@ -1154,11 +1145,11 @@ namespace OpenSim.Modules.Currency
 			if (request.Params.Count>0)
 			{
 				Hashtable requestParam = (Hashtable)request.Params[0];
-				if (requestParam.Contains("agentUUID") && requestParam.Contains("secretAccessCode")) {
-					UUID agentUUID   = UUID.Zero;
-					UUID receiptUUID = UUID.Zero; 	// UUID.Zero means System
-					if (requestParam.Contains("agentUUID"))   UUID.TryParse((string)requestParam["agentUUID"], out agentUUID);
-					if (requestParam.Contains("receiptUUID")) UUID.TryParse((string)requestParam["receiptUUID"], out receiptUUID);
+				if ((requestParam.Contains("fromUUID") || requestParam.Contains("toUUID")) && requestParam.Contains("secretAccessCode")) {
+					UUID fromUUID = UUID.Zero;
+					UUID toUUID   = UUID.Zero; 	// UUID.Zero means System
+					if (requestParam.Contains("fromUUID")) UUID.TryParse((string)requestParam["fromUUID"], out fromUUID);
+					if (requestParam.Contains("toUUID"))   UUID.TryParse((string)requestParam["toUUID"],   out toUUID);
 
 					if (requestParam.Contains("amount")) {
 						int amount  = (int)requestParam["amount"];
@@ -1169,15 +1160,15 @@ namespace OpenSim.Modules.Currency
 						byte[] code = md5.ComputeHash(ASCIIEncoding.Default.GetBytes(secretCode + "_" + scriptIP));
 						string hash = BitConverter.ToString(code).ToLower().Replace("-","");
 						//m_log.InfoFormat("[MONEY]: MoveMoneyHandler: SecretCode: {0} + {1} = {2}", secretCode, scriptIP, hash);
-						ret = MoveMoneyFromTo(agentUUID, receiptUUID, amount, hash);
+						ret = MoveMoneyFromTo(fromUUID, toUUID, amount, hash);
 					}
 					else {
 						m_log.ErrorFormat("[MONEY]: MoveMoneyHandler: amount is missed");
 					}
 				}
 				else {
-					if (!requestParam.Contains("agentUUID")) {
-						m_log.ErrorFormat("[MONEY]: MoveMoneyHandler: agentUUID is missed");
+					if (!requestParam.Contains("fromUUID") && !requestParam.Contains("toUUID")) {
+						m_log.ErrorFormat("[MONEY]: MoveMoneyHandler: fromUUID and toUUID are missed");
 					}
 					if (!requestParam.Contains("secretAccessCode")) {
 						m_log.ErrorFormat("[MONEY]: MoveMoneyHandler: secretAccessCode is missed");
