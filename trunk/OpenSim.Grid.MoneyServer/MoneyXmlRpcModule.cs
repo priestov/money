@@ -292,7 +292,8 @@ namespace OpenSim.Grid.MoneyServer
 			string simIP = string.Empty;
 			string userName = string.Empty;
 			int    balance = 0;
-			int	   avatarClass = (int)AvatarClass.UNKNOWN_AVATAR; 
+			int	   avatarType  = (int)AvatarType.UNKNOWN_AVATAR; 
+			int	   avatarClass = (int)AvatarType.UNKNOWN_AVATAR; 
 
 			if (requestData.ContainsKey("clientUUID")) 			  clientUUID = (string)requestData["clientUUID"];
 			if (requestData.ContainsKey("clientSessionID")) 	  sessionID = (string)requestData["clientSessionID"];
@@ -300,6 +301,7 @@ namespace OpenSim.Grid.MoneyServer
 			if (requestData.ContainsKey("universalID")) 	  	  universalID = (string)requestData["universalID"];
 			if (requestData.ContainsKey("userName")) 			  userName = (string)requestData["userName"];
 			if (requestData.ContainsKey("openSimServIP"))         simIP = (string)requestData["openSimServIP"];
+			if (requestData.ContainsKey("avatarType")) 	  	  	  avatarType  = Convert.ToInt32(requestData["avatarType"]);
 			if (requestData.ContainsKey("avatarClass")) 	  	  avatarClass = Convert.ToInt32(requestData["avatarClass"]);
 
 			//
@@ -319,13 +321,13 @@ namespace OpenSim.Grid.MoneyServer
 			// Information from DB
 			UserInfo userInfo = m_moneyDBService.FetchUserInfo(clientUUID);
 			if (userInfo!=null) {
+				avatarType = userInfo.Type;
+				if (avatarClass==(int)AvatarType.UNKNOWN_AVATAR) avatarClass = userInfo.Class;
 				if (String.IsNullOrEmpty(userName)) userName = userInfo.Avatar;
-				if (avatarClass==(int)AvatarClass.UNKNOWN_AVATAR) {
-					avatarClass = userInfo.Class;
-				}
 			}
 
-			m_log.InfoFormat("[MONEY RPC]: handleClientLogon: Avatar {0} ({1}) is logged on. Avatar Class is {2}", userName, clientUUID, avatarClass);
+			m_log.InfoFormat("[MONEY RPC]: handleClientLogon: Avatar {0} ({1}) is logged on.", userName, clientUUID);
+			m_log.InfoFormat("[MONEY RPC]: handleClientLogon: Avatar Type is {0} and Avatar Class is {1}", avatarType, avatarClass);
 
 			//
 			// Check Avatar
@@ -334,27 +336,27 @@ namespace OpenSim.Grid.MoneyServer
 				m_log.InfoFormat("[MONEY RPC]: handleClientLogon: {0}", responseData["description"]);
 				return response;
 			}
-			else if (avatarClass==(int)AvatarClass.GUEST_AVATAR && !m_gst_enable) {
+			else if (avatarClass==(int)AvatarType.GUEST_AVATAR && !m_gst_enable) {
 				responseData["description"] = "Avatar is a Guest avatar. But this Money Server does not support Guest avatars.";
 				m_log.InfoFormat("[MONEY RPC]: handleClientLogon: {0}", responseData["description"]);
 				return response;
 			}
-			else if (avatarClass==(int)AvatarClass.HG_AVATAR && !m_hg_enable) {
+			else if (avatarClass==(int)AvatarType.HG_AVATAR && !m_hg_enable) {
 				responseData["description"] = "Avatar is a HG avatar. But this Money Server does not support HG avatars.";
 				m_log.InfoFormat("[MONEY RPC]: handleClientLogon: {0}", responseData["description"]);
 				return response;
 			}
-			else if (avatarClass==(int)AvatarClass.NPC_AVATAR) {
+			else if (avatarClass==(int)AvatarType.NPC_AVATAR) {
 				responseData["description"] = "Avatar is a NPC.";
 				m_log.InfoFormat("[MONEY RPC]: handleClientLogon: {0}", responseData["description"]);
 				return response;
 			}
-			else if (avatarClass==(int)AvatarClass.FOREIGN_AVATAR) {
+			else if (avatarClass==(int)AvatarType.FOREIGN_AVATAR) {
 				responseData["description"] = "Avatar is a Foreign avatar.";
 				m_log.InfoFormat("[MONEY RPC]: handleClientLogon: {0}", responseData["description"]);
 				return response;
 			}
-			else if (avatarClass==(int)AvatarClass.UNKNOWN_AVATAR) {
+			else if (avatarClass==(int)AvatarType.UNKNOWN_AVATAR) {
 				responseData["description"] = "Avatar is a Unknown avatar.";
 				m_log.InfoFormat("[MONEY RPC]: handleClientLogon: {0}", responseData["description"]);
 				return response;
@@ -382,6 +384,7 @@ namespace OpenSim.Grid.MoneyServer
 				userInfo.SimIP     = simIP;
 				userInfo.Avatar    = userName;
 				userInfo.PswHash   = UUID.Zero.ToString();
+				userInfo.Type      = avatarType;
 				userInfo.Class     = avatarClass;
 				userInfo.ServerURL = serverURL;
 				if (!String.IsNullOrEmpty(securePsw)) userInfo.PswHash = securePsw;
@@ -406,8 +409,8 @@ namespace OpenSim.Grid.MoneyServer
 				//add user to balances table if not exist. (if balance is -1, it means avatar is not exist at balances table)
 				if (balance==-1) {
 					int default_balance = m_defaultBalance;
-					if (avatarClass==(int)AvatarClass.HG_AVATAR)    default_balance = m_hg_defaultBalance;
-					if (avatarClass==(int)AvatarClass.GUEST_AVATAR) default_balance = m_gst_defaultBalance;
+					if (avatarClass==(int)AvatarType.HG_AVATAR)    default_balance = m_hg_defaultBalance;
+					if (avatarClass==(int)AvatarType.GUEST_AVATAR) default_balance = m_gst_defaultBalance;
 
 					if (m_moneyDBService.addUser(clientUUID, default_balance, 0)) {
 						responseData["success"] = true;

@@ -189,21 +189,21 @@ namespace OpenSim.Modules.Currency
 
 		private IConfigSource m_config;
 
-		private string m_moneyServURL	  = string.Empty;
+		private string m_moneyServURL	 = string.Empty;
 		public  BaseHttpServer HttpServer;
 
-		private string m_certFilename	  = "";
-		private string m_certPassword	  = "";
-		private bool   m_checkServerCert  = false;
-		private string m_cacertFilename	  = "";
-		private X509Certificate2 m_cert	  = null;
+		private string m_certFilename	 = "";
+		private string m_certPassword	 = "";
+		private bool   m_checkServerCert = false;
+		private string m_cacertFilename	 = "";
+		private X509Certificate2 m_cert	 = null;
 
-		private bool   m_use_web_settle	  = false;
-		private string m_settle_url	  	  = "";
-		private string m_settle_message   = "";
-		private bool   m_settle_user  	  = false;
+		private bool   m_use_web_settle	 = false;
+		private string m_settle_url	  	 = "";
+		private string m_settle_message  = "";
+		private bool   m_settle_user  	 = false;
 
-		private int    m_hg_avatarClass   = (int)AvatarClass.HG_AVATAR;
+		private int    m_hg_avatarClass  = (int)AvatarType.HG_AVATAR;
 
 		private NSLCertificateVerify m_certVerify = new NSLCertificateVerify();	// サーバ認証用
 
@@ -324,11 +324,11 @@ namespace OpenSim.Modules.Currency
 
 				// for HG Avatar
 				string avatar_class = economyConfig.GetString("HGAvatarAs", "HGAvatar").ToLower();
-				if      (avatar_class=="localavatar")   m_hg_avatarClass = (int)AvatarClass.LOCAL_AVATAR;
-				else if (avatar_class=="guestavatar")   m_hg_avatarClass = (int)AvatarClass.GUEST_AVATAR;
-				else if (avatar_class=="hgavatar")      m_hg_avatarClass = (int)AvatarClass.HG_AVATAR;
-				else if (avatar_class=="foreignavatar") m_hg_avatarClass = (int)AvatarClass.FOREIGN_AVATAR;
-				else                                    m_hg_avatarClass = (int)AvatarClass.UNKNOWN_AVATAR;
+				if      (avatar_class=="localavatar")   m_hg_avatarClass = (int)AvatarType.LOCAL_AVATAR;
+				else if (avatar_class=="guestavatar")   m_hg_avatarClass = (int)AvatarType.GUEST_AVATAR;
+				else if (avatar_class=="hgavatar")      m_hg_avatarClass = (int)AvatarType.HG_AVATAR;
+				else if (avatar_class=="foreignavatar") m_hg_avatarClass = (int)AvatarType.FOREIGN_AVATAR;
+				else                                    m_hg_avatarClass = (int)AvatarType.UNKNOWN_AVATAR;
 
 			}
 			catch {
@@ -1587,7 +1587,8 @@ namespace OpenSim.Modules.Currency
 				string firstName   = string.Empty;
 				string lastName    = string.Empty;
 				string serverURL   = string.Empty;
-				int    avatarClass = (int)AvatarClass.LOCAL_AVATAR;
+				int    avatarType  = (int)AvatarType.LOCAL_AVATAR;
+				int    avatarClass = (int)AvatarType.LOCAL_AVATAR;
 
 				AgentCircuitData agent = scene.AuthenticateHandler.GetAgentCircuitData(client.AgentId);
 				if (agent!=null) {
@@ -1599,11 +1600,11 @@ namespace OpenSim.Modules.Currency
 					}
 					// if serverURL is empty, avatar is a NPC
 					if (String.IsNullOrEmpty(serverURL)) {
-						avatarClass = (int)AvatarClass.NPC_AVATAR;
+						avatarType = (int)AvatarType.NPC_AVATAR;
 					}
 					//
 					if ((agent.teleportFlags & (uint)Constants.TeleportFlags.ViaHGLogin)!=0 || String.IsNullOrEmpty(userName)) {
-						avatarClass = (int)AvatarClass.HG_AVATAR;
+						avatarType = (int)AvatarType.HG_AVATAR;
 					}
 				}
 				if (String.IsNullOrEmpty(userName)) {
@@ -1611,14 +1612,15 @@ namespace OpenSim.Modules.Currency
 				}
 				
 				//
-				if (avatarClass==(int)AvatarClass.NPC_AVATAR) return false;
-				if (avatarClass==(int)AvatarClass.HG_AVATAR)  avatarClass = m_hg_avatarClass;
+				if (avatarType==(int)AvatarType.NPC_AVATAR) return false;
+				if (avatarType==(int)AvatarType.HG_AVATAR)  avatarClass = m_hg_avatarClass;
 
 				//
 				// Lognn the Money Server.   
 				Hashtable paramTable = new Hashtable();
 				paramTable["openSimServIP"] 		= scene.RegionInfo.ServerURI.Replace(scene.RegionInfo.InternalEndPoint.Port.ToString(), 
 																						 scene.RegionInfo.HttpPort.ToString());
+				paramTable["avatarType"]            = avatarType.ToString();
 				paramTable["avatarClass"]           = avatarClass.ToString();
 				paramTable["userName"] 				= userName;
 				paramTable["universalID"]           = universalID;

@@ -164,7 +164,7 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
     }
 
 
-    public enum AvatarClass
+    public enum AvatarType
     { 
         LOCAL_AVATAR   = 0, 
         GUEST_AVATAR   = 1,
@@ -181,7 +181,8 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
         string m_simIP = string.Empty;
         string m_avatarName = string.Empty;
         string m_passwordHash = string.Empty;
-        int    m_avatarClass = (int)AvatarClass.LOCAL_AVATAR;
+        int    m_avatarType  = (int)AvatarType.LOCAL_AVATAR;
+        int    m_avatarClass = (int)AvatarType.LOCAL_AVATAR;
 		string m_serverURL = string.Empty;
 
         public string UserID
@@ -206,6 +207,12 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
         {
             get { return m_passwordHash; }
             set { m_passwordHash = value; }
+        }
+
+        public int Type
+        {
+            get { return m_avatarType; }
+            set { m_avatarType = value; }
         }
 
         public int Class
