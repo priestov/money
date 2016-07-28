@@ -127,7 +127,6 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 					string version = tableList[Table_of_UserInfo].Trim();
 					int nVer = getTableVersionNum(version);
 					userinfo_rev = nVer;
-	m_log.ErrorFormat("[MONEY DB]: ====> userinfo_rev = {0}", userinfo_rev);
 					switch (nVer) {
 					  case 1: //Rev.1
 						UpdateUserInfoTable1();
