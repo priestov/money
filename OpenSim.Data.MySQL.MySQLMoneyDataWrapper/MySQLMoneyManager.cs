@@ -47,7 +47,6 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 		private string Table_of_Transactions = "transactions";
 		private string Table_of_TotalSales	 = "totalsales";
 		private string Table_of_UserInfo	 = "userinfo";
-//		private string Table_of_UserInfo	 = "currency_users";	// for Aurora-Sim
 		private int    userinfo_rev          = 0;
 
 		private string connectString;
@@ -107,14 +106,9 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 					  case 1: //Rev.1
 						UpdateBalancesTable1();
 						UpdateBalancesTable2();
-						UpdateBalancesTable3();
 						break;
 					  case 2: //Rev.2
 						UpdateBalancesTable2();
-						UpdateBalancesTable3();
-						break;
-					  case 3: //Rev.3
-						UpdateBalancesTable3();
 						break;
 					}
 				}
@@ -133,18 +127,14 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 					string version = tableList[Table_of_UserInfo].Trim();
 					int nVer = getTableVersionNum(version);
 					userinfo_rev = nVer;
+	m_log.ErrorFormat("[MONEY DB]: ====> userinfo_rev = {0}", userinfo_rev);
 					switch (nVer) {
 					  case 1: //Rev.1
 						UpdateUserInfoTable1();
 						UpdateUserInfoTable2();
-						UpdateUserInfoTable3();
 						break;
 					  case 2: //Rev.2
 						UpdateUserInfoTable2();
-						UpdateUserInfoTable3();
-						break;
-					  case 3: //Rev.3
-						UpdateUserInfoTable3();
 						break;
 					}
 				}
@@ -174,7 +164,6 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 						UpdateTransactionsTable8();
 						UpdateTransactionsTable9();
 						UpdateTransactionsTable10();
-						UpdateTransactionsTable11();
 						break;
 					  case 3: //Rev.3
 						UpdateTransactionsTable3();
@@ -185,7 +174,6 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 						UpdateTransactionsTable8();
 						UpdateTransactionsTable9();
 						UpdateTransactionsTable10();
-						UpdateTransactionsTable11();
 						break;
 					  case 4: //Rev.4
 						UpdateTransactionsTable4();
@@ -195,7 +183,6 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 						UpdateTransactionsTable8();
 						UpdateTransactionsTable9();
 						UpdateTransactionsTable10();
-						UpdateTransactionsTable11();
 						break;
 					  case 5: //Rev.5
 						UpdateTransactionsTable5();
@@ -204,7 +191,6 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 						UpdateTransactionsTable8();
 						UpdateTransactionsTable9();
 						UpdateTransactionsTable10();
-						UpdateTransactionsTable11();
 						break;
 					  case 6: //Rev.6
 						UpdateTransactionsTable6();
@@ -212,32 +198,24 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 						UpdateTransactionsTable8();
 						UpdateTransactionsTable9();
 						UpdateTransactionsTable10();
-						UpdateTransactionsTable11();
 						break;
 					  case 7: //Rev.7
 						UpdateTransactionsTable7();
 						UpdateTransactionsTable8();
 						UpdateTransactionsTable9();
 						UpdateTransactionsTable10();
-						UpdateTransactionsTable11();
 						break;
 					  case 8: //Rev.8
 						UpdateTransactionsTable8();
 						UpdateTransactionsTable9();
 						UpdateTransactionsTable10();
-						UpdateTransactionsTable11();
 						break;
 					  case 9: //Rev.9
 						UpdateTransactionsTable9();
 						UpdateTransactionsTable10();
-						UpdateTransactionsTable11();
 						break;
 					  case 10: //Rev.10
 						UpdateTransactionsTable10();
-						UpdateTransactionsTable11();
-						break;
-					  case 11: //Rev.11
-						UpdateTransactionsTable11();
 						break;
 					}
 				}
@@ -259,14 +237,9 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 					  case 1: //Rev.1
 						UpdateTotalSalesTable1();
 						UpdateTotalSalesTable2();
-						UpdateTotalSalesTable3();
 						break;
 					  case 2: //Rev.2
 						UpdateTotalSalesTable2();
-						UpdateTotalSalesTable3();
-						break;
-					  case 3: //Rev.3
-						UpdateTotalSalesTable3();
 						break;
 					}
 				}
@@ -307,7 +280,7 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 			sql += "PRIMARY KEY (`user`))";
 			sql += "Engine=InnoDB DEFAULT CHARSET=utf8 ";
 			///////////////////////////////////////////////
-			sql += "COMMENT='Rev.4';";
+			sql += "COMMENT='Rev.3';";
 			MySqlCommand cmd = new MySqlCommand(sql, dbcon);
 			cmd.ExecuteNonQuery();
 			cmd.Dispose();
@@ -322,13 +295,14 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 			sql += "`user` varchar(36) NOT NULL,";
 			sql += "`simip` varchar(64) NOT NULL,";
 			sql += "`avatar` varchar(50) NOT NULL,";
-			sql += "`pass` varchar(36) NOT NULL DEFAULT '',";
-			sql += "`class`  tinyint(2) NOT NULL DEFAULT 0,";
+			sql += "`pass`  varchar(36) NOT NULL DEFAULT '',";
+			sql += "`type`  tinyint(2)  NOT NULL DEFAULT 0,";
+			sql += "`class` tinyint(2)  NOT NULL DEFAULT 0,";
 			sql += "`serverurl` varchar(255) NOT NULL DEFAULT '',";
 			sql += "PRIMARY KEY(`user`))";
 			sql += "Engine=InnoDB DEFAULT CHARSET=utf8 ";
 			///////////////////////////////////////////////
-			sql += "COMMENT='Rev.5';";
+			sql += "COMMENT='Rev.3';";
 			MySqlCommand cmd = new MySqlCommand(sql, dbcon);
 			cmd.ExecuteNonQuery();
 			cmd.Dispose();
@@ -380,7 +354,7 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 			sql += "PRIMARY KEY(`UUID`))";
 			sql += "Engine=InnoDB DEFAULT CHARSET=utf8 ";
 			///////////////////////////////////////////////
-			sql += "COMMENT='Rev.4';";
+			sql += "COMMENT='Rev.3';";
 			MySqlCommand cmd = new MySqlCommand(sql, dbcon);
 			cmd.ExecuteNonQuery();
 			cmd.Dispose();
@@ -460,29 +434,14 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 		}
 
 
-		/// No Operation
 		private void UpdateBalancesTable2()
 		{
 			string sql = string.Empty;
 
 			sql  = "BEGIN;";
 			sql += "ALTER TABLE `" + Table_of_Balances + "` ";
-			sql += "COMMENT = 'Rev.3';";
-			sql += "COMMIT;";
-			MySqlCommand cmd = new MySqlCommand(sql, dbcon);
-			cmd.ExecuteNonQuery();
-			cmd.Dispose();
-		}
-
-
-		private void UpdateBalancesTable3()
-		{
-			string sql = string.Empty;
-
-			sql  = "BEGIN;";
-			sql += "ALTER TABLE `" + Table_of_Balances + "` ";
 			sql += "MODIFY COLUMN `user` varchar(36) NOT NULL,";
-			sql += "COMMENT = 'Rev.4';";
+			sql += "COMMENT = 'Rev.3';";
 			sql += "COMMIT;";
 			MySqlCommand cmd = new MySqlCommand(sql, dbcon);
 			cmd.ExecuteNonQuery();
@@ -561,22 +520,7 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 		}
 
 
-		/// No Operation
 		private void UpdateUserInfoTable2()
-		{
-			string sql = string.Empty;
-
-			sql  = "BEGIN;";
-			sql += "ALTER TABLE `" + Table_of_UserInfo + "` ";
-			sql += "COMMENT = 'Rev.3';";
-			sql += "COMMIT;";
-			MySqlCommand cmd = new MySqlCommand(sql, dbcon);
-			cmd.ExecuteNonQuery();
-			cmd.Dispose();
-		}
-
-
-		private void UpdateUserInfoTable3()
 		{
 			string sql = string.Empty;
 
@@ -584,9 +528,10 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 			sql += "ALTER TABLE `" + Table_of_UserInfo + "` ";
 			sql += "MODIFY COLUMN `user` varchar(36) NOT NULL,";
 			sql += "MODIFY COLUMN `pass` varchar(36) NOT NULL DEFAULT '',";
-			sql += "ADD `class` tinyint(2) NOT NULL DEFAULT 0 AFTER `pass`,";
+			sql += "ADD `type`  tinyint(2) NOT NULL DEFAULT 0 AFTER `pass`,";
+			sql += "ADD `class` tinyint(2) NOT NULL DEFAULT 0 AFTER `type`,";
 			sql += "ADD `serverurl` varchar(255) NOT NULL DEFAULT '' AFTER `class`,";
-			sql += "COMMENT = 'Rev.4';";
+			sql += "COMMENT = 'Rev.3';";
 			sql += "COMMIT;";
 			MySqlCommand cmd = new MySqlCommand(sql, dbcon);
 			cmd.ExecuteNonQuery();
@@ -758,7 +703,6 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 
 		/// <summary>
 		/// update transactions table from Rev.9 to Rev.10
-		/// No Operation
 		/// </summary>
 		private void UpdateTransactionsTable9()
 		{
@@ -766,6 +710,8 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 
 			sql  = "BEGIN;";
 			sql += "ALTER TABLE `" + Table_of_Transactions + "` ";
+			sql += "MODIFY COLUMN `sender`   varchar(36) NOT NULL,";
+			sql += "MODIFY COLUMN `receiver` varchar(36) NOT NULL,";
 			sql += "COMMENT = 'Rev.10';";
 			sql += "COMMIT;";
 			MySqlCommand cmd = new MySqlCommand(sql, dbcon);
@@ -775,27 +721,9 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 
 		/// <summary>
 		/// update transactions table from Rev.10 to Rev.11
-		/// </summary>
-		private void UpdateTransactionsTable10()
-		{
-			string sql = string.Empty;
-
-			sql  = "BEGIN;";
-			sql += "ALTER TABLE `" + Table_of_Transactions + "` ";
-			sql += "MODIFY COLUMN `sender`   varchar(36) NOT NULL,";
-			sql += "MODIFY COLUMN `receiver` varchar(36) NOT NULL,";
-			sql += "COMMENT = 'Rev.11';";
-			sql += "COMMIT;";
-			MySqlCommand cmd = new MySqlCommand(sql, dbcon);
-			cmd.ExecuteNonQuery();
-			cmd.Dispose();
-		}
-
-		/// <summary>
-		/// update transactions table from Rev.11 to Rev.12
         /// change type of BirthGift from 1000 to 900
 		/// </summary>
-		private void UpdateTransactionsTable11()
+		private void UpdateTransactionsTable10()
 		{
 			//m_log.Info("[MONEY DB]: Converting Transaction Table...");
 			string sql = string.Empty;
@@ -831,7 +759,7 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 			//
 			sql  = "BEGIN;";
 			sql += "ALTER TABLE `" + Table_of_Transactions + "` ";
-			sql += "COMMENT = 'Rev.12';";
+			sql += "COMMENT = 'Rev.11';";
 			sql += "COMMIT;";
 			cmd = new MySqlCommand(sql, dbcon);
 			cmd.ExecuteNonQuery();
@@ -860,29 +788,14 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 		}
 
 
-		/// No Operation
 		private void UpdateTotalSalesTable2()
 		{
 			string sql = string.Empty;
 
 			sql  = "BEGIN;";
 			sql += "ALTER TABLE `" + Table_of_TotalSales + "` ";
-			sql += "COMMENT = 'Rev.3';";
-			sql += "COMMIT;";
-			MySqlCommand cmd = new MySqlCommand(sql, dbcon);
-			cmd.ExecuteNonQuery();
-			cmd.Dispose();
-		}
-
-
-		private void UpdateTotalSalesTable3()
-		{
-			string sql = string.Empty;
-
-			sql  = "BEGIN;";
-			sql += "ALTER TABLE `" + Table_of_TotalSales + "` ";
 			sql += "MODIFY COLUMN `user` varchar(36) NOT NULL,";
-			sql += "COMMENT = 'Rev.4';";
+			sql += "COMMENT = 'Rev.3';";
 			sql += "COMMIT;";
 			MySqlCommand cmd = new MySqlCommand(sql, dbcon);
 			cmd.ExecuteNonQuery();
@@ -898,8 +811,8 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 		private Dictionary<string,string> CheckTables()
 		{
 			Dictionary<string,string> tableDic = new Dictionary<string,string>();
-			lock (dbcon)
-			{
+
+			lock (dbcon) {
 				string sql = string.Empty;
 
 				sql = "SELECT TABLE_NAME,TABLE_COMMENT FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA=?dbname";
@@ -1614,9 +1527,9 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 		   
 			if (userInfo.Avatar==null) return false;
 
-			if (userinfo_rev>=4) {
-				sql  = "INSERT INTO " + Table_of_UserInfo +"(`user`,`simip`,`avatar`,`pass`,`class`,`serverurl`) VALUES";
-				sql += "(?user,?simip,?avatar,?password,?class,?serverurl);";
+			if (userinfo_rev>=3) {
+				sql  = "INSERT INTO " + Table_of_UserInfo +"(`user`,`simip`,`avatar`,`pass`,`type`,`class`,`serverurl`) VALUES";
+				sql += "(?user,?simip,?avatar,?password,?type,?class,?serverurl);";
 			}
 			else {
 				sql  = "INSERT INTO " + Table_of_UserInfo +"(`user`,`simip`,`avatar`,`pass`) VALUES";
@@ -1628,7 +1541,8 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 			cmd.Parameters.AddWithValue("?simip", userInfo.SimIP);
 			cmd.Parameters.AddWithValue("?avatar", userInfo.Avatar);
 			cmd.Parameters.AddWithValue("?password", userInfo.PswHash);
-			if (userinfo_rev>=4) {
+			if (userinfo_rev>=3) {
+				cmd.Parameters.AddWithValue("?type",  userInfo.Type);
 				cmd.Parameters.AddWithValue("?class", userInfo.Class);
 				cmd.Parameters.AddWithValue("?serverurl", userInfo.ServerURL);
 			}
@@ -1665,6 +1579,7 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 						userInfo.SimIP     = (string)r["simip"];
 						userInfo.Avatar    = (string)r["avatar"];
 						userInfo.PswHash   = (string)r["pass"];
+						userInfo.Type      = Convert.ToInt32(r["type"]);
 						userInfo.Class     = Convert.ToInt32(r["class"]);
 						userInfo.ServerURL = (string)r["serverurl"];
 					}
@@ -1691,10 +1606,9 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 			bool bRet = false;
 			string sql = string.Empty;
 
-			sql = "UPDATE " + Table_of_UserInfo + " SET simip=?simip,avatar=?avatar,pass=?pass,class=?class,serverurl=?serverurl WHERE user=?user;";
+			sql = "UPDATE " + Table_of_UserInfo + " SET simip=?simip,pass=?pass,class=?class,serverurl=?serverurl WHERE user=?user;";
 			MySqlCommand cmd = new MySqlCommand(sql, dbcon);
 			cmd.Parameters.AddWithValue("?simip", userInfo.SimIP);
-			cmd.Parameters.AddWithValue("?avatar", userInfo.Avatar);
 			cmd.Parameters.AddWithValue("?pass", userInfo.PswHash);
 			cmd.Parameters.AddWithValue("?class", userInfo.Class);
 			cmd.Parameters.AddWithValue("?serverurl", userInfo.ServerURL);
