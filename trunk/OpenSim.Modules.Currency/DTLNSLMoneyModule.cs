@@ -390,8 +390,6 @@ namespace OpenSim.Modules.Currency
 
 		public void RemoveRegion(Scene scene)
 		{
-/*
-//			有効にすると，終了時に Event Manager がエラーを起こすので，コメントアウト
 			if (scene==null) return;
 
 			lock (m_sceneList) {
@@ -404,7 +402,6 @@ namespace OpenSim.Modules.Currency
 				scene.EventManager.OnValidateLandBuy -= ValidateLandBuy;
 				scene.EventManager.OnLandBuy 		 -= processLandBuy;
             }
-*/
 		}
 
 
