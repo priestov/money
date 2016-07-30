@@ -1612,6 +1612,7 @@ namespace OpenSim.Modules.Currency
 				}
 				
 				//
+				avatarClass = avatarType;
 				if (avatarType==(int)AvatarType.NPC_AVATAR) return false;
 				if (avatarType==(int)AvatarType.HG_AVATAR)  avatarClass = m_hg_avatarClass;
 
