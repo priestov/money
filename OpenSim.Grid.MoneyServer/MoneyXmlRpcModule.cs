@@ -321,7 +321,7 @@ namespace OpenSim.Grid.MoneyServer
 			// Information from DB
 			UserInfo userInfo = m_moneyDBService.FetchUserInfo(clientUUID);
 			if (userInfo!=null) {
-				avatarType = userInfo.Type;
+				avatarType = userInfo.Type;		// Avatar Type is not updated
 				if (avatarClass==(int)AvatarType.UNKNOWN_AVATAR) avatarClass = userInfo.Class;
 				if (String.IsNullOrEmpty(userName)) userName = userInfo.Avatar;
 			}
