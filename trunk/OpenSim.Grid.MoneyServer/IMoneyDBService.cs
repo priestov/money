@@ -45,7 +45,7 @@ namespace OpenSim.Grid.MoneyServer
 
         bool addTransaction(TransactionData transaction);
 
-        bool addUser(string userID, int balance, int status);
+        bool addUser(string userID, int balance, int status, int type);
 
         bool updateTransactionStatus(UUID transactionID, int status, string description);
 

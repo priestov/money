@@ -47,10 +47,10 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 		private string Table_of_Transactions = "transactions";
 		private string Table_of_TotalSales	 = "totalsales";
 		private string Table_of_UserInfo	 = "userinfo";
+		private int    balances_rev          = 0;
 		private int    userinfo_rev          = 0;
 
 		private string connectString;
-		private int m_defaultMoney = 0;
 		private MySqlConnection dbcon;
   
 
@@ -102,13 +102,19 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 				else {
 					string version = tableList[Table_of_Balances].Trim();
 					int nVer = getTableVersionNum(version);
+					balances_rev = nVer;
 					switch (nVer) {
 					  case 1: //Rev.1
 						UpdateBalancesTable1();
 						UpdateBalancesTable2();
+						UpdateBalancesTable3();
 						break;
 					  case 2: //Rev.2
 						UpdateBalancesTable2();
+						UpdateBalancesTable3();
+						break;
+					  case 3: //Rev.3
+						UpdateBalancesTable3();
 						break;
 					}
 				}
@@ -275,11 +281,12 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 			sql  = "CREATE TABLE `" + Table_of_Balances + "` (";
 			sql += "`user` varchar(36) NOT NULL,";
 			sql += "`balance` int(10) NOT NULL,";
-			sql += "`status` tinyint(2) default NULL,";
+			sql += "`status` tinyint(2) DEFAULT NULL,";
+			sql += "`type`   tinyint(2)  NOT NULL DEFAULT 0,";
 			sql += "PRIMARY KEY (`user`))";
 			sql += "Engine=InnoDB DEFAULT CHARSET=utf8 ";
 			///////////////////////////////////////////////
-			sql += "COMMENT='Rev.3';";
+			sql += "COMMENT='Rev.4';";
 			MySqlCommand cmd = new MySqlCommand(sql, dbcon);
 			cmd.ExecuteNonQuery();
 			cmd.Dispose();
@@ -402,7 +409,7 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 						updatedb = updateBalance(uuid, amount);
 					}
 					else {
-						updatedb = addUser(uuid, amount, int.Parse(row[i,2]));
+						updatedb = addUser(uuid, amount, int.Parse(row[i,2]), 0);
 					}
 					if (!updatedb) break;
 				}
@@ -441,6 +448,21 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 			sql += "ALTER TABLE `" + Table_of_Balances + "` ";
 			sql += "MODIFY COLUMN `user` varchar(36) NOT NULL,";
 			sql += "COMMENT = 'Rev.3';";
+			sql += "COMMIT;";
+			MySqlCommand cmd = new MySqlCommand(sql, dbcon);
+			cmd.ExecuteNonQuery();
+			cmd.Dispose();
+		}
+
+
+		private void UpdateBalancesTable3()
+		{
+			string sql = string.Empty;
+
+			sql  = "BEGIN;";
+			sql += "ALTER TABLE `" + Table_of_Balances + "` ";
+			sql += "ADD `type`  tinyint(2) NOT NULL DEFAULT 0 AFTER `status`,";
+			sql += "COMMENT = 'Rev.4';";
 			sql += "COMMIT;";
 			MySqlCommand cmd = new MySqlCommand(sql, dbcon);
 			cmd.ExecuteNonQuery();
@@ -923,46 +945,34 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 		}
 
 
-		public bool addUser(string userID, int balance, int status)
+		public bool addUser(string userID, int balance, int status, int type)
 		{
 			if (userID==UUID.Zero.ToString()) return true;	// System
 
 			bool bRet = false;
 			string sql = string.Empty;
 
-			sql  = "INSERT INTO " + Table_of_Balances + " (`user`,`balance`,`status`) VALUES ";
-			sql += " (?userID,?balance,?status);";
+			if (balances_rev>=4) {
+				sql  = "INSERT INTO " + Table_of_Balances + " (`user`,`balance`,`status`,`type`) VALUES ";
+				sql += " (?userID,?balance,?status,?type);";
+			}
+			else {
+				sql  = "INSERT INTO " + Table_of_Balances + " (`user`,`balance`,`status`) VALUES ";
+				sql += " (?userID,?balance,?status);";
+			}
 			MySqlCommand cmd = new MySqlCommand(sql, dbcon);
 
 			cmd.Parameters.AddWithValue("?userID",  userID);
 			cmd.Parameters.AddWithValue("?balance", balance);
 			cmd.Parameters.AddWithValue("?status",  status);
+			if (balances_rev>=4) {
+				cmd.Parameters.AddWithValue("?type",    type);
+			}
+
 			if (cmd.ExecuteNonQuery() > 0) bRet = true;
 			cmd.Dispose();
 
 			return bRet;
-		}
-
-
-		/// <summary>
-		/// Add user,for internal use
-		/// </summary>
-		/// <param name="userID"></param>
-		private void addUser(string userID)
-		{
-			if (userID==UUID.Zero.ToString()) return;	// System
-
-			string sql = string.Empty;
-
-			sql  = "INSERT INTO " + Table_of_Balances + " (`user`,`balance`,`status`) VALUES ";
-			sql += " (?userID,?balance,?status)";
-			MySqlCommand cmd = new MySqlCommand(sql, dbcon);
-
-			cmd.Parameters.AddWithValue("?userID",  userID);
-			cmd.Parameters.AddWithValue("?balance", m_defaultMoney);
-			cmd.Parameters.AddWithValue("?status",  0);
-			cmd.ExecuteNonQuery();
-			cmd.Dispose();
 		}
 
 
