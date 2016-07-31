@@ -8,9 +8,12 @@
 if (!defined('ENV_READ_CONFIG')) require_once(realpath(dirname(__FILE__).'/../include/config.php'));
 if ( defined('ENV_READ_DEFINE')) return;
 
-require_once(realpath(ENV_HELPER_PATH.'/../include/xmlgroups_config.php'));
-require_once(realpath(ENV_HELPER_PATH.'/../include/profile_config.php'));
-require_once(realpath(ENV_HELPER_PATH.'/../include/search_config.php'));
+$groups_config  = realpath(ENV_HELPER_PATH.'/../include/xmlgroups_config.php');
+$profile_config = realpath(ENV_HELPER_PATH.'/../include/profile_config.php');
+$search_sonfig  = realpath(ENV_HELPER_PATH.'/../include/search_config.php');
+if ($groups_config!='')  require_once($groups_config);
+if ($profile_config!='') require_once($profile_config);
+if ($search_config!='')  require_once($search_config);
 
 
 
