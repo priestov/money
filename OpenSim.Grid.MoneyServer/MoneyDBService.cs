@@ -42,7 +42,7 @@ namespace OpenSim.Grid.MoneyServer
         private static readonly ILog m_log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
         private string m_connect;
         private MySQLMoneyManager m_moneyManager;
-		private long TicksToEpoch = new DateTime(1970, 1, 1).Ticks;
+		private long TicksToEpoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).Ticks;
 
         // DB manager pool
         protected Dictionary<int, MySQLSuperManager> m_dbconnections = new Dictionary<int, MySQLSuperManager>();
@@ -169,7 +169,7 @@ namespace OpenSim.Grid.MoneyServer
 
             MySQLSuperManager dbm = GetLockedConnection();
             try {
-				int time = (int)((DateTime.Now.Ticks - TicksToEpoch) / 10000000);
+				int time = (int)((DateTime.UtcNow.Ticks - TicksToEpoch) / 10000000);
                 return dbm.Manager.setTotalSale(transaction.Receiver, transaction.ObjectUUID, transaction.Type, 1, transaction.Amount, time);
             }
             catch (Exception e) {
@@ -200,7 +200,7 @@ namespace OpenSim.Grid.MoneyServer
         }
 
 
-        public bool addUser(string userID, int balance, int status)
+        public bool addUser(string userID, int balance, int status, int type)
         {
             TransactionData transaction = new TransactionData();
             transaction.TransUUID    = UUID.Random();
@@ -211,11 +211,11 @@ namespace OpenSim.Grid.MoneyServer
             transaction.ObjectName   = string.Empty;
             transaction.RegionHandle = string.Empty;
             transaction.Type         = (int)TransactionType.BirthGift;
-            transaction.Time         = (int)((DateTime.Now.Ticks - TicksToEpoch) / 10000000);;
+            transaction.Time         = (int)((DateTime.UtcNow.Ticks - TicksToEpoch) / 10000000);;
             transaction.Status       = (int)Status.PENDING_STATUS;
             transaction.SecureCode   = UUID.Random().ToString();
             transaction.CommonName   = string.Empty;
-            transaction.Description  = "addUser " + DateTime.Now.ToString();
+            transaction.Description  = "addUser " + DateTime.UtcNow.ToString();
 		
             bool ret = addTransaction(transaction);
 			if (!ret) return false;
@@ -223,8 +223,7 @@ namespace OpenSim.Grid.MoneyServer
 			//
             MySQLSuperManager dbm = GetLockedConnection();
             try {
-                ret = dbm.Manager.addUser(userID, 0, status);		// make Balance Table
-                //return dbm.Manager.addUser(userID, balance, status);
+                ret = dbm.Manager.addUser(userID, 0, status, type);		// make Balance Table
             }
             catch (Exception e) {
                 dbm.Manager.Reconnect();
@@ -365,8 +364,8 @@ namespace OpenSim.Grid.MoneyServer
                     if (withdrawMoney(transactionUUID, transaction.Sender, transaction.Amount)) {
                         //If receiver not found, add it to DB.
                         if (getBalance(transaction.Receiver) == -1) {
-                            m_log.ErrorFormat("[MONEY DB]: DoTransfer: Receiver not found. {0}", transaction.Receiver);
-                            addUser(transaction.Receiver, 0, (int)Status.SUCCESS_STATUS);
+                            m_log.ErrorFormat("[MONEY DB]: DoTransfer: Receiver not found in balances DB. {0}", transaction.Receiver);
+							return false;
                         }
 
                         if (giveMoney(transactionUUID, transaction.Receiver, transaction.Amount)) {
@@ -417,8 +416,8 @@ namespace OpenSim.Grid.MoneyServer
             if (transaction!=null && transaction.Status==(int)Status.PENDING_STATUS) {
                 //If receiver not found, add it to DB.
                 if (getBalance(transaction.Receiver)==-1) {
-                    m_log.ErrorFormat("[MONEY DB]: DoAddMoney: Receiver not found. {0}", transaction.Receiver);
-                    addUser(transaction.Receiver, 0, (int)Status.SUCCESS_STATUS);
+                    m_log.ErrorFormat("[MONEY DB]: DoAddMoney: Receiver not found in balances DB. {0}", transaction.Receiver);
+					return false;
                 }
 				//
                 if (giveMoney(transactionUUID, transaction.Receiver, transaction.Amount)) {

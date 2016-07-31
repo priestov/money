@@ -100,7 +100,7 @@ namespace OpenSim.Grid.MoneyServer
 		private bool m_enableAmountZero = false;
 
 		const int MONEYMODULE_REQUEST_TIMEOUT = 30 * 1000;	//30 seconds
-		private long TicksToEpoch = new DateTime(1970, 1, 1).Ticks;
+		private long TicksToEpoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).Ticks;
 
 		private IMoneyDBService m_moneyDBService;
 		private IMoneyServiceCore m_moneyCore;
@@ -325,6 +325,7 @@ namespace OpenSim.Grid.MoneyServer
 				if (avatarClass==(int)AvatarType.UNKNOWN_AVATAR) avatarClass = userInfo.Class;
 				if (String.IsNullOrEmpty(userName)) userName = userInfo.Avatar;
 			}
+			if (avatarType==(int)AvatarType.UNKNOWN_AVATAR) avatarType = avatarClass;
 
 			m_log.InfoFormat("[MONEY RPC]: handleClientLogon: Avatar {0} ({1}) is logged on.", userName, clientUUID);
 			m_log.InfoFormat("[MONEY RPC]: handleClientLogon: Avatar Type is {0} and Avatar Class is {1}", avatarType, avatarClass);
@@ -412,7 +413,7 @@ namespace OpenSim.Grid.MoneyServer
 					if (avatarClass==(int)AvatarType.HG_AVATAR)    default_balance = m_hg_defaultBalance;
 					if (avatarClass==(int)AvatarType.GUEST_AVATAR) default_balance = m_gst_defaultBalance;
 
-					if (m_moneyDBService.addUser(clientUUID, default_balance, 0)) {
+					if (m_moneyDBService.addUser(clientUUID, default_balance, 0, avatarType)) {
 						responseData["success"] = true;
 						responseData["description"] = "add user successfully";
 						responseData["clientBalance"] = default_balance;
@@ -526,7 +527,7 @@ namespace OpenSim.Grid.MoneyServer
 			if (m_sessionDic.ContainsKey(senderID) && m_secureSessionDic.ContainsKey(senderID)) {
 				if (m_sessionDic[senderID]==senderSessionID && m_secureSessionDic[senderID]==senderSecureSessionID) {
 					m_log.InfoFormat("[MONEY RPC]: handleTransaction: Transfering money from {0} to {1}", senderID, receiverID);
-					int time = (int)((DateTime.Now.Ticks - TicksToEpoch) / 10000000);
+					int time = (int)((DateTime.UtcNow.Ticks - TicksToEpoch) / 10000000);
 					try {
 						TransactionData transaction = new TransactionData();
 						transaction.TransUUID  = transactionUUID;
@@ -541,7 +542,7 @@ namespace OpenSim.Grid.MoneyServer
 						transaction.SecureCode = UUID.Random().ToString();
 						transaction.Status = (int)Status.PENDING_STATUS;
 						transaction.CommonName  = GetSSLCommonName();
-						transaction.Description = description + " " + DateTime.Now.ToString();
+						transaction.Description = description + " " + DateTime.UtcNow.ToString();
 
 						UserInfo rcvr = m_moneyDBService.FetchUserInfo(receiverID);
 						if (rcvr==null) {
@@ -648,7 +649,7 @@ namespace OpenSim.Grid.MoneyServer
 			if (requestData.ContainsKey("description")) 	description = (string)requestData["description"];
 
 			m_log.InfoFormat("[MONEY RPC]: handleForceTransaction: Force transfering money from {0} to {1}", senderID, receiverID);
-			int time = (int)((DateTime.Now.Ticks - TicksToEpoch) / 10000000);
+			int time = (int)((DateTime.UtcNow.Ticks - TicksToEpoch) / 10000000);
 
 			try {
 				TransactionData transaction = new TransactionData();
@@ -664,7 +665,7 @@ namespace OpenSim.Grid.MoneyServer
 				transaction.SecureCode = UUID.Random().ToString();
 				transaction.Status = (int)Status.PENDING_STATUS;
 				transaction.CommonName  = GetSSLCommonName();
-				transaction.Description = description + " " + DateTime.Now.ToString();
+				transaction.Description = description + " " + DateTime.UtcNow.ToString();
 
 				UserInfo rcvr = m_moneyDBService.FetchUserInfo(receiverID);
 				if (rcvr==null) {
@@ -774,7 +775,7 @@ namespace OpenSim.Grid.MoneyServer
 			}
 
 			m_log.InfoFormat("[MONEY RPC]: handleScriptTransaction: Send money from {0} to {1}", senderID, receiverID);
-			int time = (int)((DateTime.Now.Ticks - TicksToEpoch) / 10000000);
+			int time = (int)((DateTime.UtcNow.Ticks - TicksToEpoch) / 10000000);
 
 			try {
 				TransactionData transaction = new TransactionData();
@@ -789,7 +790,7 @@ namespace OpenSim.Grid.MoneyServer
 				transaction.SecureCode = UUID.Random().ToString();
 				transaction.Status = (int)Status.PENDING_STATUS;
 				transaction.CommonName  = GetSSLCommonName();
-				transaction.Description = description + " " + DateTime.Now.ToString();
+				transaction.Description = description + " " + DateTime.UtcNow.ToString();
 
 				UserInfo senderInfo   = null;
 				UserInfo receiverInfo = null;
@@ -892,7 +893,7 @@ namespace OpenSim.Grid.MoneyServer
 			responseData["banker"] = true;
 
 			m_log.InfoFormat("[MONEY RPC]: handleAddBankerMoney: Add money to avatar {0}", bankerID);
-			int time = (int)((DateTime.Now.Ticks - TicksToEpoch) / 10000000);
+			int time = (int)((DateTime.UtcNow.Ticks - TicksToEpoch) / 10000000);
 
 			try {
 				TransactionData transaction = new TransactionData();
@@ -907,7 +908,7 @@ namespace OpenSim.Grid.MoneyServer
 				transaction.SecureCode = UUID.Random().ToString();
 				transaction.Status = (int)Status.PENDING_STATUS;
 				transaction.CommonName  = GetSSLCommonName();
-				transaction.Description = description + " " + DateTime.Now.ToString();
+				transaction.Description = description + " " + DateTime.UtcNow.ToString();
 
 				UserInfo rcvr = m_moneyDBService.FetchUserInfo(bankerID);
 				if (rcvr==null) {
@@ -990,7 +991,7 @@ namespace OpenSim.Grid.MoneyServer
 			if (m_sessionDic.ContainsKey(senderID) && m_secureSessionDic.ContainsKey(senderID)) {
 				if (m_sessionDic[senderID]==senderSessionID && m_secureSessionDic[senderID]==senderSecureSessionID) {
 					m_log.InfoFormat("[MONEY RPC]: handlePayMoneyCharge: Pay from {0}", senderID);
-					int time = (int)((DateTime.Now.Ticks - TicksToEpoch) / 10000000);
+					int time = (int)((DateTime.UtcNow.Ticks - TicksToEpoch) / 10000000);
 					try {
 						TransactionData transaction = new TransactionData();
 						transaction.TransUUID  = transactionUUID;
@@ -1005,7 +1006,7 @@ namespace OpenSim.Grid.MoneyServer
 						transaction.SecureCode = UUID.Random().ToString();
 						transaction.Status = (int)Status.PENDING_STATUS;
 						transaction.CommonName  = GetSSLCommonName();
-						transaction.Description = description + " " + DateTime.Now.ToString();
+						transaction.Description = description + " " + DateTime.UtcNow.ToString();
 
 						bool result = m_moneyDBService.addTransaction(transaction);
 						if (result) {
@@ -1358,7 +1359,7 @@ namespace OpenSim.Grid.MoneyServer
 				if (m_moneyDBService.ValidateTransfer(secureCode, transactionUUID)) {
 					m_log.InfoFormat("[MONEY RPC]: handleCancelTransfer: User {0} has canceled the transaction {1}", user.Avatar, transactionID);
 					m_moneyDBService.updateTransactionStatus(transactionUUID, (int)Status.FAILED_STATUS, 
-															"User canceled the transaction on " + DateTime.Now.ToString());
+															"User canceled the transaction on " + DateTime.UtcNow.ToString());
 					responseData["success"] = true;
 				}
 			}
