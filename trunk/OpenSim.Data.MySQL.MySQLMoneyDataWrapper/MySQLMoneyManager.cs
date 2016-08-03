@@ -77,13 +77,13 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 					dbcon.Open();
 				}
 				catch (Exception e) {
-					throw new Exception("[MONEY DB]: Connection error while using connection string ["+connectString+"]", e);
+					throw new Exception("[MONEY MANAGER]: Connection error while using connection string ["+connectString+"]", e);
 				}
-				//m_log.Info("[MONEY DB]: Connection established");
+				//m_log.Info("[MONEY MANAGER]: Connection established");
 			}
 
 			catch(Exception e) {
-				throw new Exception("[MONEY DB]: Error initialising MySql Database: " + e.ToString());
+				throw new Exception("[MONEY MANAGER]: Error initialising MySql Database: " + e.ToString());
 			}
 
 			try {
@@ -96,7 +96,7 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 						CreateBalancesTable();
 					}
 					catch (Exception e) {
-						throw new Exception("[MONEY DB]: Error creating balances table: " + e.ToString());
+						throw new Exception("[MONEY MANAGER]: Error creating balances table: " + e.ToString());
 					}
 				}
 				else {
@@ -126,7 +126,7 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 						CreateUserInfoTable();
 					}
 					catch (Exception e) {
-						throw new Exception("[MONEY DB]: Unable to create currency userinfo table: " + e.ToString());
+						throw new Exception("[MONEY MANAGER]: Unable to create currency userinfo table: " + e.ToString());
 					}
 				}
 				else {
@@ -151,7 +151,7 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 						CreateTransactionsTable();
 					}
 					catch (Exception e) {
-						throw new Exception("[MONEY DB]: Error creating transactions table: " + e.ToString());
+						throw new Exception("[MONEY MANAGER]: Error creating transactions table: " + e.ToString());
 					}
 				}
 				// check transactions table version
@@ -232,7 +232,7 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 						CreateTotalSalesTable();
 					}
 					catch (Exception e) {
-						throw new Exception("[MONEY DB]: Unable to create currency totalsales table: " + e.ToString());
+						throw new Exception("[MONEY MANAGER]: Unable to create currency totalsales table: " + e.ToString());
 					}
 				}
 				else {
@@ -250,8 +250,8 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 				}
 			}
 			catch (Exception e) {
-				m_log.Error("[MONEY DB]: Error checking or creating tables: " + e.ToString());
-				throw new Exception("[MONEY DB]: Error checking or creating tables: " + e.ToString());
+				m_log.Error("[MONEY MANAGER]: Error checking or creating tables: " + e.ToString());
+				throw new Exception("[MONEY MANAGER]: Error checking or creating tables: " + e.ToString());
 			}
 		}
 
@@ -375,7 +375,7 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 
 		private void UpdateBalancesTable1()
 		{
-			m_log.Info("[MONEY DB]: Converting Balance Table...");
+			m_log.Info("[MONEY MANAGER]: Converting Balance Table...");
 			string sql = string.Empty;
 
 			sql = "SELECT COUNT(*) FROM " + Table_of_Balances;
@@ -476,7 +476,7 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 
 		private void UpdateUserInfoTable1()
 		{
-			//m_log.Info("[MONEY DB]: Converting UserInfo Table...");
+			//m_log.Info("[MONEY MANAGER]: Converting UserInfo Table...");
 			string sql = string.Empty;
 
 			sql = "SELECT COUNT(*) FROM " + Table_of_UserInfo;
@@ -640,7 +640,7 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 		/// </summary>
 		private void UpdateTransactionsTable6()
 		{
-			//m_log.Info("[MONEY DB]: Converting Transaction Table...");
+			//m_log.Info("[MONEY MANAGER]: Converting Transaction Table...");
 			string sql = string.Empty;
 
 			sql = "SELECT COUNT(*) FROM " + Table_of_Transactions;
@@ -746,7 +746,7 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 		/// </summary>
 		private void UpdateTransactionsTable10()
 		{
-			//m_log.Info("[MONEY DB]: Converting Transaction Table...");
+			//m_log.Info("[MONEY MANAGER]: Converting Transaction Table...");
 			string sql = string.Empty;
 
 			sql = "SELECT COUNT(*) FROM `" + Table_of_Transactions + "` WHERE type=1000";
@@ -848,7 +848,7 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 							tableDic.Add(tableName, comment);
 						}
 						catch (Exception e) {
-							throw new Exception("[MONEY DB]: Error checking tables" + e.ToString());
+							throw new Exception("[MONEY MANAGER]: Error checking tables" + e.ToString());
 						}
 					}
 					r.Close();
@@ -865,16 +865,16 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 		/// </summary>
 		public void Reconnect()
 		{
-			m_log.Info("[MONEY DB]: Reconnecting database");
+			m_log.Info("[MONEY MANAGER]: Reconnecting database");
 			lock (dbcon) {
 				try {
 					dbcon.Close();
 					dbcon = new MySqlConnection(connectString);
 					dbcon.Open();
-					m_log.Info("[MONEY DB]: Reconnected database");
+					m_log.Info("[MONEY MANAGER]: Reconnected  database");
 				}
 				catch (Exception e) {
-					m_log.Error("[MONEY DB]: Unable to reconnect to database" + e.ToString());
+					m_log.Error("[MONEY MANAGER]: Unable to reconnect to database: " + e.ToString());
 				}
 			}
 		}
@@ -909,8 +909,7 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 					}
 				}
 				catch (Exception e) {
-					m_log.ErrorFormat("[MoneyDB]: MySql failed to fetch balance {0}" + Environment.NewLine + e.ToString()
-															+ Environment.NewLine + "Reconnecting" + userID);
+					m_log.ErrorFormat("[MoneyDB]: MySql failed to fetch balance {0}.", userID);
 					retValue = -2;
 				}
 				dbReader.Close();
@@ -933,12 +932,7 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 			cmd.Parameters.AddWithValue("?amount", amount);
 			cmd.Parameters.AddWithValue("?userID", userID);
 
-			try {
-				if (cmd.ExecuteNonQuery() > 0) bRet = true;
-			}
-			catch (Exception e) {
-				m_log.Error("[MONEY DB]: update money error " + e.ToString());
-			}
+			if (cmd.ExecuteNonQuery() > 0) bRet = true;
 
 			cmd.Dispose();
 			return bRet;
@@ -1014,12 +1008,7 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 				cmd.Parameters.AddWithValue("?tranid", transactionID.ToString());
 			}
 
-			try {
-				if (cmd.ExecuteNonQuery() > 0) bRet = true;
-			}
-			catch (Exception e) {
-				m_log.Error("[MONEY DB]: withdraw money error " + e.ToString());
-			}
+			if (cmd.ExecuteNonQuery() > 0) bRet = true;
 
 			cmd.Dispose();
 			return bRet;
@@ -1064,12 +1053,7 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 				cmd.Parameters.AddWithValue("?tranid", transactionID.ToString());
 			}
 
-			try {
-				if (cmd.ExecuteNonQuery() > 0) bRet = true;
-			}
-			catch (Exception e) {
-				m_log.Error("[MONEY DB]: give money error " + e.ToString());
-			}
+			if (cmd.ExecuteNonQuery() > 0) bRet = true;
 
 			cmd.Dispose();
 			return bRet;
@@ -1083,7 +1067,7 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 		//
 		private void initTotalSalesTable()
  		{
-			m_log.Info("[MONEY DB]: Initailising TotalSales Table...");
+			m_log.Info("[MONEY MANAGER]: Initailising TotalSales Table...");
 			string sql = string.Empty;
 
 			sql  = "SELECT SQL_CALC_FOUND_ROWS receiver,objectUUID,type,COUNT(*),SUM(amount),MIN(time) FROM "+ Table_of_Transactions;
@@ -1131,7 +1115,7 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 
 		private void deleteTotalSalesTable()
  		{
-			m_log.Info("[MONEY DB]: Deleting TotalSales Table...");
+			//m_log.Info("[MONEY MANAGER]: Deleting TotalSales Table...");
 			string sql = string.Empty;
 
 			sql = "DELETE FROM "+ Table_of_TotalSales;
@@ -1167,12 +1151,7 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 			cmd.Parameters.AddWithValue("?amount",  amount);
 			cmd.Parameters.AddWithValue("?time",    tmstamp);
 
-			try {
-				if (cmd.ExecuteNonQuery() > 0) bRet = true;
-			}
-			catch (Exception e) {
-				m_log.Error("[MONEY DB]: Error adding sale data to DB: " + e.ToString());
-			}
+			if (cmd.ExecuteNonQuery() > 0) bRet = true;
 
 			cmd.Dispose();
 			return bRet;
@@ -1194,12 +1173,7 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 			cmd.Parameters.AddWithValue("?amount", amount);
 			cmd.Parameters.AddWithValue("?time",   tmstamp);
 
-			try {
-				if (cmd.ExecuteNonQuery() > 0) bRet = true;
-			}
-			catch (Exception e) {
-				m_log.Error("[MONEY DB]: Error updating sale data in DB: " + e.ToString());
-			}
+			if (cmd.ExecuteNonQuery() > 0) bRet = true;
 
 			cmd.Dispose();
 			return bRet;
@@ -1229,7 +1203,7 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 						dbtm = Convert.ToInt32(r["time"]);
 					}
 					catch (Exception e) {
-						m_log.Error("[MONEY DB]: get sale data from DB failed: " + e.ToString());
+						m_log.Error("[MONEY MANAGER]: Get sale data from DB failed: " + e.ToString());
 						r.Close();
 						cmd.Dispose();
 						return false;
@@ -1289,12 +1263,7 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 			cmd.Parameters.AddWithValue("?cname", transaction.CommonName);
 			cmd.Parameters.AddWithValue("?desc", transaction.Description);
 
-			try {
-				if (cmd.ExecuteNonQuery() > 0) bRet = true;
-			}
-			catch (Exception e) {
-				m_log.Error("[MONEY DB]: Error adding transation to DB: " + e.ToString());
-			}
+			if (cmd.ExecuteNonQuery() > 0) bRet = true;
 
 			cmd.Dispose();
 			return bRet;
@@ -1312,12 +1281,7 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 			cmd.Parameters.AddWithValue("?desc", description);
 			cmd.Parameters.AddWithValue("?tranid", transactionID);
 
-			try {
-				if (cmd.ExecuteNonQuery() > 0) bRet = true;
-			}
-			catch (Exception e) {
-				m_log.Error("[MONEY DB]: Error updating transation in DB: " + e.ToString());
-			}
+			if (cmd.ExecuteNonQuery() > 0) bRet = true;
 
 			cmd.Dispose();
 			return bRet;
@@ -1337,12 +1301,7 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 			cmd.Parameters.AddWithValue("?deadTime", deadTime);
 			cmd.Parameters.AddWithValue("?pendingstatus", (int)Status.PENDING_STATUS);
 
-			try {
-				if (cmd.ExecuteNonQuery() > 0) bRet = true;
-			}
-			catch (Exception e) {
-				m_log.Error("[MONEY DB]: Error updating transation in DB: " + e.ToString());
-			}
+			if (cmd.ExecuteNonQuery() > 0) bRet = true;
 
 			cmd.Dispose();
 			return bRet;
@@ -1371,7 +1330,7 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 						secure = (string)r["secure"];
 					}
 					catch (Exception e) {
-						m_log.Error("[MONEY DB]: get transaction from DB failed: " + e.ToString());
+						m_log.Error("[MONEY MANAGER]: Get transaction from DB failed: " + e.ToString());
 					}
 					if (secureCode == secure) bRet = true;
 					else bRet = false;
@@ -1416,7 +1375,7 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 						else                                   transactionData.Description = (string)r["description"];
 					}
 					catch (Exception e) {
-						m_log.Error("[MONEY DB]: Fetching transaction failed 1: " + e.ToString());
+						m_log.Error("[MONEY MANAGER]: Fetching transaction failed 1: " + e.ToString());
 						r.Close();
 						cmd.Dispose();
 						return null;
@@ -1477,7 +1436,7 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 							rows.Add(transactionData);
 						}
 						catch (Exception e) {
-							m_log.Error("[MONEY DB]: Fetching transaction failed 2: " + e.ToString());
+							m_log.Error("[MONEY MANAGER]: Fetching transaction failed 2: " + e.ToString());
 							r.Close();
 							cmd.Dispose();
 							return null;
@@ -1511,7 +1470,7 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 						iRet = Convert.ToInt32(r["number"]);
 					}
 					catch (Exception e) {
-						m_log.Error("[MONEY DB]: Unable to get transaction info: " + e.ToString());
+						m_log.Error("[MONEY MANAGER]: Unable to get transaction info: " + e.ToString());
 					}
 				}
 				r.Close();
@@ -1529,7 +1488,7 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 		//
 		public bool addUserInfo(UserInfo userInfo)
 		{
-			//m_log.Error("[MONEY DB]: Adding UserInfo: " + userInfo.UserID);
+			//m_log.Error("[MONEY MANAGER]: Adding UserInfo: " + userInfo.UserID);
 
 			bool bRet = false;
 			string sql = string.Empty;
@@ -1556,13 +1515,7 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 				cmd.Parameters.AddWithValue("?serverurl", userInfo.ServerURL);
 			}
 
-			try {
-				if (cmd.ExecuteNonQuery()>0) bRet = true;
-			}
-			catch (Exception e) {
-				m_log.Error("[MONEY DB]: Unable to add user information to database: " + e.ToString());
-				bRet = false;
-			}
+			if (cmd.ExecuteNonQuery()>0) bRet = true;
 
 			cmd.Dispose();
 			return bRet;
@@ -1571,7 +1524,7 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 
 		public UserInfo fetchUserInfo(string userID)
 		{
-			//m_log.Error("[MONEY DB]: Fetching UserInfo: " + userID);
+			//m_log.Error("[MONEY MANAGER]: Fetching UserInfo: " + userID);
 
 			UserInfo userInfo = new UserInfo();
 			userInfo.UserID = null;
@@ -1593,7 +1546,7 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 						userInfo.ServerURL = (string)r["serverurl"];
 					}
 					catch (Exception e) {
-						m_log.Error("[MONEY DB]: Fetching UserInfo failed: " + e.ToString());
+						m_log.Error("[MONEY MANAGER]: Fetching UserInfo failed: " + e.ToString());
 						r.Close();
 						cmd.Dispose();
 						return null;
@@ -1610,7 +1563,7 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 
 		public bool updateUserInfo(UserInfo userInfo)
 		{
-			//m_log.Error("[MONEY DB]: Updating UserInfo: " + userInfo.UserID);
+			//m_log.Error("[MONEY MANAGER]: Updating UserInfo: " + userInfo.UserID);
 
 			bool bRet = false;
 			string sql = string.Empty;
