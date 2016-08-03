@@ -283,7 +283,7 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 			sql += "`balance` int(10) NOT NULL,";
 			sql += "`status` tinyint(2) DEFAULT NULL,";
 			sql += "`type`   tinyint(2)  NOT NULL DEFAULT 0,";
-			sql += "PRIMARY KEY (`user`))";
+			sql += "PRIMARY KEY(`user`))";
 			sql += "Engine=InnoDB DEFAULT CHARSET=utf8 ";
 			///////////////////////////////////////////////
 			sql += "COMMENT='Rev.4';";
@@ -335,7 +335,7 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 			sql += "`status` tinyint(1)  NOT NULL,";
 			sql += "`commonName` varchar(128) NOT NULL,";
 			sql += "`description` varchar(255) DEFAULT NULL,";
-			sql += "PRIMARY KEY (`UUID`))";
+			sql += "PRIMARY KEY(`UUID`))";
 			sql += "Engine=InnoDB DEFAULT CHARSET=utf8 ";
 			///////////////////////////////////////////////
 			sql += "COMMENT='Rev.11';";
