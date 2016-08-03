@@ -41,11 +41,11 @@ namespace OpenSim.Grid.MoneyServer
     {
         private static readonly ILog m_log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
         private string m_connect;
-        private MySQLMoneyManager m_moneyManager;
+		//private MySQLMoneyManager m_moneyManager;
 		private long TicksToEpoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).Ticks;
 
         // DB manager pool
-        protected Dictionary<int, MySQLSuperManager> m_dbconnections = new Dictionary<int, MySQLSuperManager>();
+        protected Dictionary<int, MySQLSuperManager> m_dbconnections = new Dictionary<int, MySQLSuperManager>();	// Lock付
         private int m_maxConnections;
 
         public int m_lastConnect = 0;
@@ -67,7 +67,7 @@ namespace OpenSim.Grid.MoneyServer
         {
             m_maxConnections = maxDBConnections;
             if (connectionString != string.Empty) {
-                m_moneyManager = new MySQLMoneyManager(connectionString);
+                //m_moneyManager = new MySQLMoneyManager(connectionString);
 
                 //m_log.Info("Creating " + m_maxConnections + " DB connections...");
                 for (int i = 0; i < m_maxConnections; i++) {
@@ -78,7 +78,7 @@ namespace OpenSim.Grid.MoneyServer
                 }
             }
             else {
-                m_log.Error("[MONEY DB]: Connection string is null,initialise database failed");
+                m_log.Error("[MONEY DB]: Connection string is null, initialise database failed");
                 throw new Exception("Failed to initialise MySql database");
             }
         }
@@ -446,20 +446,22 @@ namespace OpenSim.Grid.MoneyServer
         {
             MySQLSuperManager dbm = GetLockedConnection();
 
+			UserInfo userInfo = FetchUserInfo(user.UserID);
+
             try {
-                if (dbm.Manager.fetchUserInfo(user.UserID)!=null) {
-                    //m_log.InfoFormat("[MONEY DB]: Found user \"{0}\", now update information", user.Avatar);
-                    if (m_moneyManager.updateUserInfo(user)) return true;
+				if (userInfo!=null) {
+                    m_log.InfoFormat("[MONEY DB]: Found user \"{0}\", now update information", user.Avatar);
+                    if (dbm.Manager.updateUserInfo(user)) return true;
                 }
                 else if (dbm.Manager.addUserInfo(user)) {
-                    //m_log.InfoFormat("[MONEY DB]: Unable to find user \"{0}\", add it to DB successfully", user.Avatar);
+                    m_log.InfoFormat("[MONEY DB]: Unable to find user \"{0}\", add it to DB successfully", user.Avatar);
                     return true;
                 }
                 m_log.InfoFormat("[MONEY DB]: WARNNING: TryAddUserInfo: Unable to TryAddUserInfo. NPC or HG avatar?");
                 return false;
             }
             catch (Exception e) {
-                //m_log.InfoFormat("[MONEY DB]: ERROR: EXCEPTION: Reconnect to Managers.");
+                m_log.InfoFormat("[MONEY DB]: ERROR: EXCEPTION: Reconnect to Managers.");
                 dbm.Manager.Reconnect();
                 m_log.Error(e.ToString());
                 return false;
@@ -479,8 +481,13 @@ namespace OpenSim.Grid.MoneyServer
             }
             catch (Exception e) {
                 dbm.Manager.Reconnect();
-                m_log.Error(e.ToString());
-                return null;
+
+				try {
+                	return dbm.Manager.fetchUserInfo(userID);
+				}
+            	catch (Exception e) {
+                	m_log.Error(e.ToString());
+				}
             }
             finally {
                 dbm.Release();
