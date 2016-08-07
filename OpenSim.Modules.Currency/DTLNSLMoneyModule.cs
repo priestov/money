@@ -461,9 +461,11 @@ namespace OpenSim.Modules.Currency
 			string avatarName = string.Empty;
 
 			SceneObjectPart sceneObj = GetLocatePrim(objectID);
-			if (sceneObj!=null) {
-				objName = sceneObj.Name;
+			if (sceneObj==null) {
+				result = "LINDENDOLLAR_INSUFFICIENTFUNDS";
+				return false;
 			}
+			objName = sceneObj.Name;
 
 			Scene scene = GetLocateScene(toID);
 			if (scene!=null) {
@@ -1238,6 +1240,7 @@ namespace OpenSim.Modules.Currency
 				paramTable["objectID"] 				= objectID.ToString();
 				paramTable["objectName"] 			= objName;
 				paramTable["regionHandle"] 			= regionHandle.ToString();
+				paramTable["regionUUID"] 	  		= UUID.Zero.ToString();
 				paramTable["amount"] 				= amount;
 				paramTable["description"] 			= description;
 
@@ -1292,6 +1295,7 @@ namespace OpenSim.Modules.Currency
 				paramTable["objectID"] 		  = objectID.ToString();
 				paramTable["objectName"] 	  = objName;
 				paramTable["regionHandle"] 	  = regionHandle.ToString();
+				paramTable["regionUUID"] 	  = UUID.Zero.ToString();
 				paramTable["amount"] 		  = amount;
 				paramTable["description"] 	  = description;
 
@@ -1422,6 +1426,7 @@ namespace OpenSim.Modules.Currency
 				paramTable["transactionType"] 	= (int)TransactionType.BuyMoney;
 				paramTable["amount"] 			= amount;
 				paramTable["regionHandle"] 		= regionHandle.ToString();
+				paramTable["regionUUID"] 		= UUID.Zero.ToString();
 				paramTable["description"] 		= "Add Money to Avatar";
 
 				// Generate the request for transfer.   
@@ -1487,6 +1492,7 @@ namespace OpenSim.Modules.Currency
 				paramTable["transactionType"] 		= type;
 				paramTable["amount"] 				= amount;
 				paramTable["regionHandle"] 			= regionHandle.ToString();
+				paramTable["regionUUID"] 			= UUID.Zero.ToString();
 				paramTable["description"] 			= description;
 
 				// Generate the request for transfer.   
