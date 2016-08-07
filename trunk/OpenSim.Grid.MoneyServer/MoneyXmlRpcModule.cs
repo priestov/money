@@ -509,6 +509,7 @@ namespace OpenSim.Grid.MoneyServer
 			string objectID = string.Empty;
 			string objectName = string.Empty;
 			string regionHandle = string.Empty;
+			string regionUUID = string.Empty;
 			string description  = "Newly added on";
 
 			responseData["success"] = false;
@@ -522,6 +523,7 @@ namespace OpenSim.Grid.MoneyServer
 			if (requestData.ContainsKey("objectID")) 			  objectID = (string)requestData["objectID"];
 			if (requestData.ContainsKey("objectName")) 			  objectName = (string)requestData["objectName"];
 			if (requestData.ContainsKey("regionHandle")) 		  regionHandle = (string)requestData["regionHandle"];
+			if (requestData.ContainsKey("regionUUID")) 		  	  regionUUID = (string)requestData["regionUUID"];
 			if (requestData.ContainsKey("transactionType")) 	  transactionType = Convert.ToInt32(requestData["transactionType"]);
 			if (requestData.ContainsKey("description")) 		  description = (string)requestData["description"];
 
@@ -538,6 +540,7 @@ namespace OpenSim.Grid.MoneyServer
 						transaction.ObjectUUID = objectID;
 						transaction.ObjectName = objectName;
 						transaction.RegionHandle = regionHandle;
+						transaction.RegionUUID = regionUUID;
 						transaction.Type = transactionType;
 						transaction.Time = time;
 						transaction.SecureCode = UUID.Random().ToString();
@@ -627,6 +630,7 @@ namespace OpenSim.Grid.MoneyServer
 			string objectID   = string.Empty;
 			string objectName = string.Empty;
 			string regionHandle = string.Empty;
+			string regionUUID = string.Empty;
 			string description  = "Newly added on";
 
 			responseData["success"] = false;
@@ -646,6 +650,7 @@ namespace OpenSim.Grid.MoneyServer
 			if (requestData.ContainsKey("objectID")) 		objectID = (string)requestData["objectID"];
 			if (requestData.ContainsKey("objectName")) 		objectName = (string)requestData["objectName"];
 			if (requestData.ContainsKey("regionHandle")) 	regionHandle = (string)requestData["regionHandle"];
+			if (requestData.ContainsKey("regionUUID")) 		regionUUID = (string)requestData["regionUUID"];
 			if (requestData.ContainsKey("transactionType")) transactionType = Convert.ToInt32(requestData["transactionType"]);
 			if (requestData.ContainsKey("description")) 	description = (string)requestData["description"];
 
@@ -661,6 +666,7 @@ namespace OpenSim.Grid.MoneyServer
 				transaction.ObjectUUID = objectID;
 				transaction.ObjectName = objectName;
 				transaction.RegionHandle = regionHandle;
+				transaction.RegionUUID = regionUUID;
 				transaction.Type = transactionType;
 				transaction.Time = time;
 				transaction.SecureCode = UUID.Random().ToString();
@@ -872,6 +878,7 @@ namespace OpenSim.Grid.MoneyServer
 			string senderID = UUID.Zero.ToString();
 			string bankerID = string.Empty;
 			string regionHandle = "0";
+			string regionUUID = UUID.Zero.ToString();
 			string description  = "Add Money to Avatar on";
 
 			responseData["success"] = false;
@@ -880,6 +887,7 @@ namespace OpenSim.Grid.MoneyServer
 			if (requestData.ContainsKey("bankerID")) 		bankerID = (string)requestData["bankerID"];
 			if (requestData.ContainsKey("amount")) 			amount = Convert.ToInt32(requestData["amount"]);
 			if (requestData.ContainsKey("regionHandle")) 	regionHandle = (string)requestData["regionHandle"];
+			if (requestData.ContainsKey("regionUUID")) 		regionUUID = (string)requestData["regionUUID"];
 			if (requestData.ContainsKey("transactionType")) transactionType = Convert.ToInt32(requestData["transactionType"]);
 			if (requestData.ContainsKey("description")) 	description = (string)requestData["description"];
 
@@ -904,6 +912,7 @@ namespace OpenSim.Grid.MoneyServer
 				transaction.Amount     = amount;
 				transaction.ObjectUUID = UUID.Zero.ToString();
 				transaction.RegionHandle = regionHandle;
+				transaction.RegionUUID = regionUUID;
 				transaction.Type = transactionType;
 				transaction.Time = time;
 				transaction.SecureCode = UUID.Random().ToString();
@@ -976,6 +985,7 @@ namespace OpenSim.Grid.MoneyServer
 			string objectID = UUID.Zero.ToString();
 			string objectName = string.Empty;
 			string regionHandle = string.Empty;
+			string regionUUID = string.Empty;
 			string description  = "Pay Charge on";
 
 			responseData["success"] = false;
@@ -986,6 +996,7 @@ namespace OpenSim.Grid.MoneyServer
 			if (requestData.ContainsKey("senderSecureSessionID")) senderSecureSessionID = (string)requestData["senderSecureSessionID"];
 			if (requestData.ContainsKey("amount")) 				  amount = Convert.ToInt32(requestData["amount"]);
 			if (requestData.ContainsKey("regionHandle")) 		  regionHandle = (string)requestData["regionHandle"];
+			if (requestData.ContainsKey("regionUUID")) 		  	  regionUUID = (string)requestData["regionUUID"];
 			if (requestData.ContainsKey("transactionType")) 	  transactionType = Convert.ToInt32(requestData["transactionType"]);
 			if (requestData.ContainsKey("description")) 		  description = (string)requestData["description"];
 
@@ -1002,6 +1013,7 @@ namespace OpenSim.Grid.MoneyServer
 						transaction.ObjectUUID = objectID;
 						transaction.ObjectName = objectName;
 						transaction.RegionHandle = regionHandle;
+						transaction.RegionUUID = regionUUID;
 						transaction.Type = transactionType;
 						transaction.Time = time;
 						transaction.SecureCode = UUID.Random().ToString();

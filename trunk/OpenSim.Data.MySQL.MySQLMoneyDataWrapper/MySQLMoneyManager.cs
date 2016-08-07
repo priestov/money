@@ -169,6 +169,7 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 						UpdateTransactionsTable8();
 						UpdateTransactionsTable9();
 						UpdateTransactionsTable10();
+						UpdateTransactionsTable11();
 						break;
 					  case 3: //Rev.3
 						UpdateTransactionsTable3();
@@ -179,6 +180,7 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 						UpdateTransactionsTable8();
 						UpdateTransactionsTable9();
 						UpdateTransactionsTable10();
+						UpdateTransactionsTable11();
 						break;
 					  case 4: //Rev.4
 						UpdateTransactionsTable4();
@@ -188,6 +190,7 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 						UpdateTransactionsTable8();
 						UpdateTransactionsTable9();
 						UpdateTransactionsTable10();
+						UpdateTransactionsTable11();
 						break;
 					  case 5: //Rev.5
 						UpdateTransactionsTable5();
@@ -196,6 +199,7 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 						UpdateTransactionsTable8();
 						UpdateTransactionsTable9();
 						UpdateTransactionsTable10();
+						UpdateTransactionsTable11();
 						break;
 					  case 6: //Rev.6
 						UpdateTransactionsTable6();
@@ -203,24 +207,32 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 						UpdateTransactionsTable8();
 						UpdateTransactionsTable9();
 						UpdateTransactionsTable10();
+						UpdateTransactionsTable11();
 						break;
 					  case 7: //Rev.7
 						UpdateTransactionsTable7();
 						UpdateTransactionsTable8();
 						UpdateTransactionsTable9();
 						UpdateTransactionsTable10();
+						UpdateTransactionsTable11();
 						break;
 					  case 8: //Rev.8
 						UpdateTransactionsTable8();
 						UpdateTransactionsTable9();
 						UpdateTransactionsTable10();
+						UpdateTransactionsTable11();
 						break;
 					  case 9: //Rev.9
 						UpdateTransactionsTable9();
 						UpdateTransactionsTable10();
+						UpdateTransactionsTable11();
 						break;
 					  case 10: //Rev.10
 						UpdateTransactionsTable10();
+						UpdateTransactionsTable11();
+						break;
+					  case 11: //Rev.11
+						UpdateTransactionsTable11();
 						break;
 					}
 				}
@@ -329,6 +341,7 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 			sql += "`objectUUID` varchar(36)  DEFAULT NULL,";
 			sql += "`objectName` varchar(255) DEFAULT NULL,";
 			sql += "`regionHandle` varchar(36) NOT NULL,";
+			sql += "`regionUUID`   varchar(36) NOT NULL,";
 			sql += "`type` int(10) NOT NULL,";
 			sql += "`time` int(11) NOT NULL,";
 			sql += "`secure` varchar(36) NOT NULL,";
@@ -740,6 +753,7 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 			cmd.Dispose();
 		}
 
+
 		/// <summary>
 		/// update transactions table from Rev.10 to Rev.11
         /// change type of BirthGift from 1000 to 900
@@ -783,6 +797,24 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 			sql += "COMMENT = 'Rev.11';";
 			sql += "COMMIT;";
 			cmd = new MySqlCommand(sql, dbcon);
+			cmd.ExecuteNonQuery();
+			cmd.Dispose();
+		}
+
+
+		/// <summary>
+		/// update transactions table from Rev.11 to Rev.12
+		/// </summary>
+		private void UpdateTransactionsTable11()
+		{
+			string sql = string.Empty;
+
+			sql  = "BEGIN;";
+			sql += "ALTER TABLE `" + Table_of_Transactions + "` ";
+			sql += "ADD `regionUUID` varchar(36) NOT NULL AFTER `regionHandle`,";
+			sql += "COMMENT = 'Rev.12';";
+			sql += "COMMIT;";
+			MySqlCommand cmd = new MySqlCommand(sql, dbcon);
 			cmd.ExecuteNonQuery();
 			cmd.Dispose();
 		}
@@ -1243,8 +1275,8 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 
 			sql  = "INSERT INTO " + Table_of_Transactions;
 			sql += " (`UUID`,`sender`,`receiver`,`amount`,`senderBalance`,`receiverBalance`,`objectUUID`,`objectName`,";
-            sql += " `regionHandle`,`type`,`time`,`secure`,`status`,`commonName`,`description`) VALUES";
-			sql += " (?transID,?sender,?receiver,?amount,?senderBalance,?receiverBalance,?objID,?objName,?regionHandle,?type,?time,?secure,?status,?cname,?desc)";
+            sql += " `regionHandle`,`regionUUID`,`type`,`time`,`secure`,`status`,`commonName`,`description`) VALUES";
+			sql += " (?transID,?sender,?receiver,?amount,?senderBalance,?receiverBalance,?objID,?objName,?regionHandle,?regionUUID,?type,?time,?secure,?status,?cname,?desc)";
 
 			MySqlCommand cmd = new MySqlCommand(sql, dbcon);
 			cmd.Parameters.AddWithValue("?transID", transaction.TransUUID.ToString());
@@ -1256,6 +1288,7 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 			cmd.Parameters.AddWithValue("?objID", transaction.ObjectUUID);
 			cmd.Parameters.AddWithValue("?objName", transaction.ObjectName);
 			cmd.Parameters.AddWithValue("?regionHandle", transaction.RegionHandle);
+			cmd.Parameters.AddWithValue("?regionUUID", transaction.RegionUUID);
 			cmd.Parameters.AddWithValue("?type", transaction.Type);
 			cmd.Parameters.AddWithValue("?time", transaction.Time);
 			cmd.Parameters.AddWithValue("?secure", transaction.SecureCode);
@@ -1366,6 +1399,7 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 						transactionData.Status = Convert.ToInt32(r["status"]);
 						transactionData.CommonName   = (string)r["commonName"];
 						transactionData.RegionHandle = (string)r["regionHandle"];
+						transactionData.RegionUUID   = (string)r["regionUUID"];
 						//
 						if (r["objectUUID"]  is System.DBNull) transactionData.ObjectUUID  = UUID.Zero.ToString();
 						else                                   transactionData.ObjectUUID  = (string)r["objectUUID"];
@@ -1425,6 +1459,7 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 							transactionData.Status = Convert.ToInt32(r["status"]);
 							transactionData.CommonName   = (string)r["commonName"];
 							transactionData.RegionHandle = (string)r["regionHandle"];
+							transactionData.RegionUUID   = (string)r["regionUUID"];
 							//
 							if (r["objectUUID"]  is System.DBNull) transactionData.ObjectUUID  = UUID.Zero.ToString();
 							else                                   transactionData.ObjectUUID  = (string)r["objectUUID"];

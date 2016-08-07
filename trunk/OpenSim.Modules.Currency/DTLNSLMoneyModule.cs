@@ -480,11 +480,12 @@ namespace OpenSim.Modules.Currency
 
 			if (sceneObj.OwnerID==fromID) {
 				ulong regionHandle = sceneObj.RegionHandle;
+				UUID  regionUUID   = sceneObj.RegionID;
 				if (GetLocateClient(fromID)!=null) {
-					ret = TransferMoney(fromID, toID, amount, (int)TransactionType.ObjectPays, objectID, regionHandle, description);
+					ret = TransferMoney(fromID, toID, amount, (int)TransactionType.ObjectPays, objectID, regionHandle, regionUUID, description);
 				}
 				else {
-					ret = ForceTransferMoney(fromID, toID, amount, (int)TransactionType.ObjectPays, objectID, regionHandle, description);
+					ret = ForceTransferMoney(fromID, toID, amount, (int)TransactionType.ObjectPays, objectID, regionHandle, regionUUID, description);
 				}
 			}
 
@@ -540,8 +541,9 @@ namespace OpenSim.Modules.Currency
 
 		public void ApplyUploadCharge(UUID agentID, int amount, string text)
 		{
-			ulong region = GetLocateScene(agentID).RegionInfo.RegionHandle;
-			PayMoneyCharge(agentID, amount, (int)TransactionType.UploadCharge, region, text);
+			ulong regionHandle = GetLocateScene(agentID).RegionInfo.RegionHandle;
+			UUID  regionUUID   = GetLocateScene(agentID).RegionInfo.RegionID;
+			PayMoneyCharge(agentID, amount, (int)TransactionType.UploadCharge, regionHandle, regionUUID, text);
 		}
 
 
@@ -553,14 +555,15 @@ namespace OpenSim.Modules.Currency
 
 		public void ApplyCharge(UUID agentID, int amount, MoneyTransactionType type, string text)
 		{
-			ulong region = GetLocateScene(agentID).RegionInfo.RegionHandle;
-			PayMoneyCharge(agentID, amount, (int)type, region, text);
+			ulong regionHandle = GetLocateScene(agentID).RegionInfo.RegionHandle;
+			UUID  regionUUID   = GetLocateScene(agentID).RegionInfo.RegionID;
+			PayMoneyCharge(agentID, amount, (int)type, regionHandle, regionUUID, text);
 		}
 
 
 		public bool Transfer(UUID fromID, UUID toID, int regionHandle, int amount, MoneyTransactionType type, string text)
 		{
-			return TransferMoney(fromID, toID, amount, (int)type, UUID.Zero, (ulong)regionHandle, text);
+			return TransferMoney(fromID, toID, amount, (int)type, UUID.Zero, (ulong)regionHandle, UUID.Zero, text);
 		}
 
 
@@ -570,14 +573,15 @@ namespace OpenSim.Modules.Currency
 			if (sceneObj==null) return false;
 
 			ulong regionHandle = sceneObj.ParentGroup.Scene.RegionInfo.RegionHandle;
-			return TransferMoney(fromID, toID, amount, (int)type, objectID, (ulong)regionHandle, text);
+			UUID  regionUUID   = sceneObj.ParentGroup.Scene.RegionInfo.RegionID;
+			return TransferMoney(fromID, toID, amount, (int)type, objectID, (ulong)regionHandle, regionUUID, text);
 		}
 
 
 		// for 0.8.3 over
         public void MoveMoney(UUID fromAgentID, UUID toAgentID, int amount, string text)
         {
-			ForceTransferMoney(fromAgentID, toAgentID, amount, (int)TransactionType.MoveMoney, UUID.Zero, (ulong)0, text);
+			ForceTransferMoney(fromAgentID, toAgentID, amount, (int)TransactionType.MoveMoney, UUID.Zero, (ulong)0, UUID.Zero, text);
         }
 
 		#endregion
@@ -627,7 +631,7 @@ namespace OpenSim.Modules.Currency
 		}
 
 
-		// for OnMoneyTransfer event  (for OpenSim)
+		// for OnMoneyTransfer event 
 		private void MoneyTransferAction(Object sender, EventManager.MoneyTransferArgs moneyEvent)
 		{
 			//m_log.InfoFormat("[MONEY]: MoneyTransferAction: type = {0}", moneyEvent.transactiontype);
@@ -654,17 +658,19 @@ namespace OpenSim.Modules.Currency
 			// Before paying for the object, save the object local ID for current transaction.
 			UUID  objectID = UUID.Zero;
 			ulong regionHandle = 0;
+			UUID  regionUUID   = UUID.Zero;
 
 			if (sender is Scene) {
 				Scene scene  = (Scene)sender;
 				regionHandle = scene.RegionInfo.RegionHandle;
+				regionUUID   = scene.RegionInfo.RegionID;
 
 				if (moneyEvent.transactiontype==(int)TransactionType.PayObject) {
 					objectID = scene.GetSceneObjectPart(moneyEvent.receiver).UUID;
 				}
 			}
 
-			TransferMoney(moneyEvent.sender, receiver, moneyEvent.amount, moneyEvent.transactiontype, objectID, regionHandle, "OnMoneyTransfer event");
+			TransferMoney(moneyEvent.sender, receiver, moneyEvent.amount, moneyEvent.transactiontype, objectID, regionHandle, regionUUID, "OnMoneyTransfer event");
 			return;
 		}
 
@@ -699,11 +705,11 @@ namespace OpenSim.Modules.Currency
 					landBuyEvent.transactionID = Util.UnixTimeSinceEpoch();
 
 					ulong parcelID = (ulong)landBuyEvent.parcelLocalID;
-					UUID  regionID = UUID.Zero;
-					if (sender is Scene) regionID = ((Scene)sender).RegionInfo.RegionID;
+					UUID  regionUUID = UUID.Zero;
+					if (sender is Scene) regionUUID = ((Scene)sender).RegionInfo.RegionID;
 
 					if (TransferMoney(landBuyEvent.agentId, landBuyEvent.parcelOwnerID, 
-									  landBuyEvent.parcelPrice, (int)TransactionType.LandSale, regionID, parcelID, "Land Purchase")) {
+									  landBuyEvent.parcelPrice, (int)TransactionType.LandSale, regionUUID, parcelID, regionUUID, "Land Purchase")) {
 						landBuyEvent.amountDebited = landBuyEvent.parcelPrice;
 					}
 				}
@@ -735,14 +741,15 @@ namespace OpenSim.Modules.Currency
 				if (sceneObj!=null) {
 					IBuySellModule mod = scene.RequestModuleInterface<IBuySellModule>();
 					if (mod!=null) {
-						UUID receiverId = sceneObj.OwnerID;
+						UUID  receiverId = sceneObj.OwnerID;
 						ulong regionHandle = sceneObj.RegionHandle;
+						UUID  regionUUID   = sceneObj.RegionID;
 						bool ret = false;
 						//
 						if (salePrice>=0) {
 							if (!string.IsNullOrEmpty(m_moneyServURL)) {
 								ret = TransferMoney(remoteClient.AgentId, receiverId, salePrice,
-												(int)TransactionType.PayObject, sceneObj.UUID, regionHandle, "Object Buy");
+												(int)TransactionType.PayObject, sceneObj.UUID, regionHandle, regionUUID, "Object Buy");
 							}
 							else if (salePrice==0) {	// amount is 0 with No Money Server
 								ret = true;
@@ -1048,7 +1055,9 @@ namespace OpenSim.Modules.Currency
 							{
 								Scene scene = (Scene)client.Scene;
 								int amount  = (int)requestParam["amount"];
-								ret = AddBankerMoney(bankerUUID, amount, scene.RegionInfo.RegionHandle);
+								ulong regionHandle = scene.RegionInfo.RegionHandle;
+								UUID  regionUUID   = scene.RegionInfo.RegionID;
+								ret = AddBankerMoney(bankerUUID, amount, regionHandle, regionUUID);
 
 								if (m_use_web_settle && m_settle_user) {
 									ret = true;
@@ -1204,7 +1213,7 @@ namespace OpenSim.Modules.Currency
 		/// <returns>   
 		/// return true, if successfully.   
 		/// </returns>   
-		private bool TransferMoney(UUID sender, UUID receiver, int amount, int type, UUID objectID, ulong regionHandle, string description)
+		private bool TransferMoney(UUID sender, UUID receiver, int amount, int type, UUID objectID, ulong regionHandle, UUID regionUUID, string description)
 		{
 			//m_log.InfoFormat("[MONEY]: TransferMoney:");
 
@@ -1240,7 +1249,7 @@ namespace OpenSim.Modules.Currency
 				paramTable["objectID"] 				= objectID.ToString();
 				paramTable["objectName"] 			= objName;
 				paramTable["regionHandle"] 			= regionHandle.ToString();
-				paramTable["regionUUID"] 	  		= UUID.Zero.ToString();
+				paramTable["regionUUID"] 	  		= regionUUID.ToString();
 				paramTable["amount"] 				= amount;
 				paramTable["description"] 			= description;
 
@@ -1274,7 +1283,7 @@ namespace OpenSim.Modules.Currency
 		/// <returns>   
 		/// return true, if successfully.   
 		/// </returns>   
-		private bool ForceTransferMoney(UUID sender, UUID receiver, int amount, int type, UUID objectID, ulong regionHandle, string description)
+		private bool ForceTransferMoney(UUID sender, UUID receiver, int amount, int type, UUID objectID, ulong regionHandle, UUID regionUUID, string description)
 		{
 			//m_log.InfoFormat("[MONEY]: ForceTransferMoney:");
 
@@ -1295,7 +1304,7 @@ namespace OpenSim.Modules.Currency
 				paramTable["objectID"] 		  = objectID.ToString();
 				paramTable["objectName"] 	  = objName;
 				paramTable["regionHandle"] 	  = regionHandle.ToString();
-				paramTable["regionUUID"] 	  = UUID.Zero.ToString();
+				paramTable["regionUUID"] 	  = regionUUID.ToString();
 				paramTable["amount"] 		  = amount;
 				paramTable["description"] 	  = description;
 
@@ -1412,7 +1421,7 @@ namespace OpenSim.Modules.Currency
 		/// <returns>   
 		/// return true, if successfully.   
 		/// </returns>   
-		private bool AddBankerMoney(UUID bankerID, int amount, ulong regionHandle)
+		private bool AddBankerMoney(UUID bankerID, int amount, ulong regionHandle, UUID regionUUID)
 		{
 			//m_log.InfoFormat("[MONEY]: AddBankerMoney:");
 
@@ -1426,7 +1435,7 @@ namespace OpenSim.Modules.Currency
 				paramTable["transactionType"] 	= (int)TransactionType.BuyMoney;
 				paramTable["amount"] 			= amount;
 				paramTable["regionHandle"] 		= regionHandle.ToString();
-				paramTable["regionUUID"] 		= UUID.Zero.ToString();
+				paramTable["regionUUID"] 		= regionUUID.ToString();
 				paramTable["description"] 		= "Add Money to Avatar";
 
 				// Generate the request for transfer.   
@@ -1462,7 +1471,7 @@ namespace OpenSim.Modules.Currency
 		/// <returns>   
 		/// return true, if successfully.   
 		/// </returns>   
-		private bool PayMoneyCharge(UUID sender, int amount, int type, ulong regionHandle, string description)
+		private bool PayMoneyCharge(UUID sender, int amount, int type, ulong regionHandle, UUID regionUUID, string description)
 		{
 			//m_log.InfoFormat("[MONEY]: PayMoneyCharge:");
 
@@ -1492,7 +1501,7 @@ namespace OpenSim.Modules.Currency
 				paramTable["transactionType"] 		= type;
 				paramTable["amount"] 				= amount;
 				paramTable["regionHandle"] 			= regionHandle.ToString();
-				paramTable["regionUUID"] 			= UUID.Zero.ToString();
+				paramTable["regionUUID"] 			= regionUUID.ToString();
 				paramTable["description"] 			= description;
 
 				// Generate the request for transfer.   
