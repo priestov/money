@@ -28,17 +28,23 @@ define('HELPER_DB_PASS',  '');
 define('HELPER_DB_MYSQLI', 1);
 
 
-// for Money Server
+// for DTL/NSL Money Module
 define('USE_CURRENCY_SERVER', 1);
 
-// Money Server Access Key
+// DTL/NSL Money Server Access Key
 // Please set same key with MoneyScriptAccessKey in MoneyServer.ini
 define('CURRENCY_SCRIPT_KEY', '123456789');
 
-// Group Module Access Keys
-// Please set same keys with at [Groups] section in OpenSim.ini
+
+// Flotsam XMLRPC Group Module Access Keys
+// If you use Flotsam XMLRPC Group Module, please set same keys with at [Groups] section in OpenSim.ini
 define('XMLGROUP_RKEY',  '1234');	// Read Key
 define('XMLGROUP_WKEY',  '1234');	// Write key
+
+
+// OpenSimProfile Module
+define('OSPROFILE_DB',  'OPENSIM');	// set 'HELPER' or 'OPENSIM'
+
 
 //
 define('OPENSIM_PG_ONLY', 0);
