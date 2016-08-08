@@ -90,6 +90,7 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 				Dictionary<string,string> tableList = new Dictionary<string,string>();
 				tableList = CheckTables();
 
+				//
 				// Balances Table
 				if (!tableList.ContainsKey(Table_of_Balances)) {
 					try {
@@ -126,7 +127,7 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 						CreateUserInfoTable();
 					}
 					catch (Exception e) {
-						throw new Exception("[MONEY MANAGER]: Unable to create currency userinfo table: " + e.ToString());
+						throw new Exception("[MONEY MANAGER]: Error creating userinfo table: " + e.ToString());
 					}
 				}
 				else {
@@ -244,7 +245,7 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 						CreateTotalSalesTable();
 					}
 					catch (Exception e) {
-						throw new Exception("[MONEY MANAGER]: Unable to create currency totalsales table: " + e.ToString());
+						throw new Exception("[MONEY MANAGER]: Error creating totalsales table: " + e.ToString());
 					}
 				}
 				else {
