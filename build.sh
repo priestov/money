@@ -10,7 +10,8 @@ echo "==================="
 ./clean.sh
 ./runprebuild.sh
 xbuild /target:CLean || exit 1
-xbuild || exit 1
+#xbuild || exit 1
+xbuild /p:Configuration=Release || exit 1
 
 echo
 cp -f bin/OpenSim.Data.MySQL.MySQLMoneyDataWrapper.dll $OPNSIMPATH
