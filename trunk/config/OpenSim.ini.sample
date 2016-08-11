@@ -20,8 +20,8 @@
     ;; Money Unit fee to upload textures, animations etc.  Default is 0.
     PriceUpload = 10
 
-	;; Mesh upload factors
-	;MeshModelUploadCostFactor = 0.0
+    ;; Mesh upload factors
+    ;MeshModelUploadCostFactor = 0.0
     ;MeshModelUploadTextureCostFactor = 1.0
     ;MeshModelMinCostFactor = 0.0
 
