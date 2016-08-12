@@ -604,7 +604,7 @@ namespace OpenSim.Modules.Currency
 			int balance = 0;
 			IClientAPI client = agent.ControllingClient;
 
-			m_enable_server = LoginMoneyServer(client, out balance);
+			m_enable_server = LoginMoneyServer(agent, out balance);
 			client.SendMoneyBalance(UUID.Zero, true, new byte[0], balance, 0, UUID.Zero, false, UUID.Zero, false, 0, String.Empty);
 
 			client.OnMoneyBalanceRequest 	+= OnMoneyBalanceRequest;
@@ -1570,12 +1570,15 @@ namespace OpenSim.Modules.Currency
 		/// <returns>   
 		/// return true, if successfully.   
 		/// </returns>   
-		private bool LoginMoneyServer(IClientAPI client, out int balance)
+		private bool LoginMoneyServer(ScenePresence avatar, out int balance)
 		{
 			//m_log.InfoFormat("[MONEY]: LoginMoneyServer:");
 
-			bool ret = false;
 			balance = 0;
+			bool ret = false;
+			bool isNpc = avatar.isNPC;
+
+			IClientAPI client = avatar.ControllingClient;
 
 			#region Send money server the client info for login.
 
@@ -1603,6 +1606,7 @@ namespace OpenSim.Modules.Currency
 				int    avatarClass = (int)AvatarType.LOCAL_AVATAR;
 
 				AgentCircuitData agent = scene.AuthenticateHandler.GetAgentCircuitData(client.AgentId);
+
 				if (agent!=null) {
 					universalID = Util.ProduceUserUniversalIdentifier(agent);
 					if (!String.IsNullOrEmpty(universalID)) {
@@ -1611,7 +1615,7 @@ namespace OpenSim.Modules.Currency
 						Util.ParseUniversalUserIdentifier(universalID, out uuid, out serverURL, out firstName, out lastName, out tmp);
 					}
 					// if serverURL is empty, avatar is a NPC
-					if (String.IsNullOrEmpty(serverURL)) {
+					if (isNpc || String.IsNullOrEmpty(serverURL)) {
 						avatarType = (int)AvatarType.NPC_AVATAR;
 					}
 					//
