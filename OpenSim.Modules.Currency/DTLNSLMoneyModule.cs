@@ -102,6 +102,7 @@ namespace OpenSim.Modules.Currency
 		ObjectPays		 	= 5009,
 		BuyMoney		 	= 5010,
 		MoveMoney		 	= 5011,
+		SendMoney		 	= 5012,
 		// Group Transactions
 		GroupLandDeed    	= 6001,
 		GroupObjectDeed  	= 6002,
