@@ -1108,7 +1108,9 @@ namespace OpenSim.Modules.Currency
 
 					if (agentUUID!=UUID.Zero) {
 						if (requestParam.Contains("amount")) {
-							int amount  = (int)requestParam["amount"];
+							int amount = (int)requestParam["amount"];
+							int type   = -1;
+							if (requestParam.Contains("type")) type = (int)requestParam["type"];
 							string secretCode = (string)requestParam["secretAccessCode"];
 							string scriptIP   = remoteClient.Address.ToString();
 
@@ -1116,7 +1118,7 @@ namespace OpenSim.Modules.Currency
 							byte[] code = md5.ComputeHash(ASCIIEncoding.Default.GetBytes(secretCode + "_" + scriptIP));
 							string hash = BitConverter.ToString(code).ToLower().Replace("-","");
 							//m_log.InfoFormat("[MONEY]: SendMoneyHandler: SecretCode: {0} + {1} = {2}", secretCode, scriptIP, hash);
-							ret = SendMoneyTo(agentUUID, amount, hash);
+							ret = SendMoneyTo(agentUUID, amount, type, hash);
 						}
 					}
 					else {
@@ -1342,7 +1344,7 @@ namespace OpenSim.Modules.Currency
 		/// <returns>   
 		/// return true, if successfully.   
 		/// </returns>   
-		private bool SendMoneyTo(UUID avatarID, int amount, string secretCode)
+		private bool SendMoneyTo(UUID avatarID, int amount, int type, string secretCode)
 		{
 			//m_log.InfoFormat("[MONEY]: SendMoneyTo:");
 
@@ -1350,9 +1352,10 @@ namespace OpenSim.Modules.Currency
 
 			if (m_enable_server) {
 				// Fill parameters for money transfer XML-RPC.   
+				if (type<0) type = (int)TransactionType.ReferBonus;
 				Hashtable paramTable = new Hashtable();
 				paramTable["receiverID"] 	   = avatarID.ToString();
-				paramTable["transactionType"]  = (int)TransactionType.ReferBonus;
+				paramTable["transactionType"]  = type;
 				paramTable["amount"] 		   = amount;
 				paramTable["secretAccessCode"] = secretCode;
 				paramTable["description"] 	   = "Bonus to Avatar";

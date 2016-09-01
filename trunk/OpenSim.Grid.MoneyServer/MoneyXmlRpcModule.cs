@@ -1072,8 +1072,8 @@ namespace OpenSim.Grid.MoneyServer
 				if (m_moneyDBService.DoTransfer(transactionUUID)) {
 					TransactionData transaction = m_moneyDBService.FetchTransaction(transactionUUID);
 					if (transaction!=null && transaction.Status==(int)Status.SUCCESS_STATUS) {
-						//m_log.InfoFormat("[MONEY RPC]: NotifyTransfer: Transaction Type = {0}", transaction.Type);
-						//m_log.InfoFormat("[MONEY RPC]: NotifyTransfer: Payment finished successfully, now update balance {0}", transactionUUID.ToString());
+						m_log.InfoFormat("[MONEY RPC]: NotifyTransfer: Transaction Type = {0}", transaction.Type);
+						m_log.InfoFormat("[MONEY RPC]: NotifyTransfer: Payment finished successfully, now update balance {0}", transactionUUID.ToString());
 
 						bool updateSender = true;
 						bool updateReceiv = true;
@@ -1098,7 +1098,7 @@ namespace OpenSim.Grid.MoneyServer
 
 						// Notify to sender
 						if (transaction.Type==(int)TransactionType.PayObject) {
-							//m_log.InfoFormat("[MONEY RPC]: NotifyTransfer: Now notify opensim to give object to customer {0} ", transaction.Sender);
+							m_log.InfoFormat("[MONEY RPC]: NotifyTransfer: Now notify opensim to give object to customer {0} ", transaction.Sender);
 							Hashtable requestTable = new Hashtable();
 							requestTable["clientUUID"]   = transaction.Sender;
 							requestTable["receiverUUID"] = transaction.Receiver;
@@ -1309,7 +1309,7 @@ namespace OpenSim.Grid.MoneyServer
 		/// <returns></returns>
 		protected bool RollBackTransaction(TransactionData transaction)
 		{
-			//m_log.InfoFormat("[MONEY RPC]: RollBackTransaction:");
+			m_log.InfoFormat("[MONEY RPC]: RollBackTransaction:");
 
 			if(m_moneyDBService.withdrawMoney(transaction.TransUUID, transaction.Receiver, transaction.Amount)) {
 				if(m_moneyDBService.giveMoney(transaction.TransUUID, transaction.Sender, transaction.Amount)) {
