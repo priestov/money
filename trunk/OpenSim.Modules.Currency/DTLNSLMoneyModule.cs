@@ -592,14 +592,20 @@ namespace OpenSim.Modules.Currency
 		// 
 		private void OnNewClient(IClientAPI client)
 		{
+			m_log.InfoFormat("[MONEY]: OnNewClient");
+
 			client.OnEconomyDataRequest += OnEconomyDataRequest;
 			client.OnLogout 			+= ClientClosed;
+
+			client.OnMoneyBalanceRequest += OnMoneyBalanceRequest;
+			client.OnRequestPayPrice 	 += OnRequestPayPrice;
+			client.OnObjectBuy			 += OnObjectBuy;
 		}
 
 
 		public void OnMakeRootAgent(ScenePresence agent)
 		{
-			//m_log.InfoFormat("[MONEY]: OnMakeRootAgent:");
+			m_log.InfoFormat("[MONEY]: OnMakeRootAgent:");
 
 			int balance = 0;
 			IClientAPI client = agent.ControllingClient;
@@ -607,9 +613,9 @@ namespace OpenSim.Modules.Currency
 			m_enable_server = LoginMoneyServer(agent, out balance);
 			client.SendMoneyBalance(UUID.Zero, true, new byte[0], balance, 0, UUID.Zero, false, UUID.Zero, false, 0, String.Empty);
 
-			client.OnMoneyBalanceRequest 	+= OnMoneyBalanceRequest;
-			client.OnRequestPayPrice 		+= OnRequestPayPrice;
-			client.OnObjectBuy				+= OnObjectBuy;
+			//client.OnMoneyBalanceRequest += OnMoneyBalanceRequest;
+			//client.OnRequestPayPrice 	 += OnRequestPayPrice;
+			//client.OnObjectBuy			 += OnObjectBuy;
 		}	   
 
 
@@ -722,7 +728,7 @@ namespace OpenSim.Modules.Currency
 		public void OnObjectBuy(IClientAPI remoteClient, UUID agentID, UUID sessionID, 
 								UUID groupID, UUID categoryID, uint localID, byte saleType, int salePrice)
 		{
-			//m_log.InfoFormat("[MONEY]: OnObjectBuy: agent = {0}, {1}", agentID, remoteClient.AgentId);
+			m_log.InfoFormat("[MONEY]: OnObjectBuy: agent = {0}, {1}", agentID, remoteClient.AgentId);
 
 			// Handle the parameters error.   
 			if (!m_sellEnabled) return;
@@ -778,7 +784,7 @@ namespace OpenSim.Modules.Currency
 		/// <param name="TransactionID"></param>   
 		private void OnMoneyBalanceRequest(IClientAPI client, UUID agentID, UUID SessionID, UUID TransactionID)
 		{
-			//m_log.InfoFormat("[MONEY]: OnMoneyBalanceRequest:");
+			m_log.InfoFormat("[MONEY]: OnMoneyBalanceRequest:");
 
 			if (client.AgentId==agentID && client.SessionId==SessionID) {
 				int balance = 0;
@@ -797,7 +803,7 @@ namespace OpenSim.Modules.Currency
 
 		private void OnRequestPayPrice(IClientAPI client, UUID objectID)
 		{
-			//m_log.InfoFormat("[MONEY]: OnRequestPayPrice:");
+			m_log.InfoFormat("[MONEY]: OnRequestPayPrice:");
 
 			Scene scene = GetLocateScene(client.AgentId);
 			if (scene==null) return;
@@ -837,7 +843,7 @@ namespace OpenSim.Modules.Currency
 		// "OnMoneyTransfered" RPC from MoneyServer
 		public XmlRpcResponse OnMoneyTransferedHandler(XmlRpcRequest request, IPEndPoint remoteClient)
 		{
-			//m_log.InfoFormat("[MONEY]: OnMoneyTransferedHandler:");
+			m_log.InfoFormat("[MONEY]: OnMoneyTransferedHandler:");
 
 			bool ret = false;
 
