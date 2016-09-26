@@ -70,6 +70,7 @@ namespace OpenSim.Modules.Currency
 		None             	= 0,
 		// Extend
 		BirthGift        	= 900,
+        Award               = 901,
 		// One-Time Charges
 		ObjectClaim      	= 1000,
 		LandClaim        	= 1001,
