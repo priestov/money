@@ -352,7 +352,7 @@ namespace OpenSim.Data.MySQL.MySQLMoneyDataWrapper
 			sql += "PRIMARY KEY(`UUID`))";
 			sql += "Engine=InnoDB DEFAULT CHARSET=utf8 ";
 			///////////////////////////////////////////////
-			sql += "COMMENT='Rev.11';";
+			sql += "COMMENT='Rev.12';";
 			MySqlCommand cmd = new MySqlCommand(sql, dbcon);
 			cmd.ExecuteNonQuery();
 			cmd.Dispose();
