@@ -1587,7 +1587,7 @@ namespace OpenSim.Modules.Currency
 
 			balance = 0;
 			bool ret = false;
-			bool isNpc = avatar.isNPC;
+			bool isNpc = avatar.IsNPC;
 
 			IClientAPI client = avatar.ControllingClient;
 
